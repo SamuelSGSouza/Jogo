@@ -1,0 +1,159 @@
+body/bodies/female/walk/brown.png
+	- Note: see details at https://opengameart.org/content/lpc-character-bases
+	- Licenses:
+		- OGA-BY 3.0
+		- CC-BY-SA 3.0
+		- GPL 3.0
+	- Authors:
+		- Benjamin K. Smith (BenCreating)
+		- bluecarrot16
+		- TheraHedwig
+		- Evert
+		- MuffinElZangano
+		- Durrani
+		- Pierre Vigier (pvigier)
+		- ElizaWy
+		- Matthew Krohn (makrohn)
+		- Johannes Sjölund (wulax)
+		- Stephen Challener (Redshrike)
+	- Links:
+		- https://opengameart.org/content/liberated-pixel-cup-lpc-base-assets-sprites-map-tiles
+		- https://opengameart.org/content/lpc-medieval-fantasy-character-sprites
+		- https://opengameart.org/content/lpc-ladies
+		- https://opengameart.org/content/lpc-7-womens-shirts
+		- https://opengameart.org/content/lpc-jump-expanded
+		- https://opengameart.org/content/lpc-be-seated
+		- https://opengameart.org/content/lpc-revised-character-basics
+		- https://gitlab.com/vagabondgame/lpc-characters
+		- https://opengameart.org/content/lpc-male-jumping-animation-by-durrani
+		- https://opengameart.org/content/lpc-runcycle-and-diagonal-walkcycle
+
+head/heads/human/female_elderly/walk/brown.png
+	- Licenses:
+		- OGA-BY 3.0
+		- CC-BY 3.0
+	- Authors:
+		- Benjamin K. Smith (BenCreating)
+		- Eliza Wyatt (ElizaWy)
+		- Stephen Challener (Redshrike)
+	- Links:
+		- https://opengameart.org/content/liberated-pixel-cup-lpc-base-assets-sprites-map-tiles
+		- https://opengameart.org/content/lpc-revised-elders
+		- https://opengameart.org/content/lpc-character-bases
+
+head/faces/elderly/sad/walk/brown.png
+	- Note: Original by Redshrike, Expressions by ElizaWy, mapped to all frames by JaidynReiman
+	- Licenses:
+		- OGA-BY 3.0
+	- Authors:
+		- JaidynReiman
+		- ElizaWy
+		- Stephen Challener (Redshrike)
+	- Links:
+		- https://github.com/ElizaWy/LPC/tree/main/Characters/Head
+		- https://opengameart.org/content/ulpc-expanded-expressions
+
+neck/scarf/walk/red.png
+	- Licenses:
+		- OGA-SA 3.0
+		- CC-BY-SA 3.0
+		- GPL 2.0
+		- GPL 3.0
+	- Authors:
+		- Nila122
+		- Johannes Sjölund (wulax)
+		- Stephen Challener (Redshrike)
+	- Links:
+		- https://opengameart.org/content/more-lpc-clothes-and-hair
+
+eyes/human/elderly/sad/walk/yellow.png
+	- Note: original by Redshrike, mapped to all frames by Matthew Krohn & JaidynReiman
+	- Licenses:
+		- OGA-BY 3.0
+		- CC-BY-SA 3.0
+		- GPL 3.0
+	- Authors:
+		- JaidynReiman
+		- Matthew Krohn (makrohn)
+		- Stephen Challener (Redshrike)
+	- Links:
+		- https://opengameart.org/content/liberated-pixel-cup-lpc-base-assets-sprites-map-tiles
+
+head/wrinkles/walk/brown.png
+	- Licenses:
+		- CC0
+	- Authors:
+		- bluecarrot16
+	- Links:
+		- 
+
+arms/gloves/female/walk/red.png
+	- Note: metal gloves by wulax, extended to female base by makrohn, recolors by bigbeargames, adapted to v3 bases by bluecarrot16, added to expanded animations by JaidynReiman
+	- Licenses:
+		- OGA-BY 3.0
+		- CC-BY-SA 3.0
+		- GPL 3.0
+	- Authors:
+		- Michael Whitlock (bigbeargames)
+		- Matthew Krohn (makrohn)
+		- Johannes Sjölund (wulax)
+		- bluecarrot16
+	- Links:
+		- https://opengameart.org/content/lpc-medieval-fantasy-character-sprites
+		- http://opengameart.org/content/lpc-clothing-updates
+
+dress/slit/female/walk/white.png
+	- Note: original "TightDress" by Nila122, by ElizaWy, extended to all animation frames and edited for v3 bases by bluecarrot16
+	- Licenses:
+		- OGA-BY 3.0
+		- CC-BY-SA 3.0
+		- GPL 2.0
+		- GPL 3.0
+	- Authors:
+		- Nila122
+		- ElizaWy
+		- bluecarrot16
+	- Links:
+		- https://opengameart.org/content/lpc-clothes-and-hair
+		- http://opengameart.org/content/lpc-clothing-updates
+
+feet/shoes/sara/thin/walk/red.png
+	- Note: LPC Sara by Redshrike, contributed by William Thompsonj, Shoes Separated by Bluecarrot16, Jump/Sit/Emote/Run/Revised Combat by JaidynReiman
+	- Licenses:
+		- OGA-BY 3.0
+		- CC-BY 3.0+
+		- GPL 2.0
+		- GPL 3.0
+	- Authors:
+		- JaidynReiman
+		- Bluecarrot16
+		- Mandi Paugh
+		- Stephen Challener (Redshrike)
+		- William.Thompsonj
+	- Links:
+		- http://opengameart.org/content/sara-wizard
+		- https://opengameart.org/content/lpc-sara
+		- https://opengameart.org/content/lpc-expanded-socks-shoes
+
+weapon/magic/simple/foreground/walk/simple.png
+	- Note: original by DrJamgo, hands switched and split into to layers by bluecarrot16
+	- Licenses:
+		- CC0
+	- Authors:
+		- bluecarrot16
+		- Dr. Jamgo
+	- Links:
+		- https://opengameart.org/content/lpc-simple-staff
+
+hat/magic/celestial/adult/walk/red.png
+	- Note: Original by Tracy, Adapted to ULPC by Big Bear Games, reduced colors by Napsio
+	- Licenses:
+		- CC-BY 3.0
+	- Authors:
+		- Napsio
+		- Michael Whitlock (bigbeargames)
+		- Tracy
+	- Links:
+		- https://opengameart.org/content/lpc-celestial-wizard-hats
+		- https://opengameart.org/content/lpc-expanded-hats-facial-helmets
+

@@ -1,0 +1,42 @@
+{
+    "iniciando": [
+        [
+            "Ei, {nome_character}. Voltou cedo da patrulha?",
+            "Sim, os arredores estavam tranquilos.",
+            "Bom saber. Hoje vou caçar perto do rio norte.",
+            "Se encontrar algo estranho, me avise depois."
+        ],
+        [
+            "Olá, {nome_character}. Preparado para mais um dia?",
+            "Tanto quanto possível. E você?",
+            "Com meu arco afinado e passos leves, sempre.",
+            "Então estamos seguros."
+        ],
+        [
+            "Saudações, {nome_character}. Escutou os lobos de madrugada?",
+            "Escutei sim, estavam bem próximos.",
+            "Achei rastros… mas nada recente.",
+            "Talvez estejam mudando de território."
+        ],
+        [
+            "Ei {nome_character}, viu pegadas grandes perto do celeiro?",
+            "Vi sim, não reconheci de nenhum animal comum.",
+            "Também notei. Vou rastrear depois do almoço.",
+            "Se precisar de ajuda, me chame."
+        ]
+    ],
+    "respondendo": [
+        [
+            "{nome_character}, você sabe onde deixaram minhas flechas novas?",
+            "O ferreiro mencionou que estavam na bancada externa.",
+            "Ótimo, achei que tinham desaparecido.",
+            "Aproveite, ouvi dizer que estão muito bem feitas."
+        ],
+        [
+            "{nome_character}, a caçada hoje vai ser complicada.",
+            "Por quê? Algo mudou na floresta?",
+            "Parece que os orcs estão agitados na parte leste… isso nunca é bom sinal.",
+            "Cuidado por lá. Pode ser algo grande."
+        ]
+    ]
+}

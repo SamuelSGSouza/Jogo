@@ -1,0 +1,42 @@
+{
+    "iniciando":[
+        [
+            "Olá, {nome_character}. Alguma novidade pela vila?",
+            "Nada demais, só o vento forte hoje.",
+            "Fique atento. Os Orcs parecem agitados hoje.",
+            "Vou reforçar as portas antes da noite."
+        ],
+        [
+            "Ei {nome_character}, você viu alguém estranho passando por aqui?",
+            "Acho que vi um viajante com capa cinza.",
+            "Hum… vou verificar. Obrigado pela informação.",
+            "Se precisar de algo, estarei na taverna."
+        ],
+        [
+            "Saudações, {nome_character}. Está tudo tranquilo por aqui?",
+            "Sim, a vila está bem calma hoje.",
+            "Ótimo. Qualquer coisa suspeita, me avise.",
+            "Pode deixar."
+        ],
+        [
+            "Ei {nome_character}, Você ouviu barulhos estranhos ontem à noite?",
+            "Ouvi sim, parecia metal batendo.",
+            "Talvez ferreiros trabalhando tarde… ou algo pior.",
+            "Espero que seja só trabalho mesmo."
+        ]
+    ],
+    "respondendo":[
+        [
+            "Ei, Obi! Perdi meu cachorro. Viu ele por aí?",
+            "Um pequeno marrom? Vi correndo perto da floresta.",
+            "Esse mesmo! Vou lá agora.",
+            "Boa sorte, ele parecia assustado."
+        ],
+        [
+            "Obi, está tudo bem? Você parece agitado.",
+            "Os Orcs parecem estar com uma movimentação estranha hoje.",
+            "Isso preocupa bastante…",
+            "Não se preocupe, se algo acontecer eu protejo vocês!."
+        ]
+    ]
+}

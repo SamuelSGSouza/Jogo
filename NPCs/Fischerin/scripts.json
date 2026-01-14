@@ -1,0 +1,44 @@
+{
+    "iniciando":[
+        [
+            "{nome_character}, ouvi seu passo pesado… problemas na cabeça?",
+            "Só estou pensando demais.",
+            "Pensar demais afoga mais rápido que rio fundo.",
+            "Essa é nova.",
+            "Aprende com quem quase se afogou umas três vezes."
+        ],
+        [
+            "Ei, {nome_character}, já comeu alguma coisa?",
+            "Ainda não.",
+            "Então os primeiros peixes de hoje vão pra você. Quem anda de estômago vazio nem o remo levanta.",
+            "Obrigado… estou precisando.",
+            "Eu sei. Dá pra ver pela cara."
+        ]
+    ],
+    "respondendo":[
+        [
+            "Fischerin, acho que pisei em falso na trilha do rio.",
+            "Ah, trilha molhada sempre prega peça. Mostra aí o tornozelo.",
+            "Não é nada demais… acho.",
+            "‘Acho’ não pesca peixe. Vamos ver direito."
+        ],
+        [
+            "Fischerin, o rio quase me puxou dessa vez.",
+            "Quase puxar já é puxar demais. Você tem que respeitar a corrente.",
+            "Eu tentei…",
+            "Tentou mal. Vou te ensinar a ler a água depois."
+        ],
+        [
+            "Fischerin, a rede rasgou enquanto eu ajudava.",
+            "Rasgou? Então você segurou errado. Cadê a mão?",
+            "Por quê?",
+            "Porque se machucou eu vou saber na hora."
+        ],
+        [
+            "Fischerin, acho que tomei sol demais.",
+            "Ah, típico. Sol forte não faz distinção.",
+            "Tem algum remédio?",
+            "Tenho uma pasta de erva fresca. Vai arder, mas funciona."
+        ]
+    ]
+}

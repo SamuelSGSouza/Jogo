@@ -1,0 +1,48 @@
+{
+    "iniciando": [
+        [
+            "Ei, {nome_character}. Já está de pé? A manhã está perfeita pra rastrear.",
+            "Sempre pronto. Encontrou sinais novos?",
+            "Alguns. Marcas leves perto das árvores retorcidas.",
+            "Hmm… isso costuma significar movimento recente."
+        ],
+        [
+            "Bom dia, {nome_character}. Dormiu bem?",
+            "Mais ou menos. O vento da noite estava estranho.",
+            "Percebi também. O cheiro da mata mudou um pouco.",
+            "Quando a floresta muda, algo grande está prestes a acontecer."
+        ],
+        [
+            "{nome_character}, você ouviu aqueles estalos ao amanhecer?",
+            "Ouvi sim. Algo pesado se movendo.",
+            "Pensei em investigar, mas decidi esperar você acordar.",
+            "Vamos juntos depois do café. Melhor não ir sozinha."
+        ],
+        [
+            "Ei, {nome_character}. Achou minhas pegadas perto do riacho?",
+            "Achei… parecia que você estava seguindo alguém.",
+            "Estava. Passos largos, profundos. Não humanos.",
+            "Então precisamos redobrar a guarda hoje."
+        ]
+    ],
+    "respondendo": [
+        [
+            "Nash, você viu meu facão de caça? Juro que deixei aqui.",
+            "Vi sim, estava apoiado na carroça de suprimentos.",
+            "Ah, ótimo. Pensei que tivesse caído no mato.",
+            "Com você? Impossível. Você revisa tudo três vezes."
+        ],
+        [
+            "Nash, encontrei uma trilha estranha a leste.",
+            "O que tinha de diferente?",
+            "Cheiro forte de ferrugem… como sangue seco.",
+            "Então não vá só. Pode ser algo maior do que aparenta."
+        ],
+        [
+            "{nome_character}, a patrulha da noite me deixou inquieta.",
+            "O que aconteceu?",
+            "Silêncio demais… até os grilos pararam.",
+            "Isso nunca é bom. Precisamos investigar antes do pôr do sol."
+        ]
+    ]
+}

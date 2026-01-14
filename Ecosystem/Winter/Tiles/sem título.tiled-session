@@ -1,0 +1,164 @@
+{
+    "Map/SizeTest": {
+        "height": 4300,
+        "width": 2
+    },
+    "activeFile": "tileset/Winter.tmx",
+    "expandedProjectPaths": [
+        ".",
+        "tileset"
+    ],
+    "fileStates": {
+        "#Ground Ice": {
+            "dynamicWrapping": false
+        },
+        "tileset/Cracs.tsx": {
+            "dynamicWrapping": false,
+            "scaleInDock": 1,
+            "scaleInEditor": 2
+        },
+        "tileset/Details.tsx": {
+            "dynamicWrapping": false,
+            "scaleInDock": 1,
+            "scaleInEditor": 2
+        },
+        "tileset/Ground Ice.tsx": {
+            "dynamicWrapping": false,
+            "scaleInDock": 0.5,
+            "scaleInEditor": 3
+        },
+        "tileset/House.tsx": {
+            "dynamicWrapping": true,
+            "scaleInDock": 0.25,
+            "scaleInEditor": 2
+        },
+        "tileset/Ice.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tileset/Mushroom2_snow_shadow3-1.tsx": {
+            "dynamicWrapping": false,
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tileset/Objects 128.tsx": {
+            "dynamicWrapping": true,
+            "scaleInDock": 0.5,
+            "scaleInEditor": 0.06
+        },
+        "tileset/Objects 16.tsx": {
+            "dynamicWrapping": false,
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tileset/Objects 32.tsx": {
+            "dynamicWrapping": true,
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tileset/Objects 512.tsx": {
+            "dynamicWrapping": true,
+            "scaleInDock": 1,
+            "scaleInEditor": 0.06
+        },
+        "tileset/Objects 64.tsx": {
+            "dynamicWrapping": true,
+            "scaleInDock": 0.5,
+            "scaleInEditor": 1
+        },
+        "tileset/Objects orcs new.tsx": {
+            "dynamicWrapping": true,
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tileset/Objects.tsx": {
+            "dynamicWrapping": true,
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tileset/Orc objects.tsx": {
+            "dynamicWrapping": false,
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tileset/Orcs Area.tsx": {
+            "dynamicWrapping": true,
+            "scaleInDock": 0.25,
+            "scaleInEditor": 0.125
+        },
+        "tileset/Orcs Houses.tsx": {
+            "dynamicWrapping": true,
+            "scaleInDock": 1
+        },
+        "tileset/Orcs objects.tsx": {
+            "dynamicWrapping": true,
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tileset/Snow.tsx": {
+            "dynamicWrapping": false,
+            "scaleInDock": 1,
+            "scaleInEditor": 2
+        },
+        "tileset/Sports.tsx": {
+            "dynamicWrapping": false,
+            "scaleInDock": 1,
+            "scaleInEditor": 2
+        },
+        "tileset/Water.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 2
+        },
+        "tileset/Winter.tmx": {
+            "scale": 1,
+            "selectedLayer": 23,
+            "viewCenter": {
+                "x": 981.5,
+                "y": 3572.5
+            }
+        },
+        "tileset/Winter.tmx#Ground Ice": {
+            "dynamicWrapping": false,
+            "scaleInDock": 1
+        },
+        "tileset/Winter.tsx": {
+            "dynamicWrapping": true,
+            "scaleInDock": 1,
+            "scaleInEditor": 1.5
+        }
+    },
+    "last.imagePath": "/home/samuel/Downloads/craftpix-net-695666-free-undead-tileset-top-down-pixel-art (1)/PNG/Objects_separately",
+    "map.height": 256,
+    "map.lastUsedFormat": "tmx",
+    "map.tileHeight": 16,
+    "map.tileWidth": 16,
+    "map.width": 256,
+    "openFiles": [
+        "tileset/Winter.tmx",
+        "tileset/Objects 128.tsx",
+        "tileset/Objects 512.tsx",
+        "tileset/Orcs Area.tsx",
+        "tileset/Ground Ice.tsx"
+    ],
+    "project": "sem título.tiled-project",
+    "recentFiles": [
+        "tileset/Ground Ice.tsx",
+        "tileset/Orcs Area.tsx",
+        "tileset/Objects 512.tsx",
+        "tileset/Objects 128.tsx",
+        "tileset/Winter.tmx",
+        "tileset/Orcs objects.tsx",
+        "tileset/Orc objects.tsx",
+        "tileset/Objects orcs new.tsx",
+        "tileset/Details.tsx",
+        "tileset/Snow.tsx",
+        "tileset/Sports.tsx",
+        "tileset/Water.tsx"
+    ],
+    "tileset.lastUsedFormat": "tsx",
+    "tileset.tileSize": {
+        "height": 16,
+        "width": 16
+    },
+    "tileset.type": 1
+}
