@@ -9,7 +9,7 @@ from Utils.classes_raiz import *
 
 class Map:
 
-    def __init__(self, all_sprites, collision_sprites, all_creatures:pygame.sprite.Group, player_group):
+    def __init__(self, all_sprites, collision_sprites, all_creatures:pygame.sprite.Group, player_group, winter_curse_group):
         self.map = load_pygame(join(getcwd(), "Ecosystem", "Winter", "Tiles", "tileset", "Winter.tmx"))
         self.village_pits:list[set] = []
 
@@ -39,6 +39,10 @@ class Map:
         fixed_objects_layer =  self.map.get_layer_by_name("Fixed Objects")
         for obj in fixed_objects_layer:
             CollisionSprites(all_sprites, collision_sprites, pos=(obj.x*SCALE, obj.y*SCALE), surface=pygame.transform.scale(obj.image, (obj.image.width*SCALE, obj.image.height*SCALE)))
+        
+        fixed_objects_layer =  self.map.get_layer_by_name("Fixed Houses")
+        for obj in fixed_objects_layer:
+            CollisionSprites(all_sprites, collision_sprites, pos=(obj.x*SCALE, obj.y*SCALE), surface=pygame.transform.scale(obj.image, (obj.image.width*SCALE, obj.image.height*SCALE)), is_fixed_house=True)
         
         moveable_objects =  self.map.get_layer_by_name("Moveable Objects")
         for obj in moveable_objects:
@@ -111,7 +115,7 @@ class Map:
         AnimatedSprite(all_sprites,collision_sprites,root=water,obj = image_surf, use_center=True,pos=(4817, 4222))
         
         
-        WinterCurseSprites(all_sprites, collision_sprites, pos=(4617, 4322), duration=4000, stacks=3)
+        WinterCurseSprites(all_sprites, collision_sprites, winter_curse_group, pos=(4617, 4322), duration=4000, stacks=3)
         # getable_objects_layer =  self.map.get_layer_by_name("Getable_Objects")
         # inventory_objects_layer =  self.map.get_layer_by_name("Inventory_Objects")
         # moveable_objects_layer =  self.map.get_layer_by_name("Moveable_Objects")

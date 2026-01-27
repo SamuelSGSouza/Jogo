@@ -195,7 +195,7 @@ class Character(pygame.sprite.Sprite):
                 max_hp:int = 100,life_regen_percent=1, attack_damage:int=10, 
                 attack_delay:int= 1750, attack_duration:int = 2000,
                 is_ranged=False, range_distance = 36,
-                scale_on_attack_value=2, team_members=[]):
+                scale_on_attack_value=2, team_members=[], is_player=False):
         super().__init__(*groups, )
         self.specie = ""
         self.being_healed = False
@@ -208,7 +208,7 @@ class Character(pygame.sprite.Sprite):
         self.is_interacting = False
         self.is_chatting = False
         self.is_talking = False
-        self.is_player = False
+        self.is_player = is_player
         self.is_blind = False
         self.is_invisible = False
         self.is_sleeping = False
@@ -227,6 +227,7 @@ class Character(pygame.sprite.Sprite):
         self.range_distance = range_distance
         
         self.can_talk = False
+        self.talk_options = ["respondendo","iniciando"]
 
         #kill_humans
         self.kill_humans = False
@@ -255,9 +256,10 @@ class Character(pygame.sprite.Sprite):
         self.last_changed_pov = init_time
         self.last_regenered_hp = init_time
         self.last_mimetization = init_time
-        
+        self.start_begging_time = init_time
         
         self.mimetization_delay = 15000
+        self.begging_delay = 8000
 
         
         self.has_vision = True
@@ -375,6 +377,19 @@ class Character(pygame.sprite.Sprite):
 
         self.specie_group = pygame.sprite.Group()
 
+        self.rota = []
+
+        if not self.is_player:
+            grupo = self.groups()[0]
+            if hasattr(grupo, "world_matriz"):
+                matriz_mundo = grupo.world_matriz
+                self.locais_favoritos = []
+                for _ in range(0,200):
+                    x, y = randint(0, LARGURA_MAPA-200), randint(0, ALTURA_MAPA-200)
+                    if matriz_mundo[x//GRID_SIZE][y//GRID_SIZE] != 1 and (x,y) not in self.locais_favoritos:
+                        self.locais_favoritos.append((x,y))
+
+
     def _get_facing_dir(self) -> pygame.Vector2:
         d = self.direction
         if d.x != 0 or d.y != 0:
@@ -389,6 +404,10 @@ class Character(pygame.sprite.Sprite):
         if self.state == "Left":
             return pygame.Vector2(-1, 0)
         return pygame.Vector2(1, 0)  # "Right" ou default
+
+    def get_hour(self):
+        hour = self.groups()[0].hour
+        return hour
 
     # ---------------------------------------------------------
     # Constrói a lista de retângulos (FRect) à frente do monstro.
@@ -548,7 +567,7 @@ class Character(pygame.sprite.Sprite):
                 self.pontuacao = 0
                 
             delta_rep = self.pontuacao * 20  # Exemplo: pontuação alta -> +rep, baixa -> -rep
-            self.reputacao_orcs = max(0, min(100, self.reputacao_orcs + delta_rep))
+            # self.reputacao_orcs = max(0, min(100, self.reputacao_orcs + delta_rep))
             return fala_data["fala"], []  # Mostra fala final e encerra
         
         self.encerrou_conversa = False
@@ -559,10 +578,7 @@ class Character(pygame.sprite.Sprite):
 
     @property
     def speed(self):
-        mult = 1.0
-        for f in self.speed_multipliers:
-            mult *= f
-        return self.original_speed * mult
+        return self.original_speed
     
     @property
     def is_making_noise(self):
@@ -673,9 +689,18 @@ class Character(pygame.sprite.Sprite):
                             "Tenha piedade… minha vida ainda importa."
                         ])
                 self.animate(dt)
+                if pygame.time.get_ticks() - self.start_begging_time > self.begging_delay:
+                    self.is_begging = False
+                    self.action = "WakeUp"
+                    parar_ataque = choice([True, False])
+                    if parar_ataque:
+                        self.attacking_character = None
+                        self.is_combating = False
+
                 return
             else:
                 self.action="Begging"
+                self.start_begging_time = pygame.time.get_ticks()
             self.animate(dt)
             return
         return True
@@ -713,7 +738,12 @@ class Character(pygame.sprite.Sprite):
         FEEDBACK_DEG = 6       # giro leve
         x_move_ok = True
         y_move_ok = True
-        colissiors = self.collision_sprites if self.is_player==True else []
+        winter_curse_group = self.groups()[0].winter_curse_group
+        if self.is_player:
+            colissiors = self.collision_sprites
+        else:
+            colissiors = [winter_tree for winter_tree in winter_curse_group]
+
         # 1) Recupera apenas os sprites que realmente colidem (loop em C, bem mais rápido)
         hits = pygame.sprite.spritecollide(self, colissiors, False)
         if not hits:
@@ -739,7 +769,7 @@ class Character(pygame.sprite.Sprite):
                 if getattr(sprite, "is_winter_curse", False):
                     if (self.position_vector - pygame.Vector2(sprite.rect.center)).length() < self.rect.width*1.3:
                         if not self.is_frozen:
-                            freeze = FrozenEffect(20000, curse_groups=[self.groups()[0], self.collision_sprites])
+                            freeze = FrozenEffect(20000, curse_groups=[self.groups()[0], self.collision_sprites, winter_curse_group])
                             self.effects.append(freeze)
 
                 if isinstance(sprite, EffectSprite):
@@ -818,6 +848,7 @@ class Character(pygame.sprite.Sprite):
         impact_slide_strength: float = 50.0,
         attacking_character = None
     ) -> None:
+        
          #zerando a direção para ele não ser arremessado
         self.direction = pygame.Vector2()
 

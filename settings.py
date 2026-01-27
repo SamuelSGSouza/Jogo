@@ -26,6 +26,8 @@ HHHDCS = DCS/8 #Half Quarter of default character size
 GRID_SIZE = TILE_SIZE
 SCALE = 1.5
 MARGEM_DE_ATAQUE = 0.5 #abaixo disso, seres que se encontrarem vão se atacar
+LARGURA_MAPA = int(4100 * SCALE) # 200 tiles de largura
+ALTURA_MAPA  = int(4100 * SCALE) # 200 tiles de altura
 matriz_mapa_global =[[]]
 
 #lendo sprite de flecha
@@ -768,7 +770,7 @@ def draw_speech_bubble(screen, font, text, x, y, max_width=300, padding=15, bg_c
     # Posiciona a caixa na tela (centralizada horizontalmente acima do personagem)
     screen.blit(bubble_surface, (x - total_width // 2, y - total_height - 50))
 
-def show_modal(screen, font, main_text, options, max_width=400, padding=20, bg_color=(242, 237, 204, 255), text_color=(101, 67, 33), border_color=(139, 108, 66), chat_end=False):
+def show_modal_old(screen, font, main_text, options, max_width=400, padding=20, bg_color=(242, 255, 255, 255), text_color=(91, 37, 3), border_color=(139, 108, 66), chat_end=False):
     """
     Exibe um modal estilo pergaminho com texto principal e opções clicáveis.
     A função é bloqueante e retorna o índice da opção selecionada pelo usuário.
@@ -950,6 +952,139 @@ def show_modal(screen, font, main_text, options, max_width=400, padding=20, bg_c
                     hovered = new_hovered
                     draw_modal(hovered)
 
+def show_modal(screen, font, main_text, options, max_width=500, padding=30, chat_end=False):
+    """
+    Exibe um modal com textos e botões centralizados.
+    """
+
+    COLORS = {
+        'bg': (238, 221, 185),
+        'border': (64, 38, 18),
+        'text': (38, 24, 12),
+        'option_bg': (214, 187, 138),
+        'option_hover': (198, 163, 96),
+        'accent': (191, 144, 0),
+        'white': (255, 255, 255)
+    }
+
+    def wrap_text(text, width, font):
+        # Primeiro, divide o texto pelas quebras de linha manuais (\n)
+        paragraphs = text.split('\n')
+        all_lines = []
+        
+        for paragraph in paragraphs:
+            # Se o parágrafo estiver vazio (ex: "\n\n"), adiciona uma linha vazia
+            if paragraph == "":
+                all_lines.append("")
+                continue
+                
+            words = paragraph.split(' ')
+            current_line = []
+            
+            for word in words:
+                test_line = ' '.join(current_line + [word])
+                if font.size(test_line)[0] <= width:
+                    current_line.append(word)
+                else:
+                    all_lines.append(' '.join(current_line))
+                    current_line = [word]
+            
+            # Adiciona a última linha do parágrafo processado
+            all_lines.append(' '.join(current_line))
+            
+        return all_lines
+
+    # --- CÁLCULOS DE DIMENSÃO ---
+    usable_width = max_width - (padding * 2)
+    main_lines = wrap_text(main_text, usable_width, font)
+    
+    # Encontra a largura da maior linha ou opção para definir o tamanho do modal
+    max_content_width = 0
+    for line in main_lines:
+        max_content_width = max(max_content_width, font.size(line)[0])
+    for opt in options:
+        max_content_width = max(max_content_width, font.size(opt)[0])
+    
+    total_width = max_content_width + (padding * 2)
+    line_height = font.get_linesize()
+    total_height = (len(main_lines) * line_height) + (len(options) * (line_height + 15)) + (padding * 2) + 20
+    
+    modal_rect = pygame.Rect(0, 0, total_width, total_height)
+    modal_rect.center = screen.get_rect().center
+    
+    def draw_ui(hovered_idx=None):
+        # Fundo do Modal
+        bg_surf = pygame.Surface((total_width, total_height), pygame.SRCALPHA)
+        pygame.draw.rect(bg_surf, COLORS['bg'], (0, 0, total_width, total_height), border_radius=12)
+        pygame.draw.rect(bg_surf, COLORS['border'], (0, 0, total_width, total_height), width=2, border_radius=12)
+        
+        # 1. Desenha Texto Principal CENTRALIZADO
+        y_offset = padding
+        for line in main_lines:
+            text_surf = font.render(line, True, COLORS['text'])
+            # Cálculo do X centralizado: (Largura Total - Largura da Linha) / 2
+            text_x = (total_width - text_surf.get_width()) // 2
+            bg_surf.blit(text_surf, (text_x, y_offset))
+            y_offset += line_height
+        
+        y_offset += 20 
+        
+        # 2. Desenha Opções CENTRALIZADAS
+        option_rects = []
+        for i, opt in enumerate(options):
+            is_hovered = (i == hovered_idx)
+            color = COLORS['accent'] if is_hovered else COLORS['option_bg']
+            
+            # Ajustamos a largura do botão para o conteúdo ou para o máximo disponível
+            opt_text_surf = font.render(opt, True, COLORS['white'] if is_hovered else COLORS['text'])
+            
+            # Definimos o retângulo do botão (um pouco maior que o texto)
+            button_w = max_content_width 
+            button_h = line_height + 10
+            button_x = (total_width - button_w) // 2
+            
+            opt_box = pygame.Rect(button_x, y_offset, button_w, button_h)
+            pygame.draw.rect(bg_surf, color, opt_box, border_radius=6)
+            
+            # Texto centralizado dentro do botão
+            text_pos = (opt_box.centerx - opt_text_surf.get_width() // 2, 
+                        opt_box.centery - opt_text_surf.get_height() // 2)
+            bg_surf.blit(opt_text_surf, text_pos)
+            
+            # Guardar o rect global para colisão
+            global_rect = opt_box.move(modal_rect.topleft)
+            option_rects.append(global_rect)
+            
+            y_offset += line_height + 15
+            
+        screen.blit(bg_surf, modal_rect.topleft)
+        return option_rects
+
+    # --- LOOP DE EVENTOS (Igual ao anterior) ---
+    clock = pygame.time.Clock()
+    hovered_idx = None
+
+    while True:
+        mouse_pos = pygame.mouse.get_pos()
+        screen_option_rects = draw_ui(hovered_idx)
+        pygame.display.flip()
+
+        if chat_end: return
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit(); exit()
+            if event.type == pygame.MOUSEMOTION:
+                hovered_idx = None
+                for i, rect in enumerate(screen_option_rects):
+                    if rect.collidepoint(mouse_pos):
+                        hovered_idx = i
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                for i, rect in enumerate(screen_option_rects):
+                    if rect.collidepoint(mouse_pos):
+                        return i
+        clock.tick(60)
+
 
 # === Helpers geométricos ============================================
 def angle_of(vec: pygame.Vector2) -> float:
@@ -1051,7 +1186,7 @@ def gerar_matriz_mapa(largura_mapa: int, altura_mapa: int, tilesize: int, grupo_
             # 3. Verifica se este retângulo colide com QUALQUER obstáculo no grupo
             for obstaculo in grupo_de_obstaculos:
                 # Usamos colliderect para uma verificação rápida de colisão entre retângulos
-                if celula_rect.colliderect(obstaculo.hitbox):
+                if celula_rect.colliderect(obstaculo.rect):
                     # Se houver colisão, marca a célula como 1 (obstáculo)
                     matriz[y][x] = 1
                     # Uma vez que encontramos uma colisão para esta célula,
@@ -1062,11 +1197,17 @@ def gerar_matriz_mapa(largura_mapa: int, altura_mapa: int, tilesize: int, grupo_
 
 def criar_surface_debug_matriz(matriz: list[list[int]], tilesize: int, 
                               cor_obstaculo=(255, 0, 0, 100),   # Vermelho semi-transparente
-                              cor_fundo=(0, 0, 0, 0)) -> pygame.Surface:     # Transparente
+                              cor_caminho=(0, 0, 255, 100),   # Azul semi-transparente
+                              cor_fundo=(0, 0, 0, 0),
+                              caminho = [],
+                              finais=[]
+                              ) -> pygame.Surface:     # Transparente
     """
     Cria uma Surface única com o grid de colisão já desenhado.
     Pode ser blitada diretamente na tela para debug.
     """
+    
+
     altura = len(matriz)
     largura = len(matriz[0]) if altura > 0 else 0
     
@@ -1074,12 +1215,28 @@ def criar_surface_debug_matriz(matriz: list[list[int]], tilesize: int,
     surface = pygame.Surface((largura * tilesize, altura * tilesize), pygame.SRCALPHA)
     surface.fill(cor_fundo)  # Fundo transparente
 
+        
     # Desenha apenas as células que são obstáculo
     for y in range(altura):
         for x in range(largura):
-            if matriz[y][x] == 1:
+            
+            if (x,y) in finais and matriz[y][x] == 1:
+                
+                rect = pygame.Rect(x * tilesize, y * tilesize, tilesize, tilesize)
+                pygame.draw.rect(surface, (0,255,255), rect)
+            if (x,y) in finais:
+                rect = pygame.Rect(x * tilesize, y * tilesize, tilesize, tilesize)
+                pygame.draw.rect(surface, (0,255,0), rect)
+            elif (x,y) in caminho and matriz[y][x] == 1:
+                rect = pygame.Rect(x * tilesize, y * tilesize, tilesize, tilesize)
+                pygame.draw.rect(surface, (255,255,255), rect)
+            elif (x,y) in caminho:
+                rect = pygame.Rect(x * tilesize, y * tilesize, tilesize, tilesize)
+                pygame.draw.rect(surface, cor_caminho, rect)
+            elif matriz[y][x] == 1:
                 rect = pygame.Rect(x * tilesize, y * tilesize, tilesize, tilesize)
                 pygame.draw.rect(surface, cor_obstaculo, rect)
+            
     
     # Opcional: desenhar a grade (linhas finas) para ver melhor os tiles
     cor_grid = (50, 50, 50, 80)  # Cinza bem claro e transparente

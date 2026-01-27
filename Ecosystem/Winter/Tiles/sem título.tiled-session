@@ -9,6 +9,9 @@
         "tileset"
     ],
     "fileStates": {
+        "": {
+            "scaleInDock": 1
+        },
         "#Ground Ice": {
             "dynamicWrapping": false
         },
@@ -76,6 +79,11 @@
             "scaleInDock": 1,
             "scaleInEditor": 1
         },
+        "tileset/Orc Houses definitive.tsx": {
+            "dynamicWrapping": true,
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
         "tileset/Orc objects.tsx": {
             "dynamicWrapping": false,
             "scaleInDock": 1,
@@ -88,7 +96,8 @@
         },
         "tileset/Orcs Houses.tsx": {
             "dynamicWrapping": true,
-            "scaleInDock": 1
+            "scaleInDock": 1,
+            "scaleInEditor": 1
         },
         "tileset/Orcs objects.tsx": {
             "dynamicWrapping": true,
@@ -110,11 +119,11 @@
             "scaleInEditor": 2
         },
         "tileset/Winter.tmx": {
-            "scale": 1,
-            "selectedLayer": 23,
+            "scale": 0.33,
+            "selectedLayer": 7,
             "viewCenter": {
-                "x": 981.5,
-                "y": 3572.5
+                "x": 322.7272727272727,
+                "y": 4062.121212121212
             }
         },
         "tileset/Winter.tmx#Ground Ice": {
@@ -127,7 +136,7 @@
             "scaleInEditor": 1.5
         }
     },
-    "last.imagePath": "/home/samuel/Downloads/craftpix-net-695666-free-undead-tileset-top-down-pixel-art (1)/PNG/Objects_separately",
+    "last.imagePath": "/home/samuel/Trabalho/SAMUEL/DUNGEON_EXPLORATION/Ecosystem/Winter/animated_objects/Chief Orcs Houses/on",
     "map.height": 256,
     "map.lastUsedFormat": "tmx",
     "map.tileHeight": 16,
@@ -138,22 +147,23 @@
         "tileset/Objects 128.tsx",
         "tileset/Objects 512.tsx",
         "tileset/Orcs Area.tsx",
-        "tileset/Ground Ice.tsx"
+        "tileset/Ground Ice.tsx",
+        "tileset/Orc Houses definitive.tsx"
     ],
     "project": "sem título.tiled-project",
     "recentFiles": [
+        "tileset/Orc Houses definitive.tsx",
         "tileset/Ground Ice.tsx",
         "tileset/Orcs Area.tsx",
         "tileset/Objects 512.tsx",
         "tileset/Objects 128.tsx",
         "tileset/Winter.tmx",
+        "tileset/Orcs Houses.tsx",
         "tileset/Orcs objects.tsx",
         "tileset/Orc objects.tsx",
         "tileset/Objects orcs new.tsx",
         "tileset/Details.tsx",
-        "tileset/Snow.tsx",
-        "tileset/Sports.tsx",
-        "tileset/Water.tsx"
+        "tileset/Snow.tsx"
     ],
     "tileset.lastUsedFormat": "tsx",
     "tileset.tileSize": {

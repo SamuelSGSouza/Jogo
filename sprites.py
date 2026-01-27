@@ -161,13 +161,14 @@ class MoveableSprites(pygame.sprite.Sprite):
         self.is_getable = False
 
 class CollisionSprites(pygame.sprite.Sprite):
-    def __init__(self, *groups,surface, pos,is_inventory=False, use_center=False, is_getable = False, item=None, is_tree=False, is_roof=False):
+    def __init__(self, *groups,surface, pos,is_inventory=False, use_center=False, is_getable = False, item=None, is_tree=False, is_roof=False, is_fixed_house=False):
         super().__init__(*groups)
         self.item = item
         self.image = surface
         self.is_getable = is_getable
         self.is_tree = is_tree
         self.is_roof = is_roof
+        self.is_fixed_house = is_fixed_house
         self.is_invisible=False
         if use_center:
             self.rect = self.image.get_frect(center=pos)
@@ -179,6 +180,10 @@ class CollisionSprites(pygame.sprite.Sprite):
         if self.is_tree:
             self.hitbox.width = self.rect.width - self.rect.width *50/100
             self.hitbox.height = self.rect.height - self.rect.height *60/100
+
+        elif self.is_fixed_house:
+            self.hitbox.width = self.rect.width - self.rect.width *30/100
+            self.hitbox.height = self.rect.height - self.rect.height *10/100
         else:
             self.hitbox.width = self.rect.width - self.rect.width *30/100
             self.hitbox.height = self.rect.height - self.rect.height *40/100

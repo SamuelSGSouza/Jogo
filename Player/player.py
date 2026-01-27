@@ -5,7 +5,7 @@ from Utils.speels import *
 from Utils.effects import Blind
 class Player(Character):
     def __init__(self, *groups, collision_sprites:pygame.sprite.Group,creatures_sprites:pygame.sprite.Group):
-        super().__init__(*groups, collision_sprites=collision_sprites, creatures_sprites=creatures_sprites)
+        super().__init__(*groups, collision_sprites=collision_sprites, creatures_sprites=creatures_sprites, is_player=True)
         self.all_groups= groups
         self.is_player = True
         self.is_human = True
@@ -25,7 +25,7 @@ class Player(Character):
         
         
         self.image = pygame.transform.scale(self.frames[self.action][self.state][0], (self.default_size, self.default_size))
-        self.rect = self.image.get_frect(center = (3672, 115))
+        self.rect = self.image.get_frect(center = (1571,5268))
         self.hitbox = pygame.FRect(
             self.rect.left + self.rect.width/2,
             self.rect.top + self.rect.height/3+50,
@@ -62,7 +62,8 @@ class Player(Character):
         self.box_5 = pygame.Rect(1980,5435, 10, 100)
         self.box_6 = pygame.Rect(2040,5435, 10, 100)
         self.inside_maze = False
-        self.hp =200
+        self.max_hp =200
+        self.hp=self.max_hp
 
         self.player_chatting_to: Character=None
         self.player_chatting_end =  None
@@ -99,7 +100,12 @@ class Player(Character):
         ]
         
         
-
+    @property
+    def speed(self):
+        mult = min(1, 1.0 - (1 - self.hp/self.max_hp))
+        for f in self.speed_multipliers:
+            mult *= f
+        return self.original_speed * mult
 
     def move(self, dt):
         self.direction = self.direction.normalize() if self.direction else self.direction

@@ -144,13 +144,13 @@ class Brain:
             for creature in proximos: 
                 if creature != self.character:
                     if creature.specie == self.character.specie:
-                        if creature.is_player:
+                        if creature.is_player :
                             return None
                         if self.character.now - self.character.last_talk_time > self.character.talk_delay and self.character.can_talk == True and self.character.scripts:
                             self.character.last_talk_time = self.character.now
                             self.character.is_chatting = True
                             creature.is_chatting = True
-                            tipo_conversa = choice(["respondendo","iniciando"])
+                            tipo_conversa = choice(self.character.talk_options)
                             try:
                                 script = [t.replace(r"{nome_character}", creature.personal_name) for t in choice(self.character.scripts[tipo_conversa]) ]
                             except:
@@ -238,16 +238,16 @@ class Brain:
     def move_to(self, final_dest:set, tolerance = 2, use_manhattam=False):
         char_center = self.character.rect.center
         char_point = pygame.Vector2(char_center[0],char_center[1])
-        final_dest_point = pygame.Vector2(final_dest[0],final_dest[1])
-        global matriz_mapa_global
-
+        try:
+            final_dest_point = pygame.Vector2(final_dest[0],final_dest[1])
+        except:
+            raise Exception(f"Erro ao tentar pegar o ponto final do personagem {self.character}")
         if not self.rota or self.last_dest != final_dest:
-            if use_manhattam == True:
-                self.rota = calcula_rota_manhattan(self.character.groups()[0].world_matriz, char_center, final_dest) or []
-            else:
-                self.rota = calcula_rota_correta(self.character.groups()[0].world_matriz, char_center, final_dest) or []
+            self.rota = calcula_rota_correta(self.character.groups()[0].world_matriz, char_center, final_dest) or []
+            self.character.rota = self.rota
             if not self.rota:
-                return Move(self.character, "to", dest=final_dest)
+                self.final_dest = None
+                return None
         #se acabou a rota ou chegou no destino, reseta tudo
         if self.rota_index >= len(self.rota) or (final_dest_point - char_point).length() <= self.character.default_size//tolerance:
             self.rota_index = 0
@@ -275,6 +275,14 @@ class MonsterBrain(Brain):
 class SlimeBrain(MonsterBrain):
     def __init__(self, character):
         super().__init__(character)
+    
+    def rotina_diaria(self):
+        if not self.final_dest:
+            self.final_dest = choice(self.character.locais_favoritos)
+
+        move = self.move_to(self.final_dest)
+        return move
+
 
 class GolemBrain(MonsterBrain):
     def __init__(self, character):
@@ -310,15 +318,6 @@ class GhostBrain(Brain):
         move = self.move_to(self.final_dest)
         return move
 
-class ExplorerOrcBrain(Brain):
-    def __init__(self, character):
-        super().__init__(character)
-
-    def rotina_diaria(self,):
-        self.final_dest = (5852, 5842)
-        move = self.move_to(self.final_dest)
-        return move
-
 class ObiBrain(Brain):
     def __init__(self, character, can_attack=False):
         super().__init__(character,mental_type="raivoso")
@@ -327,9 +326,10 @@ class ObiBrain(Brain):
         self.final_dest = ()
     
     def rotina_diaria(self):
-        vr = self.character.village_rect #village rect
+        
         if not self.final_dest:
-            self.final_dest = (randint(vr.left, vr.right), randint(vr.top, vr.bottom))
+            self.final_dest = choice(self.character.locais_patrulha)
+
         move = self.move_to(self.final_dest)
         return move
     
@@ -680,6 +680,173 @@ def start_chat(a:Character, b:Character, script:list[str]) -> tuple[Chatting, Ch
     conv = Conversation(script)
     return Chatting(a, b, conv, role=0), Chatting(b, a, conv, role=1), conv
 
+
+#ORCS
+class ExplorerOrcBrain(Brain):
+    def __init__(self, character):
+        super().__init__(character)
+
+    def rotina_diaria(self,):
+        self.final_dest = (5852, 5842)
+        move = self.move_to(self.final_dest)
+        return move
+    
+class ChiefOrcBrain(Brain):
+    def __init__(self, character):
+        super().__init__(character)
+
+    def rotina_diaria(self,):
+        hora = self.character.get_hour()
+        if hora < 19:
+            return None
+        else:
+            self.character.confiabilidades["HUMAN"] = -20
+            # vaga pela vila humana matando todos que encontrar
+            if not self.final_dest:
+                self.final_dest = choice(self.character.locais_vila_humana)
+
+            move = self.move_to(self.final_dest)
+            return move
+
+    def esbarrar_em_character(self):
+        hora = self.character.get_hour()
+        if hora < 19:
+            return None
+        else:
+            return super().esbarrar_em_character()
+    
+class OrcCacadorBrain(Brain):
+    def __init__(self, character, ):
+        super().__init__(character,mental_type="raivoso")
+        self.can_attack = True
+        self.target = None
+        self.final_dest = ()
+        self.indo_reuniao = False
+        self.ouvindo_reuniao = False
+    def rotina_diaria(self):
+        hora = self.character.get_hour()
+        falou_mensageiro = self.character.falou_mensageiro
+        locais_reuniao = [(1271,5268), (1302, 5084), (1121,4898), (859, 5109)]
+        if  hora < 17 or not falou_mensageiro:
+            #anda pelo mapa matando o que encontrar
+            if not self.final_dest:
+                self.final_dest = choice(self.character.locais_patrulha)
+
+            move = self.move_to(self.final_dest)
+            return move
+        
+        elif hora >= 17 and hora < 19 and falou_mensageiro:
+            if not self.final_dest and not self.indo_reuniao and not self.ouvindo_reuniao:
+                self.final_dest = choice(locais_reuniao)
+                self.indo_reuniao=True
+            if self.final_dest:
+                move = self.move_to(self.final_dest)
+                return move
+            return None
+        else:
+            self.character.confiabilidades["HUMAN"] = -20
+            # vaga pela vila humana matando todos que encontrar
+            if not self.final_dest:
+                self.final_dest = choice(self.character.locais_vila_humana)
+
+            move = self.move_to(self.final_dest)
+            return move
+
+        return None
+
+class OrcMensageiroBrain(Brain):
+    def __init__(self, character, ):
+        super().__init__(character,mental_type="raivoso")
+        self.can_attack = False
+        self.target = None
+        self.final_dest = ()
+        self.indo_reuniao = False
+        self.ouvindo_reuniao = False
+    
+    def esbarrar_em_character(self,):
+        if self.character.is_chatting == True or self.character.is_begging==True:
+            return None
+        proximos = pygame.sprite.spritecollide(self.character, self.character.creatures_sprites, False)
+        if proximos:
+            for creature in proximos: 
+                if creature != self.character:
+                    if creature.specie == self.character.specie:
+                        if self.character.now - self.character.last_talk_time > 10000 and self.character.can_talk == True and self.character.scripts and creature not in self.character.orcs_falados:
+                            self.character.last_talk_time = self.character.now
+                            self.character.is_chatting = True
+                            creature.is_chatting = True
+                            tipo_conversa = choice(self.character.talk_options)
+                            try:
+                                script = [t.replace(r"{nome_character}", creature.personal_name) for t in choice(self.character.scripts[tipo_conversa]) ]
+                            except:
+                                raise Exception(f"Falha ao iniciar conversa entre: {self.character} X {creature}")
+                            if tipo_conversa == "respondendo":
+                                action_a,action_b,conv = start_chat(creature, self.character,script=script)
+                                creature.current_action = action_a
+                                self.character.current_action = action_b
+                            else:
+                                action_a,action_b,conv = start_chat(self.character,creature,script=script)
+                                creature.current_action = action_b
+                                self.character.current_action = action_a
+                            self.conversation = conv
+                            creature.falou_mensageiro = True
+                            self.character.orcs_falados.append(creature)
+                            print(f"Orc {creature} recebeu a mensagem")
+                            return self.character.current_action
+                    
+
+        return None
+    
+
+    def rotina_diaria(self):
+        hora = self.character.get_hour()
+
+        locais_reuniao = [(1271,5268), (1302, 5084), (1121,4898), (859, 5109)]
+
+        if hora < 10:
+            return None
+        if  hora < 17  or len(self.character.orcs_falados) < 10:
+            #anda pelo mapa matando o que encontrar
+            if not self.final_dest:
+                #escolhe um dos orcs e vai até ele
+                orc_dest = choice(self.character.orcs_para_falar)
+                self.final_dest = orc_dest.rect.center
+
+            move = self.move_to(self.final_dest)
+            return move
+        
+        elif hora >= 17 and hora < 19:
+            if not self.final_dest and not self.indo_reuniao and not self.ouvindo_reuniao:
+                self.final_dest = choice(locais_reuniao)
+                self.indo_reuniao=True
+            if self.final_dest:
+                move = self.move_to(self.final_dest)
+                return move
+            return None
+        else:
+            self.character.confiabilidades["HUMAN"] = -20
+            # vaga pela vila humana matando todos que encontrar
+            if not self.final_dest:
+                self.final_dest = choice(self.character.locais_vila_humana)
+
+            move = self.move_to(self.final_dest)
+            return move
+
+        return None
+
+class OrcGuardaBrain(Brain):
+    def __init__(self, character, guard_pos=0):
+        super().__init__(character,mental_type="raivoso")
+        self.can_attack = True
+        self.target = None
+        self.final_dest = ()
+        self.guard_pos = guard_pos
+
+    def rotina_diaria(self):
+        if self.guard_pos == 0:
+            return self.move_to((2168,5579), )
+        else:
+            return self.move_to((2161,5414), )
 
 class KeepDistance(Action):
     """

@@ -1,5 +1,4 @@
-# Colocar um velho sábio que sempre sabe como você morreu e pode dar dicas do que fazer
-## Se o jogador conseguir 10+ finais, pode se transformar nele.
+
 
 
 
@@ -39,15 +38,24 @@ Econtra o jogador
             %Quando o jogador chegar na vila, nina agradece e deixa de seguir o jogador 
 
 
+# Criar rotina dos orcs.
+
+## Orcs terão profissões então sua rotina vai depender da profissão.
+
+### Chefe Orc - 1
+#### Passa o dia dentro da caverna dos orcs "Planejando" o ataque. 
+
+# Às 17h os orcs que receberam a mensagem do mensageiro devem se reunir na caverna ao redor do Chefe.
+# O Chefe deve falar sobre como tem sido tempos difíceis, falar sobre como o relacionamento com os humanos nunca foi positivo mas também nunca foi totalmente hostil. Falar sobre como o desespero levou ele a planejar o que estão prestes a executar.
+# Ás 19h Todos os orcs juntos se encaminham para a vila humana onde vão realizar um massacre
 
 
+# Trocar o som de ataque dos slimes
+# Melhorar design das montanhas
+# Colocar um velho sábio que sempre sabe como você morreu e pode dar dicas do que fazer
+## Se o jogador conseguir 10+ finais, pode se transformar nele.
 
-# goblins e slimes devem vagar pelo mapa
-# Ajustar as caixas de diálogo de opção
-# Ajustar hitbox dos orcs
-# ajustar hitbox da nash
+# Às 18:30h Nash e Dash se encaminham para a próximo da entrada da caverna dos orcs por que lá é um bom local para caça nessa época. Eles vão ser os primeiros a fazer contato com os orcs
 
-# colocar canais de som diferentes nos passos e no ataque
-# Maldição do gelo não está afetando NPC's e Monstros
-# Conforme a vida diminui, a velocidade de movimento deve diminuir também
-# Após 5s implorando, o personagem deve voltar ao padrão
+# Adicionar botão de "Matar-se"
+# Adicionar check point 1 ao deixar a nina na vila

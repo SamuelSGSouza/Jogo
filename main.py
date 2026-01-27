@@ -65,7 +65,7 @@ class Mundo:
         self._thread.join()
 
 class GameClock:
-    def __init__(self, start_hour=8, start_min=0, start_sec=0,
+    def __init__(self, start_hour=9, start_min=0, start_sec=0,
                  game_hour_in_real_seconds=300):
         self.hour = start_hour
         self.min = start_min
@@ -163,6 +163,7 @@ class Game:
         self.collision_sprites = pygame.sprite.Group()
         self.creatures = pygame.sprite.Group()
         self.player_group = pygame.sprite.Group()
+        self.winter_curse_group = pygame.sprite.Group()
         self.group_index = 0
 
         #SPECIE GROUPS
@@ -199,9 +200,13 @@ class Game:
         self.box_6 = pygame.Rect(2040,5435, 10, 100)
        
         
+        self.decided_path = []
+        self.char_monitored = None
         
 
-        
+        # Variável para ligar/desligar o debug
+        self.mostrar_grid_debug = False
+        self.mostrar_rects = False
 
     def change_background_music(self, dt):
         # changing_speed = 0.04 #TODO: turn on volume
@@ -231,7 +236,7 @@ class Game:
         opcao = main_menu(self.screen, title_font, button_font)
         intensidade_congelamento = 0
         if opcao == "JOGAR":
-            self.setup()
+            
             light_sprites = [sp for sp in self.all_sprites if hasattr(sp, "has_light")]
               
             #NEVE
@@ -245,7 +250,7 @@ class Game:
             self.changing_music = True
 
             
-            game_clock = GameClock(start_hour=8, game_hour_in_real_seconds=15)
+            game_clock = GameClock(start_hour=8, game_hour_in_real_seconds=60)
         
             #LUZ
             LIGHT_RADIUS = 550
@@ -257,6 +262,7 @@ class Game:
                 light_radius=LIGHT_RADIUS,
                 max_dark_alpha=220,  # quão escuro é o máximo da noite
             )
+            self.setup()
             while self.game_running:
                 now = pygame.time.get_ticks()
                 if self.player.is_dead and self.player.death_time and now - self.player.death_time > 4000:
@@ -302,7 +308,9 @@ class Game:
                 self.screen.fill("#3a2e3f")
                 # Relógio na tela
                 time_str = game_clock.get_time_str()
+                
                 hour = int(time_str.split(":")[0])
+                self.all_sprites.hour = hour
                 if hour > 19 and not self.lights_on:
                     self.lights_on = True
                     for sprite in self.all_sprites:
@@ -332,11 +340,13 @@ class Game:
                     if event.type == pygame.KEYDOWN:
                         if event.key == pygame.K_g:
                             self.mostrar_grid_debug = not self.mostrar_grid_debug
+                        if event.key == pygame.K_h:
+                            self.mostrar_rects = not self.mostrar_rects
                     if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                         mouse_click = True
                 #updates
                 self.all_sprites.draw(self.player.rect.center)
-                    
+                # print(self.player.rect.center)   
                     
 
                 
@@ -353,12 +363,7 @@ class Game:
                 #     new_hitbox = pygame.FRect(orr.left + offset.x, orr.top + offset.y, orr.width, orr.height)
                 #     # pygame.draw.rect(self.screen, (255, 0, 0), new_hitbox, 1)
 
-                # for spr in self.collision_sprites:
-                    
-                #     new_hitbox = pygame.FRect(spr.hitbox.left + offset.x, spr.hitbox.top + offset.y, spr.hitbox.width, spr.hitbox.height)
-                #     new_rect= pygame.FRect(spr.rect.left + offset.x, spr.rect.top + offset.y, spr.rect.width, spr.rect.height)
-                #     pygame.draw.rect(self.screen, (255, 0, 0), new_hitbox, 1)
-                #     pygame.draw.rect(self.screen, (255, 0, 255), new_rect, 1)
+                
 
                 bx = self.box_1
                 box_rect = pygame.Rect(bx.left + offset.x, bx.top + offset.y, bx.width, bx.height)
@@ -496,13 +501,10 @@ class Game:
                     fps_text = game_defaul_font.render(txt, True, (12, 12, 12))  # verde
                     self.screen.blit(fps_text, (bar_x, bar_y-40))
 
-                    txt = "Atacante - " + str(creat.attacking_character)
+                    txt = "Ação - " + str(creat.current_action)
                     fps_text = game_defaul_font.render(txt, True, (153, 12, 13))  # verde
                     self.screen.blit(fps_text, (bar_x, bar_y-70))
 
-                    txt = "Está em Combate? - " + str(creat.is_combating)
-                    fps_text = game_defaul_font.render(txt, True, (153, 12, 13))  # verde
-                    self.screen.blit(fps_text, (bar_x, bar_y-100))
                 
                 
 
@@ -510,6 +512,14 @@ class Game:
                     offset_x = int(self.all_sprites.offset[0])
                     offset_y = int(self.all_sprites.offset[1])
                     self.screen.blit(self.debug_grid_surface, (offset_x, offset_y))
+
+                if self.mostrar_rects:
+                    for spr in self.collision_sprites:
+                    
+                        new_hitbox = pygame.FRect(spr.hitbox.left + offset.x, spr.hitbox.top + offset.y, spr.hitbox.width, spr.hitbox.height)
+                        new_rect= pygame.FRect(spr.rect.left + offset.x, spr.rect.top + offset.y, spr.rect.width, spr.rect.height)
+                        pygame.draw.rect(self.screen, (255, 255, 0), new_hitbox, 1)
+                        pygame.draw.rect(self.screen, (255, 0, 255), new_rect, 1)
                 # desenhar_matriz_mapa(self.screen, self.matriz_mapa, GRID_SIZE, offset)
 
                 if not self.player.is_chatting:
@@ -533,6 +543,7 @@ class Game:
 
                         if opcoes != [] or self.player.is_chatting == True :
                             opcao_escolhida = show_modal(self.screen,font=game_defaul_font, main_text=fala, options=opcoes, max_width=800, chat_end=chat_end)
+                            
                             self.player.player_chatting_to.processa_escolha(str(opcao_escolhida))  
                 
                 def efeito_resfriamento(tela: pygame.Surface, intensidade: int):                    
@@ -591,6 +602,28 @@ class Game:
                         estado_info={"aberto": True},
                         player=self.player
                     )
+                if self.decided_path != self.char_monitored.rota:
+                    self.decided_path = self.char_monitored.rota
+                    caminhos = []
+                    for c in self.decided_path:
+                        x,y = int(c[0]//GRID_SIZE), int(c[1]//GRID_SIZE)
+                        caminhos.append((x,y))
+
+                    finais = []
+                    for c in self.char_monitored.locais_patrulha:
+                        x,y = int(c[0]//GRID_SIZE), int(c[1]//GRID_SIZE)
+                        finais.append((x,y))
+
+                    # print(self.char_monitored.locais_patrulha)
+                    # self.debug_grid_surface = criar_surface_debug_matriz(
+                    #     self.matriz_mapa, 
+                    #     tilesize=GRID_SIZE,
+                    #     cor_obstaculo=(255, 0, 0, 80),     # Vermelho semi-transparente
+                    #     cor_caminho=(00, 0, 255, 80),     # Vermelho semi-transparente
+                    #     cor_fundo=(0, 0, 0, 0),
+                    #     caminho=caminhos,
+                    #     finais=finais
+                    # )
                 pygame.display.flip()
 
              
@@ -598,7 +631,30 @@ class Game:
             pygame.quit()
 
     def setup(self,):
-        self.mapa = Map(self.all_sprites, self.collision_sprites, self.creatures, player_group=self.player_group)
+        
+        self.mapa = Map(self.all_sprites, self.collision_sprites, self.creatures, player_group=self.player_group, winter_curse_group = self.winter_curse_group)
+
+        
+        objetos_fixos =[sprite for sprite in self.collision_sprites if isinstance(sprite, CollisionSprites) and sprite.is_getable ==False]
+        
+        self.matriz_mapa = gerar_matriz_mapa(LARGURA_MAPA, ALTURA_MAPA, GRID_SIZE, objetos_fixos)
+        self.all_sprites.world_matriz = self.matriz_mapa
+        self.all_sprites.winter_curse_group = self.winter_curse_group
+
+        
+
+        # Cria a surface de debug UMA ÚNICA VEZ
+        self.debug_grid_surface = criar_surface_debug_matriz(
+            self.matriz_mapa, 
+            tilesize=GRID_SIZE,
+            cor_obstaculo=(255, 0, 0, 80),     # Vermelho semi-transparente
+            cor_caminho=(00, 0, 255, 80),     # Vermelho semi-transparente
+            cor_fundo=(0, 0, 0, 0),
+            caminho=[],
+            finais=[]
+            
+        )
+
 
         #village infos
         self.human_village_rect = pygame.Rect(3800,1400,2200, 2000)
@@ -608,13 +664,14 @@ class Game:
         
         # Obi
         obi = Obi(self.all_sprites, self.player_group,self.creatures, collision_sprites=self.collision_sprites, creatures_sprites=self.creatures, npc_name="Obi")
+        self.char_monitored = obi
         dash = Dash(self.all_sprites, self.player_group,self.creatures, collision_sprites=self.collision_sprites, creatures_sprites=self.creatures, npc_name="Dash", is_ranged=True, attack_hitbox_list={"Front": (0,0), "Back": (0,0), "Left": (0,0), "Right": (0,0)}, range_distance=550)
-        nash = Nash(self.all_sprites, self.player_group,self.creatures, collision_sprites=self.collision_sprites, creatures_sprites=self.creatures, npc_name="Nash", is_ranged=False, default_size=HDCS +HHDCS - 5, team_members=[dash,])
+        nash = Nash(self.all_sprites, self.player_group,self.creatures, collision_sprites=self.collision_sprites, creatures_sprites=self.creatures, npc_name="Nash", is_ranged=False, default_size=HDCS +HHDCS - 5, team_members=[dash,], attack_hitbox_list={"Front": (150,70), "Back": (150,70), "Left": (130,70), "Right": (130,70),})
         dash.team_members = [nash,]
 
-        rose = Rose(self.all_sprites, self.player_group,self.creatures, collision_sprites=self.collision_sprites, creatures_sprites=self.creatures, npc_name="Rose", is_ranged=False, default_size=HDCS +HHDCS - 7, original_speed=120, actions_to_add=["SpellCast",])
-        holz = Holz(self.all_sprites, self.player_group,self.creatures, collision_sprites=self.collision_sprites, creatures_sprites=self.creatures, npc_name="Holz", is_ranged=False, default_size=HDCS +HHDCS + 7, )
-        Fischerin = Villager(self.all_sprites, self.player_group,self.creatures, collision_sprites=self.collision_sprites, creatures_sprites=self.creatures, npc_name="Fischerin", is_ranged=False, default_size=HDCS +HHDCS -3,actions_to_add=["Fishing",] )
+        # rose = Rose(self.all_sprites, self.player_group,self.creatures, collision_sprites=self.collision_sprites, creatures_sprites=self.creatures, npc_name="Rose", is_ranged=False, default_size=HDCS +HHDCS - 7, original_speed=120, actions_to_add=["SpellCast",])
+        # holz = Holz(self.all_sprites, self.player_group,self.creatures, collision_sprites=self.collision_sprites, creatures_sprites=self.creatures, npc_name="Holz", is_ranged=False, default_size=HDCS +HHDCS + 7, )
+        # Fischerin = Villager(self.all_sprites, self.player_group,self.creatures, collision_sprites=self.collision_sprites, creatures_sprites=self.creatures, npc_name="Fischerin", is_ranged=False, default_size=HDCS +HHDCS -3,actions_to_add=["Fishing",] )
         
         initial_position = (5866, 5918)
         explorer_orc = ExplorerOrc(self.all_sprites, collision_sprites=self.collision_sprites, initial_position=initial_position, creatures_sprites=self.creatures, )
@@ -635,9 +692,22 @@ class Game:
             self.creatures.add(goblin)
 
         for i in range(0,10):
-            initial_position = (randint(100,map_width), randint(100, map_height))
-            orc = Orc(self.all_sprites, collision_sprites=self.collision_sprites, initial_position=initial_position, creatures_sprites=self.creatures, )
-            self.creatures.add(orc)
+            initial_position = (1271,5268)
+            orc_cacador = OrcCacador(self.all_sprites, collision_sprites=self.collision_sprites, initial_position=initial_position, creatures_sprites=self.creatures, )
+            self.creatures.add(orc_cacador)
+        
+        initial_position = (1271,5368)
+        orc = OrcMensageiro(self.all_sprites, collision_sprites=self.collision_sprites, initial_position=initial_position, creatures_sprites=self.creatures, )
+        self.creatures.add(orc)
+
+        orc = OrcGuarda(self.all_sprites, collision_sprites=self.collision_sprites, initial_position=initial_position, creatures_sprites=self.creatures, guard_pos=0)
+        self.creatures.add(orc)
+        orc = OrcGuarda(self.all_sprites, collision_sprites=self.collision_sprites, initial_position=initial_position, creatures_sprites=self.creatures, guard_pos=1)
+        self.creatures.add(orc)
+
+        initial_position = (1371,5368)
+        orc = ChiefOrc(self.all_sprites, collision_sprites=self.collision_sprites, initial_position=initial_position, creatures_sprites=self.creatures, )
+        self.creatures.add(orc)
 
 
         creats_groups = {
@@ -653,46 +723,26 @@ class Game:
         golem = CrystalGolem(self.all_sprites, collision_sprites=self.collision_sprites, initial_position=(953,1860), creatures_sprites=self.creatures, )
         self.creatures.add(golem)
 
-        original_player =Dash(self.all_sprites, self.player_group,self.creatures, collision_sprites=self.collision_sprites, creatures_sprites=self.creatures, npc_name="Dash", is_ranged=True, attack_hitbox_list={"Front": (0,0), "Back": (0,0), "Left": (0,0), "Right": (0,0)}, range_distance=550)
-        mimezation = Mimetizacao(original_player, self.player)
-        mimezation.mimetize()
-        original_player.hp = 0
-        original_player.is_dying = True
-        self.player.transformations.append(original_player)
 
-        self.player.human_0 = obi
-        self.player.goblin_0 = goblin
-        self.player.slime_0 = slime
+        # self.player.human_0 = obi
+        # self.player.goblin_0 = goblin
+        # self.player.slime_0 = slime
         self.player.orc_0 = explorer_orc
         
-        original_player =Dash(self.all_sprites, self.player_group,self.creatures, collision_sprites=self.collision_sprites, creatures_sprites=self.creatures, npc_name="Dash", is_ranged=True, attack_hitbox_list={"Front": (0,0), "Back": (0,0), "Left": (0,0), "Right": (0,0)}, range_distance=550)
+        original_player =Dash( self.player_group, collision_sprites=self.collision_sprites, creatures_sprites=self.creatures, npc_name="Dash", is_ranged=True, attack_hitbox_list={"Front": (0,0), "Back": (0,0), "Left": (0,0), "Right": (0,0)}, range_distance=550)
         mimezation = Mimetizacao(original_player, self.player)
         mimezation.mimetize()
         original_player.hp = 0
         original_player.is_dying = True
         sammy = Sammy(self.all_sprites, self.player_group,self.creatures, collision_sprites=self.collision_sprites, creatures_sprites=self.creatures, npc_name="Sammy", initial_position=(3672, 115))
 
-        self.player.original_form = sammy
+        self.player.original_form = orc_cacador
         
 
 
-        LARGURA_MAPA = int(4100 * SCALE) # 200 tiles de largura
-        ALTURA_MAPA  = int(4100 * SCALE) # 200 tiles de altura
-        objetos_fixos =[sprite for sprite in self.collision_sprites if isinstance(sprite, CollisionSprites) and sprite.is_getable ==False]
         
-        self.matriz_mapa = gerar_matriz_mapa(LARGURA_MAPA, ALTURA_MAPA, GRID_SIZE, objetos_fixos)
-        self.all_sprites.world_matriz = self.matriz_mapa
 
-        # Cria a surface de debug UMA ÚNICA VEZ
-        self.debug_grid_surface = criar_surface_debug_matriz(
-            self.matriz_mapa, 
-            tilesize=GRID_SIZE,
-            cor_obstaculo=(255, 0, 0, 80),     # Vermelho semi-transparente
-            cor_fundo=(0, 0, 0, 0)
-        )
-
-        # Variável para ligar/desligar o debug
-        self.mostrar_grid_debug = False
+        
 
         #LENDO SONS
         pygame.mixer.pre_init(

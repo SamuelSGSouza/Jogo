@@ -1,0 +1,35 @@
+{
+    "iniciando": [
+        [
+            "{nome_character}, isso não pode esperar.",
+            "O que aconteceu?",
+            "Reunião hoje às 17h. Sua presença é necessária.",
+            "Entendi. Estarei lá."
+        ],
+        [
+            "{nome_character}, ordem direta: reunião às 17h.",
+            "Agora?",
+            "Hoje. Sem atraso. Estão contando com você.",
+            "Certo. Vou comparecer."
+        ],
+        [
+            "Tenho instruções claras para te encontrar, {nome_character}.",
+            "Então fale logo.",
+            "Convocação imediata para a reunião das 17h.",
+            "Entendido. Vou me organizar."
+        ],
+        [
+            "{nome_character}, o aviso é urgente.",
+            "O quão urgente?",
+            "Reunião às 17h. Presença indispensável.",
+            "Estarei lá."
+        ],
+        [
+            "Não é um convite, {nome_character}.",
+            "Então é o quê?",
+            "É uma convocação. Reunião hoje, às 17h.",
+            "Entendido."
+        ]
+    ],
+    "respondendo": []
+}
