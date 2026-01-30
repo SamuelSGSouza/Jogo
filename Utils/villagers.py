@@ -13,12 +13,13 @@ class Villager(Character):
             "Holz": 2,
             "Fischerin": 2,
             "Sammy": 3,
+            "Nina": 1
         }
         super().__init__(*groups, collision_sprites=collision_sprites,creatures_sprites=creatures_sprites, personal_name=npc_name, scale_on_attack_value=scale_attacks[npc_name], is_ranged=is_ranged, range_distance=range_distance, team_members=team_members)
         self.all_groups= groups
         self.is_player = False
         self.is_human = True
-
+        self.npc_name = npc_name
 
         self.village_rect = pygame.Rect(3800,1400,2200, 2000)
         self.water_sources = [(5528, 2200), (4618, 2836), (4481, 2000) ]
@@ -64,7 +65,8 @@ class Villager(Character):
             "Rose": RoseBrain(self, ),
             "Holz": HolzBrain(self, can_attack=True),
             "Fischerin": FischerinBrain(self, ),
-            "Sammy": SammyBrain(self, )
+            "Sammy": SammyBrain(self, ),
+            "Nina": None
         }
         self.brain = self.brains[npc_name]
         
@@ -299,11 +301,12 @@ class Villager(Character):
             important_infos = {
                 "percepted_enemy": percepted_monster
             }
-            try:
-                choosen_action = self.brain.choose_action(**important_infos)
-            except:
-                raise Exception(f"Erro ao escolher ação com cérebro {self.brain} do usuário {self}")
-            self.current_action = choosen_action
+            if self.brain != None:
+                try:
+                    choosen_action = self.brain.choose_action(**important_infos)
+                except:
+                    raise Exception(f"Erro ao escolher ação com cérebro {self.brain} do usuário {self}")
+                self.current_action = choosen_action
         self.handle_effects()
         
         
@@ -347,6 +350,74 @@ class Villager(Character):
         self.pontuacao += info["pontuacao"]
         self.current_id = info["next_id"]
         return True
+
+    def __str__(self):
+        return self.npc_name
+
+class Nina(Villager):
+    def __init__(self, *groups, collision_sprites, creatures_sprites, npc_name="Nina", house_point=(0, 0), is_ranged=False, attack_hitbox_list={ "Front": (150, 70),"Back": (150, 70),"Left": (70, 150),"Right": (70, 150) }, range_distance=36, default_size=HDCS - HHDCS, team_members=[], original_speed = 200, actions_to_add=[]):
+        super().__init__(*groups, collision_sprites=collision_sprites, creatures_sprites=creatures_sprites, npc_name=npc_name, house_point=house_point, is_ranged=is_ranged, attack_hitbox_list=attack_hitbox_list, range_distance=range_distance, default_size=default_size, team_members=team_members, original_speed=original_speed, actions_to_add=actions_to_add)
+
+        self.talks = {
+            "1": {  # Introdução
+                "fala": "Ah… passos cansados. Eu reconheço esse som. Sou Rose, cuido dos feridos e dos que ainda fingem estar bem. O que te traz até mim, filho?",
+                "respostas": {
+                    "Preciso de ajuda. Estou machucado.": {"pontuacao": 0.6, "next_id": "2_positiva"},
+                    "Só queria conversar um pouco.": {"pontuacao": 0.4, "next_id": "2_neutra"},
+                    "Curandeira, faça seu trabalho rápido.": {"pontuacao": -0.6, "next_id": "2_negativa"},
+                    "Não confio em remédios e superstições.": {"pontuacao": -1.0, "next_id": "end_negativo"}
+                }
+            },
+            "2_positiva": {
+                "fala": "Machucados no corpo são fáceis. Difícil é tratar o que sangra por dentro. Sente-se, vou cuidar de você.",
+                "respostas": {
+                    "Obrigado, Rose. A vila tem sorte de ter você.": {"pontuacao": 0.7, "next_id": "end_positivo"},
+                    "Não se preocupe, já aguentei coisa pior.": {"pontuacao": 0.3, "next_id": "3_positiva"},
+                    "Isso vai me custar quanto?": {"pontuacao": -0.2, "next_id": "2_neutra"}
+                }
+            },
+            "2_neutra": {
+                "fala": "Conversas também curam, às vezes mais que ervas. Mas o tempo não espera. O que deseja saber?",
+                "respostas": {
+                    "O que anda acontecendo com a vila?": {"pontuacao": 0.5, "next_id": "3_positiva"},
+                    "Preciso só de algo para seguir viagem.": {"pontuacao": 0.1, "next_id": "3_neutra"},
+                    "Nada. Foi perda de tempo.": {"pontuacao": -0.5, "next_id": "end_negativo"}
+                }
+            },
+            "2_negativa": {
+                "fala": "Cuidado com as palavras. Já vi muita gente forte cair por menos.",
+                "respostas": {
+                    "Perdão, estou exausto.": {"pontuacao": 0.3, "next_id": "3_neutra"},
+                    "Não preciso de sermões.": {"pontuacao": -0.7, "next_id": "end_negativo"},
+                    "Só diga se pode ajudar ou não.": {"pontuacao": 0.0, "next_id": "2_neutra"}
+                }
+            },
+            "3_positiva": {
+                "fala": "A vila sente medo. Dash luta com o coração, Nash com a cabeça… e Obi carrega o peso de todos. Você pode ser o equilíbrio.",
+                "respostas": {
+                    "Vou fazer o possível para ajudar.": {"pontuacao": 0.6, "next_id": "end_positivo"},
+                    "Não prometo nada, mas ouvirei.": {"pontuacao": 0.2, "next_id": "end_neutro"}
+                }
+            },
+            "3_neutra": {
+                "fala": "Leve estas ervas. Não curam tudo, mas ajudam a seguir em frente.",
+                "respostas": {
+                    "Agradeço. Já é mais do que esperava.": {"pontuacao": 0.3, "next_id": "end_neutro"}
+                }
+            },
+            "end_positivo": {
+                "fala": "Vá com cuidado, meu filho. A vila precisa de mais gente que escute antes de agir.",
+                "respostas": {}
+            },
+            "end_negativo": {
+                "fala": "Quando a dor apertar, talvez lembre das minhas palavras… ou talvez seja tarde.",
+                "respostas": {}
+            },
+            "end_neutro": {
+                "fala": "O caminho continua. Cabe a você como trilhá-lo.",
+                "respostas": {}
+            }
+        }
 
 class Dash(Villager):
     def __init__(self, *groups, collision_sprites, creatures_sprites, npc_name="Nina", house_point=(0, 0), is_ranged=False, attack_hitbox_list={ "Front": (150, 70),"Back": (150, 70),"Left": (70, 150),"Right": (70, 150) }, range_distance=36, default_size=HDCS + HHDCS, team_members=[], original_speed = 200, actions_to_add=[]):

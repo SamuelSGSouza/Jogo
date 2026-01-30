@@ -4,7 +4,7 @@ from Utils.actions import *
 
 class Monster(Character):
         
-    def __init__(self, *groups, collision_sprites:pygame.sprite.Group,creatures_sprites:pygame.sprite.Group, monster_name="Winter Slime", house_point=(0,0), initial_position, actions =[], can_talk=False,scale_on_attack_value=1,original_speed=100, attack_damage=5, max_hp=80, default_character_size=DCS):
+    def __init__(self, *groups, collision_sprites:pygame.sprite.Group,creatures_sprites:pygame.sprite.Group, monster_name="Winter Slime", house_point=(0,0), initial_position, actions =[], can_talk=False,scale_on_attack_value=1,original_speed=100, attack_damage=5, max_hp=80, default_character_size=DCS, creature_images=[]):
         super().__init__(*groups, collision_sprites=collision_sprites,creatures_sprites=creatures_sprites, personal_name=monster_name+" "+f"{randint(0,100)}",scale_on_attack_value=scale_on_attack_value, attack_damage=attack_damage, max_hp=max_hp, )
         self.all_groups= groups
         self.is_player = False
@@ -26,8 +26,10 @@ class Monster(Character):
         self.action = "Idle"
         self.state, self.frame_index = "Front", 0
         self.actions = actions
-        self.load_character_images()
-        
+        if creature_images == []:
+            self.load_character_images()
+        else:
+            self.frames = creature_images
         
         self.image = pygame.transform.scale(self.frames[self.action][self.state][0], (self.default_size, self.default_size))
         self.rect = self.image.get_frect(center = initial_position)
@@ -331,7 +333,7 @@ class Monster(Character):
         self.attack(self.attack_1,self.attack_2)
 
 class Slime(Monster):
-    def __init__(self, *groups, collision_sprites, creatures_sprites, monster_name="Winter Slime", house_point=(0, 0), initial_position, boss_chance=20):
+    def __init__(self, *groups, collision_sprites, creatures_sprites, monster_name="Winter Slime", house_point=(0, 0), initial_position, boss_chance=20, creature_images=[]):
         actions = ["Walk", "Idle", "Hurt", "Run", "Attack_1","Attack_2", "Dying", "Dead"]
         original_speed = randint(125, 150)
         default_character_size = DCS
@@ -351,7 +353,8 @@ class Slime(Monster):
             original_speed=original_speed,
             attack_damage=attack_damage,
             max_hp=max_hp,
-            default_character_size=default_character_size
+            default_character_size=default_character_size,
+            creature_images=creature_images
             )
 
         self.attack_hitbox_list = {
@@ -913,18 +916,13 @@ class ChiefOrc(Monster):
     
     
 class Orc(Monster):
-    def __init__(self, *groups, collision_sprites, creatures_sprites, monster_name="Orc do Gelo", house_point=(0, 0), initial_position, boss_chance=20):
+    def __init__(self, *groups, collision_sprites, creatures_sprites, monster_name="Orc", house_point=(0, 0), initial_position, boss_chance=20, creature_images):
         actions = ["Walk", "Idle", "Hurt", "Run", "Attack_1","Attack_2", "Dying", "Dead","Beg", "Begging", "WakeUp"]
         original_speed = randint(125, 150)
         default_character_size = DCS
-        if randint(0,100)>boss_chance:
-            max_hp = randint(20,40)
-            attack_damage = randint(4,6)
+        max_hp = randint(20,40)
+        attack_damage = randint(4,6)
 
-        else:
-            max_hp = randint(80,120)
-            attack_damage = randint(10,30)
-            default_character_size = randint(DCS, DCS*max_hp//80)
             
 
         super().__init__(*groups, 
@@ -937,7 +935,8 @@ class Orc(Monster):
             original_speed=original_speed,
             attack_damage=attack_damage,
             max_hp=max_hp,
-            default_character_size=default_character_size
+            default_character_size=default_character_size,
+            creature_images=creature_images
             )
 
         self.attack_hitbox_list = {
@@ -947,18 +946,30 @@ class Orc(Monster):
             "Right": (70,self.rect.width),#width, height
         }
         self.effects_on_damage = []
-        self.brain = GhostBrain(self,)
+        self.brain = OrcBrain(self,)
 
         self.delete_sprites_on_death = True
         self.specie = "ORC"
         self.confiabilidades["HUMAN"] = 0.3
         self.can_talk = True
+        self.default_folder_path = join(getcwd(), "Ecosystem", "Winter","Monsters", "Orc", "soldier")
+        self.scripts = load_scripts(self.default_folder_path)
+        self.talk_options = ["iniciando",]
+
+        self.locais_patrulha = []
+        matriz_mundo = self.groups()[0].world_matriz
+
+        self.locais_patrulha = []
+        for _ in range(0,200):
+            x, y = randint(0, 2000), randint(5000, 6000)
+            if matriz_mundo[x//GRID_SIZE][y//GRID_SIZE] != 1 and (x,y) not in self.locais_patrulha:
+                self.locais_patrulha.append((x,y))
 
     def __str__(self):
         return self.personal_name
 
 class OrcCacador(Monster):
-    def __init__(self, *groups, collision_sprites, creatures_sprites, monster_name="Orc do Gelo", house_point=(0, 0), initial_position, boss_chance=20):
+    def __init__(self, *groups, collision_sprites, creatures_sprites, monster_name="Orc do Gelo", house_point=(0, 0), initial_position, boss_chance=20,creature_images):
         actions = ["Walk", "Idle", "Hurt", "Run", "Attack_1","Attack_2", "Dying", "Dead","Beg", "Begging", "WakeUp"]
         original_speed = randint(125, 150)
         default_character_size = DCS
@@ -979,7 +990,8 @@ class OrcCacador(Monster):
             original_speed=original_speed,
             attack_damage=attack_damage,
             max_hp=max_hp,
-            default_character_size=default_character_size
+            default_character_size=default_character_size,
+            creature_images=creature_images
             )
 
         self.attack_hitbox_list = {
@@ -1198,7 +1210,7 @@ class CrystalGolem(Monster):
 
 
 class Goblin(Monster):
-    def __init__(self, *groups, collision_sprites, creatures_sprites, monster_name="Chefe dos Goblins", house_point=(0, 0), initial_position, boss_chance=20):
+    def __init__(self, *groups, collision_sprites, creatures_sprites, monster_name="Chefe dos Goblins", house_point=(0, 0), initial_position, boss_chance=20, creature_images):
         actions = ["Walk", "Idle", "Hurt", "Run", "Attack_1","Attack_2", "Dying", "Dead"]
         original_speed = randint(125, 150)
         default_character_size = DCS
@@ -1222,7 +1234,8 @@ class Goblin(Monster):
             original_speed=original_speed,
             attack_damage=attack_damage,
             max_hp=max_hp,
-            default_character_size=default_character_size
+            default_character_size=default_character_size,
+            creature_images=creature_images
             )
 
         self.attack_hitbox_list = {

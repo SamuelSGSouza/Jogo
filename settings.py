@@ -12,7 +12,7 @@ from pathlib import Path
 from collections import deque
 from json import load
 import sys,textwrap
-from time import time
+from time import time, perf_counter
 
 pygame.init()
 info = pygame.display.Info()
@@ -33,6 +33,29 @@ matriz_mapa_global =[[]]
 #lendo sprite de flecha
 
 arrow_surf =pygame.transform.scale(pygame.image.load(join(getcwd(), "Utils", "items", "arrow.png")), (64,64))
+
+
+def load_character_images(default_folder_path, scale_on_attack) -> dict:
+    frames = {}
+    actions = ["Walk", "Idle", "Attack_1","Attack_2", "Run", "Dead", "Dying", "Hurt",]
+
+    for act in actions:
+        povs = ["Front", "Back", "Left", "Right", ]
+
+        frames[act] = {}
+        for pov in povs:
+            full_dir_path = join(default_folder_path,"", pov,  act)
+            dir_images = []
+            for image in sorted(listdir(full_dir_path), key=lambda name: int(name.split(".")[0])):
+                pov_image = pygame.image.load(join(full_dir_path, image)).convert_alpha()
+                if act in ["Attack_1", "Attack_2", "Fishing"]:
+                    scale = scale_on_attack
+                    dir_images.append(pygame.transform.scale(pov_image, (DCS*scale, DCS*scale)))
+                else:
+                    dir_images.append(pygame.transform.scale(pov_image, (DCS, DCS)))
+            frames[act][pov] = dir_images
+
+    return frames
 
 def load_scripts(path) -> dict:
     with open(join(path, "scripts.json"), 'r', encoding='utf-8') as f:

@@ -1,0 +1,125 @@
+{
+    "iniciando": [
+        [
+            "Chefe, os homens estão reunidos.",
+            "Todos?",
+            "Sim. Armas verificadas e aguardando ordens.",
+            "Mantenha-os em posição."
+        ],
+        [
+            "Chefe, o sol começa a descer.",
+            "Quanto tempo temos?",
+            "Poucas horas. A vila ainda não suspeita.",
+            "Então não vamos perder tempo."
+        ],
+        [
+            "Os batedores voltaram, chefe.",
+            "Relatório.",
+            "Pouca movimentação. Defesas fracas.",
+            "Como esperávamos."
+        ],
+        [
+            "Chefe, suprimentos prontos.",
+            "O suficiente para todos?",
+            "Sim. Nada ficará para trás.",
+            "Bom. Avançamos leves."
+        ],
+        [
+            "As rotas estão marcadas, chefe.",
+            "Algum risco?",
+            "Terreno fácil. Sem surpresas.",
+            "Mantenha os homens alertas."
+        ],
+        [
+            "Chefe, alguns soldados estão inquietos.",
+            "Medo?",
+            "Ansiedade.",
+            "Lembre-os do objetivo."
+        ],
+        [
+            "O sinal será dado ao anoitecer?",
+            "Exato.",
+            "Todos já foram avisados.",
+            "Então não haverá confusão."
+        ],
+        [
+            "Chefe, patrulhas posicionadas.",
+            "Visibilidade?",
+            "Boa enquanto houver luz.",
+            "Quando escurecer, avançamos."
+        ],
+        [
+            "Os equipamentos extras estão prontos.",
+            "Nada desnecessário?",
+            "Nada. Só o essencial.",
+            "É assim que gosto."
+        ],
+        [
+            "Chefe, o vento mudou.",
+            "Isso interfere?",
+            "Pouco. Mas pode atrasar.",
+            "Então ajustamos o ritmo."
+        ],
+        [
+            "As ordens finais devem ser dadas agora?",
+            "Ainda não.",
+            "Os homens esperam.",
+            "Eles podem esperar mais um pouco."
+        ],
+        [
+            "Chefe, a retaguarda está segura.",
+            "Ninguém entra ou sai?",
+            "Ninguém.",
+            "Então estamos prontos."
+        ],
+        [
+            "Os líderes de grupo estão alinhados.",
+            "Eles entenderam o plano?",
+            "Sem dúvidas.",
+            "Ótimo. Confiança é tudo."
+        ],
+        [
+            "Chefe, o silêncio está pesado.",
+            "Antes da ação sempre é.",
+            "Os homens sentem isso.",
+            "Que usem isso a favor."
+        ],
+        [
+            "Última checagem feita, chefe.",
+            "Algum problema?",
+            "Nenhum.",
+            "Então seguimos."
+        ],
+        [
+            "Chefe, o céu já escurece.",
+            "Hora certa.",
+            "Dou o aviso?",
+            "Sim. Agora."
+        ],
+        [
+            "Os homens estão prontos para marchar.",
+            "Sem barulho.",
+            "Todos sabem.",
+            "Então não falharemos."
+        ],
+        [
+            "Chefe, tudo conforme o plano.",
+            "Planos mudam.",
+            "Mas estamos preparados.",
+            "É isso que importa."
+        ],
+        [
+            "A vila está logo adiante.",
+            "Distância?",
+            "Curta.",
+            "Então mantenha a formação."
+        ],
+        [
+            "Chefe, aguardamos apenas sua ordem.",
+            "Eles confiam em mim?",
+            "Confiam.",
+            "Então não vamos decepcioná-los."
+        ]
+    ],
+    "respondendo": []
+}

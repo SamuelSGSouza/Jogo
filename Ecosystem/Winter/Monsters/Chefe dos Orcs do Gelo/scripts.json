@@ -1,0 +1,66 @@
+{
+    "iniciando": [
+        [
+            "{nome_character}, olhe para estas cinzas. Não sobrou nada.",
+            "Tinha que ser assim, senhor?",
+            "O solo deles alimentará nossos filhos. O lamento é o preço da nossa sobrevivência.",
+            "Que os deuses nos perdoem."
+        ],
+        [
+            "Limpe sua lâmina, {nome_character}. O trabalho terminou.",
+            "Foi um massacre, não uma batalha.",
+            "Foi uma escolha entre o destino deles e o nosso. Escolhi nós. Sempre escolherei nós.",
+            "Entendo. Vou reunir os homens."
+        ],
+        [
+            "{nome_character}, certifique-se de que os mortos deles sejam enterrados com honra.",
+            "Mesmo depois de tudo?",
+            "Eles lutaram com bravura por sua terra, assim como nós faríamos. Respeite o sangue derramado.",
+            "Será feito conforme sua ordem."
+        ],
+        [
+            "O silêncio desta vila é ensurdecedor, não acha, {nome_character}?",
+            "É o som da vitória, senhor.",
+            "Não, é o som da necessidade. Lembre-se desse peso antes de desejar a próxima guerra.",
+            "Jamais esquecerei."
+        ],
+        [
+            "Diga aos batedores que a terra está garantida, {nome_character}.",
+            "Eles vão perguntar sobre os sobreviventes.",
+            "Diga que o rio levou o que a espada não pôde salvar. Traga-os para casa.",
+            "Sim, senhor. Estamos voltando."
+        ]
+    ],
+    "respondendo": [
+        [
+            "O senhor parece carregar o mundo nos ombros.",
+            "A coroa é feita de ferro e remorso, {nome_character}.",
+            "Fizemos o que era preciso para a tribo.",
+            "E é por isso que ainda conseguimos caminhar. Mas o peso nunca diminui."
+        ],
+        [
+            "O sangue deles não sai das minhas mãos, meu líder.",
+            "Não tente lavar sozinho o que todos nós manchamos, {nome_character}.",
+            "Eles eram apenas agricultores...",
+            "Eram obstáculos entre nossos filhos e a vida. Enterre a culpa junto com eles."
+        ],
+        [
+            "A vitória de hoje será cantada por gerações.",
+            "Não permita que transformem esse massacre em música, {nome_character}.",
+            "Mas vencemos, não vencemos?",
+            "Vencemos a morte, mas perdemos uma parte da nossa alma. Lembre-se da diferença."
+        ],
+        [
+            "Eles imploraram por misericórdia no final.",
+            "A maior misericórdia foi um fim rápido, {nome_character}.",
+            "Poderíamos ter negociado?",
+            "Fomes não negociam. A escassez não aceita promessas. Fizemos o que a sobrevivência exigia."
+        ],
+        [
+            "Senhor, a vila está em chamas. O que faremos agora?",
+            "Olhe para a frente e não para trás, {nome_character}.",
+            "É difícil ignorar os gritos.",
+            "Os gritos cessam, mas a nossa linhagem continua. Esse é o fardo de quem lidera."
+        ]
+    ]
+}

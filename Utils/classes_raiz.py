@@ -286,7 +286,7 @@ class Character(pygame.sprite.Sprite):
         self.effects: list = []
         self.speed_multipliers: list[float] = []
         
-        self.actions = ["Walk", "Idle", "Attack_1","Attack_2", "Run", "Died", "Beg", "Sleep", "Hurt", "Beg", "Begging", "WakeUp"]
+        self.actions = ["Walk", "Idle", "Attack_1","Attack_2", "Run", "Dead", "Beg", "Sleep", "Hurt", "Beg", "Begging", "WakeUp"]
         self.action = "Walk"
         self.personal_name = personal_name
 

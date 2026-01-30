@@ -710,10 +710,75 @@ class ChiefOrcBrain(Brain):
 
     def esbarrar_em_character(self):
         hora = self.character.get_hour()
-        if hora < 19:
+        if hora < 20:
             return None
+        return super().esbarrar_em_character()
+    
+class OrcBrain(Brain):
+    def __init__(self, character, ):
+        super().__init__(character,mental_type="raivoso")
+        self.can_attack = True
+        self.target = None
+        self.final_dest = ()
+        self.indo_reuniao = False
+        self.ouvindo_reuniao = False
+        
+    def esbarrar_em_character(self):
+        if self.character.is_chatting == True or self.character.is_begging==True:
+            return None
+        proximos = pygame.sprite.spritecollide(self.character, self.character.creatures_sprites, False)
+        if proximos:
+            for creature in proximos: 
+                if creature != self.character:
+                    if creature.specie == self.character.specie:
+                        if creature.is_player :
+                            return None
+                        if self.character.now - self.character.last_talk_time > self.character.talk_delay and self.character.can_talk == True and self.character.scripts and creature.personal_name=="Ghorak":
+                            self.character.last_talk_time = self.character.now
+                            self.character.is_chatting = True
+                            creature.is_chatting = True
+                            tipo_conversa = choice(self.character.talk_options)
+                            try:
+                                script = [t.replace(r"{nome_character}", creature.personal_name) for t in choice(self.character.scripts[tipo_conversa]) ]
+                            except:
+                                raise Exception(f"Falha ao iniciar conversa entre: {self.character} X {creature}")
+                            if tipo_conversa == "respondendo":
+                                action_a,action_b,conv = start_chat(creature, self.character,script=script)
+                                creature.current_action = action_a
+                                self.character.current_action = action_b
+                            else:
+                                action_a,action_b,conv = start_chat(self.character,creature,script=script)
+                                creature.current_action = action_b
+                                self.character.current_action = action_a
+                            self.conversation = conv
+                            return self.character.current_action
+                    elif not creature.is_dead and self.have_mercy(creature)==False:# se a criatura não está morta
+                        if self.character.confiabilidades[self.character.specie] <= MARGEM_DE_ATAQUE:# se a confiabilidade para com a espécie for menor que a margem, ataca
+                            self.character.attacking_character = creature
+                            return Combat(self.character, creature,ranged=self.character.is_ranged, attack_range=self.character.range_distance)
+                        return None
+
+        return None
+
+    def rotina_diaria(self):
+        hora = self.character.get_hour()
+        if hora < 19:
+            if not self.final_dest:
+                self.final_dest = choice(self.character.locais_patrulha)
+
+            move = self.move_to(self.final_dest)
+            return move
         else:
-            return super().esbarrar_em_character()
+            
+            self.character.confiabilidades["HUMAN"] = -20
+            # vaga pela vila humana matando todos que encontrar
+            if not self.final_dest:
+                self.final_dest = choice(self.character.locais_vila_humana)
+
+            move = self.move_to(self.final_dest)
+            return move
+
+        return None
     
 class OrcCacadorBrain(Brain):
     def __init__(self, character, ):
@@ -791,7 +856,6 @@ class OrcMensageiroBrain(Brain):
                             self.conversation = conv
                             creature.falou_mensageiro = True
                             self.character.orcs_falados.append(creature)
-                            print(f"Orc {creature} recebeu a mensagem")
                             return self.character.current_action
                     
 

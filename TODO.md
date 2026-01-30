@@ -38,24 +38,28 @@ Econtra o jogador
             %Quando o jogador chegar na vila, nina agradece e deixa de seguir o jogador 
 
 
-# Criar rotina dos orcs.
-
-## Orcs terão profissões então sua rotina vai depender da profissão.
-
-### Chefe Orc - 1
-#### Passa o dia dentro da caverna dos orcs "Planejando" o ataque. 
-
-# Às 17h os orcs que receberam a mensagem do mensageiro devem se reunir na caverna ao redor do Chefe.
-# O Chefe deve falar sobre como tem sido tempos difíceis, falar sobre como o relacionamento com os humanos nunca foi positivo mas também nunca foi totalmente hostil. Falar sobre como o desespero levou ele a planejar o que estão prestes a executar.
-# Ás 19h Todos os orcs juntos se encaminham para a vila humana onde vão realizar um massacre
 
 
-# Trocar o som de ataque dos slimes
-# Melhorar design das montanhas
+
 # Colocar um velho sábio que sempre sabe como você morreu e pode dar dicas do que fazer
 ## Se o jogador conseguir 10+ finais, pode se transformar nele.
 
 # Às 18:30h Nash e Dash se encaminham para a próximo da entrada da caverna dos orcs por que lá é um bom local para caça nessa época. Eles vão ser os primeiros a fazer contato com os orcs
 
-# Adicionar botão de "Matar-se"
-# Adicionar check point 1 ao deixar a nina na vila
+
+# aparece uma caixa de texto com a frase inicial ( se for segunda morte em diante, aparece um texto específico pra cada morte.)
+# adicionar a Nina no mapa
+
+# fazer o jogador se encontrar com a Nina nos primeiros passos.
+# Adicionar botão de "Matar-se". Isso faz recomeçar do último save
+# colocar a nina no mapa
+# criar rota da nina
+
+# Trocar som de ataque do golem
+# Modificar barras de vida para ficarem mais bonitas e elegantes
+# tirar sistema de transformação
+# Criar lider da vila
+
+## O lider da vila deve ser carismático e agir como se soubesse de algo sobre o retorno. 
+## Após falar com o Orc Chefe e convencer ele a não atacar, deve falar com o chefe da vila e convencer ele a dar metade do estoque de comida, alegando que vão sim precisar racionar a comida durante o resto do inverno, mas que isso vai salvar os dois lados, e quando o inverno passar eles podem decidir o que fazer. Não é uma solução permanente, mas sim, uma solução imediata para um problema imediato
+# Descobrir por que o Holz não está indo cortar árvores

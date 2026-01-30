@@ -13,7 +13,8 @@ class Player(Character):
         
 
         self.armor_type = ""
-        self.default_folder_path = join(getcwd(), "NPCs", "Obi",)
+        self.default_folder_path = join(getcwd(), "Player", "graphics","Warrior_animations", "Default")
+        # self.default_folder_path = join(getcwd(), "NPCs", "Obi",)
         self.default_size = HDCS + HHDCS
         
 
@@ -25,13 +26,14 @@ class Player(Character):
         
         
         self.image = pygame.transform.scale(self.frames[self.action][self.state][0], (self.default_size, self.default_size))
-        self.rect = self.image.get_frect(center = (1571,5268))
+        self.rect = self.image.get_frect(center = (5000, 3000))
         self.hitbox = pygame.FRect(
             self.rect.left + self.rect.width/2,
             self.rect.top + self.rect.height/3+50,
             self.rect.width/2,
             self.rect.height * 2/3
             )
+        self.hitbox.center = self.rect.center
 
         self.original_speed = 200
         self.direction = pygame.Vector2()
@@ -62,6 +64,7 @@ class Player(Character):
         self.box_5 = pygame.Rect(1980,5435, 10, 100)
         self.box_6 = pygame.Rect(2040,5435, 10, 100)
         self.inside_maze = False
+        self.inside_ice_florest = False
         self.max_hp =200
         self.hp=self.max_hp
 
@@ -145,7 +148,6 @@ class Player(Character):
                     transformations.append(kill)
         for conf, val in self.confiabilidades.items():
             if val > 1:
-                print(f"{self} posde ser transformar em {transformations_confiabilidades[conf]}")
                 transformations.append(transformations_confiabilidades[conf])
         self.transformations = transformations
 
@@ -179,9 +181,12 @@ class Player(Character):
         if collision_box_3 or collision_box_4:
             if collision_box_3:
                 self.aplicar_resfriamento = True
+                self.inside_ice_florest = True
             else:
                 self.aplicar_resfriamento = False
+                self.inside_ice_florest = False
 
+        # print(f"Está na floresta = {self.inside_ice_florest}")
         frozen_speed = 0.9999
         if self.aplicar_resfriamento == True:
             self.speed_multipliers.append(frozen_speed)
