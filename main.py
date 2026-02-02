@@ -700,8 +700,8 @@ class Game:
         self.human_village_rect = pygame.Rect(3800,1400,2200, 2000)
         self.orcs_village_rect = pygame.Rect(360,4358,1500, 1500)
         self.human_pits = [(5528, 2200), (4618, 2836), (4481, 2000) ]
-        Nina = Villager(self.all_sprites, self.player_group,self.creatures, collision_sprites=self.collision_sprites, creatures_sprites=self.creatures, default_size=DCS-HHDCS - HHHDCS)
-        
+        nina = Nina(self.all_sprites, self.player_group,self.creatures, collision_sprites=self.collision_sprites, creatures_sprites=self.creatures, default_size=DCS-HHDCS - HHHDCS, player=self.player)
+
         # Obi
         obi = Obi(self.all_sprites, self.player_group,self.creatures, collision_sprites=self.collision_sprites, creatures_sprites=self.creatures, npc_name="Obi")
         self.char_monitored = obi

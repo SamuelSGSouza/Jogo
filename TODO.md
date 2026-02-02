@@ -1,6 +1,18 @@
 
+Os 4 pilares:
+    - Nina
+    - Orc caído no labirinto
+    - Chefe da vila humana
+    - Chefe dos orcs
 
+Loop 1:
+    Nina - 
 
+    Orc caído no labirinto - 
+
+    Chefe da vila humana - 
+
+    Chefe dos orcs - 
 
 # adicionar a Nina
 * = Frase da Nina
@@ -39,7 +51,8 @@ Econtra o jogador
 
 
 
-
+# Nina sai correndo sempre em direção à posição atual do player.
+# Ao esbarrar, ela inicia a conversa com as opções
 
 # Colocar um velho sábio que sempre sabe como você morreu e pode dar dicas do que fazer
 ## Se o jogador conseguir 10+ finais, pode se transformar nele.

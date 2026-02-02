@@ -4,7 +4,7 @@ from Utils.actions import *
 
 class Villager(Character):
     
-    def __init__(self, *groups, collision_sprites:pygame.sprite.Group,creatures_sprites:pygame.sprite.Group, npc_name="Nina", house_point=(0,0), is_ranged=False, attack_hitbox_list={"Front": (150,70), "Back": (150,70), "Left": (70,150), "Right": (70,150),}, range_distance=36, default_size = HDCS + HHDCS, team_members = [], original_speed:int=200, actions_to_add=[]):
+    def __init__(self, *groups, collision_sprites:pygame.sprite.Group,creatures_sprites:pygame.sprite.Group, npc_name="Nina", house_point=(0,0), is_ranged=False, attack_hitbox_list={"Front": (150,70), "Back": (150,70), "Left": (70,150), "Right": (70,150),}, range_distance=36, default_size = HDCS + HHDCS, team_members = [], original_speed:int=200, actions_to_add=[], forma_character:str=""):
         scale_attacks = {
             "Obi": 3,
             "Dash": 1,
@@ -25,8 +25,10 @@ class Villager(Character):
         self.water_sources = [(5528, 2200), (4618, 2836), (4481, 2000) ]
         self.house_point = house_point
 
+        self.forma = forma_character
         self.armor_type = ""
-        self.default_folder_path = join(getcwd(), "NPCs", npc_name,)
+        self.default_folder_path = join(getcwd(), "NPCs", npc_name, self.forma)
+        print(f"Caminho completo: {self.default_folder_path} -- {self.forma}")
         self.scripts = load_scripts(self.default_folder_path)
         self.default_size = default_size
         self.waking_up_hour = randint(4,7)
@@ -66,7 +68,7 @@ class Villager(Character):
             "Holz": HolzBrain(self, can_attack=True),
             "Fischerin": FischerinBrain(self, ),
             "Sammy": SammyBrain(self, ),
-            "Nina": None
+            "Nina": NinaBrain(self,)
         }
         self.brain = self.brains[npc_name]
         
@@ -355,69 +357,383 @@ class Villager(Character):
         return self.npc_name
 
 class Nina(Villager):
-    def __init__(self, *groups, collision_sprites, creatures_sprites, npc_name="Nina", house_point=(0, 0), is_ranged=False, attack_hitbox_list={ "Front": (150, 70),"Back": (150, 70),"Left": (70, 150),"Right": (70, 150) }, range_distance=36, default_size=HDCS - HHDCS, team_members=[], original_speed = 200, actions_to_add=[]):
-        super().__init__(*groups, collision_sprites=collision_sprites, creatures_sprites=creatures_sprites, npc_name=npc_name, house_point=house_point, is_ranged=is_ranged, attack_hitbox_list=attack_hitbox_list, range_distance=range_distance, default_size=default_size, team_members=team_members, original_speed=original_speed, actions_to_add=actions_to_add)
-
+    def __init__(self, *groups, collision_sprites, creatures_sprites, npc_name="Nina", house_point=(0, 0), is_ranged=False, attack_hitbox_list={ "Front": (150, 70),"Back": (150, 70),"Left": (70, 150),"Right": (70, 150) }, range_distance=36, default_size=HDCS - HHDCS, team_members=[], original_speed = 200, actions_to_add=[], player):
+        super().__init__(*groups, collision_sprites=collision_sprites, creatures_sprites=creatures_sprites, npc_name=npc_name, house_point=house_point, is_ranged=is_ranged, attack_hitbox_list=attack_hitbox_list, range_distance=range_distance, default_size=default_size, team_members=team_members, original_speed=original_speed, actions_to_add=actions_to_add, )
+        self.encontrou_player = False
+        self.player = player
+        
+        #Falas loop 1
         self.talks = {
-            "1": {  # Introdução
-                "fala": "Ah… passos cansados. Eu reconheço esse som. Sou Rose, cuido dos feridos e dos que ainda fingem estar bem. O que te traz até mim, filho?",
+            "1": {  # Encontro inicial com Nina
+                "fala": "Oi. Você não é daqui, é?",
                 "respostas": {
-                    "Preciso de ajuda. Estou machucado.": {"pontuacao": 0.6, "next_id": "2_positiva"},
-                    "Só queria conversar um pouco.": {"pontuacao": 0.4, "next_id": "2_neutra"},
-                    "Curandeira, faça seu trabalho rápido.": {"pontuacao": -0.6, "next_id": "2_negativa"},
-                    "Não confio em remédios e superstições.": {"pontuacao": -1.0, "next_id": "end_negativo"}
+                    "Não. Cheguei hoje.": {"pontuacao": 0, "next_id": "2"},
+                    "Não sou, não.": {"pontuacao": 0, "next_id": "2"},
+                    "Oi.": {"pontuacao": 0, "next_id": "end_curto"}
                 }
             },
-            "2_positiva": {
-                "fala": "Machucados no corpo são fáceis. Difícil é tratar o que sangra por dentro. Sente-se, vou cuidar de você.",
+            "2": {  
+                "fala": "Eu sei que você não é. Conheço todo mundo que mora aqui no vale. (sorriso)",
                 "respostas": {
-                    "Obrigado, Rose. A vila tem sorte de ter você.": {"pontuacao": 0.7, "next_id": "end_positivo"},
-                    "Não se preocupe, já aguentei coisa pior.": {"pontuacao": 0.3, "next_id": "3_positiva"},
-                    "Isso vai me custar quanto?": {"pontuacao": -0.2, "next_id": "2_neutra"}
+                    "Onde eu estou?": {"pontuacao": 0, "next_id": "2_vale"},
                 }
             },
-            "2_neutra": {
-                "fala": "Conversas também curam, às vezes mais que ervas. Mas o tempo não espera. O que deseja saber?",
+            "2_vale": {  
+                "fala": "Bem vindo viajante, ao Vale do Retorno! Só não sei por que chamam assim, já que todo mundo que vai embora nunca quer voltar...",
                 "respostas": {
-                    "O que anda acontecendo com a vila?": {"pontuacao": 0.5, "next_id": "3_positiva"},
-                    "Preciso só de algo para seguir viagem.": {"pontuacao": 0.1, "next_id": "3_neutra"},
-                    "Nada. Foi perda de tempo.": {"pontuacao": -0.5, "next_id": "end_negativo"}
+                    "...": {"pontuacao": 0, "next_id": "2_conversa"},
                 }
             },
-            "2_negativa": {
-                "fala": "Cuidado com as palavras. Já vi muita gente forte cair por menos.",
+
+            "2_conversa": {
+                "fala": "Eu fico aqui de manhã. Dá pra ver o vale inteiro daqui.",
                 "respostas": {
-                    "Perdão, estou exausto.": {"pontuacao": 0.3, "next_id": "3_neutra"},
-                    "Não preciso de sermões.": {"pontuacao": -0.7, "next_id": "end_negativo"},
-                    "Só diga se pode ajudar ou não.": {"pontuacao": 0.0, "next_id": "2_neutra"}
+                    "O que você está vendo agora?": {"pontuacao": 0, "next_id": "5"},
+                    "É um bom lugar.": {"pontuacao": 0, "next_id": "3"}
                 }
             },
-            "3_positiva": {
-                "fala": "A vila sente medo. Dash luta com o coração, Nash com a cabeça… e Obi carrega o peso de todos. Você pode ser o equilíbrio.",
+
+            "3": {
+                "fala": "Quando alguém passa correndo, eu imagino pra onde está indo.",
                 "respostas": {
-                    "Vou fazer o possível para ajudar.": {"pontuacao": 0.6, "next_id": "end_positivo"},
-                    "Não prometo nada, mas ouvirei.": {"pontuacao": 0.2, "next_id": "end_neutro"}
+                    "E pra onde você acha que eu estou indo?": {"pontuacao": 0, "next_id": "4"},
+                    "Você parece gostar daqui.": {"pontuacao": 0, "next_id": "5"},
+                    "Faz sentido.": {"pontuacao": 0, "next_id": "5"}
                 }
             },
-            "3_neutra": {
-                "fala": "Leve estas ervas. Não curam tudo, mas ajudam a seguir em frente.",
+
+            "4": {
+                "fala": "Você? Ainda não sei.",
                 "respostas": {
-                    "Agradeço. Já é mais do que esperava.": {"pontuacao": 0.3, "next_id": "end_neutro"}
+                    "...": {"pontuacao": 0, "next_id": "5"}
                 }
             },
-            "end_positivo": {
-                "fala": "Vá com cuidado, meu filho. A vila precisa de mais gente que escute antes de agir.",
+
+            "5": {  
+                "fala": "Hoje todo mundo parece agitado. É estranho.",
+                "respostas": {
+                    "...": {"pontuacao": 0, "next_id": "6"}
+                }
+            },
+
+            "6": {
+                "fala": "Mas logo passa.",
+                "respostas": {
+                    "...": {"pontuacao": 0, "next_id": "end"}
+                }
+            },
+
+            "end": {
+                "fala": "Boa sorte… hoje",
                 "respostas": {}
             },
-            "end_negativo": {
-                "fala": "Quando a dor apertar, talvez lembre das minhas palavras… ou talvez seja tarde.",
-                "respostas": {}
-            },
-            "end_neutro": {
-                "fala": "O caminho continua. Cabe a você como trilhá-lo.",
+            "end_curto": {
+                "fala": "Oi.",
                 "respostas": {}
             }
         }
+
+        self.talks_loop_2 = {
+            "1": {  # Encontro inicial com Nina
+                "fala": "Oi. Você não é daqui, é?",
+                "respostas": {
+                    "Não. Cheguei hoje.": {"pontuacao": 0, "next_id": "2"},
+                    "Não sou, não.": {"pontuacao": 0, "next_id": "2"},
+                    "Oi.": {"pontuacao": 0, "next_id": "end_curto"}
+                }
+            },
+            "2": {  
+                "fala": "Eu sei que você não é. Conheço todo mundo que mora aqui no vale.",
+                "respostas": {
+                    "Onde eu estou?": {"pontuacao": 0, "next_id": "2_vale"},
+                    "É, imaginei que você soubesse.": {"pontuacao": 0, "next_id": "2_conversa"},
+                }
+            },
+            "2_vale": {  
+                "fala": "Vale do Retorno. Nome estranho, né? Quase ninguém volta",
+                "respostas": {
+                    "...": {"pontuacao": 0, "next_id": "2_conversa"},
+                }
+            },
+
+            "2_conversa": {
+                "fala": "Eu fico aqui de manhã. Gosto de olhar tudo antes de ficar cheio.",
+                "respostas": {
+                    "Está vendo alguma coisa estranha agora?": {"pontuacao": 0, "next_id": "5_quieto"},
+                    "É um bom lugar.": {"pontuacao": 0, "next_id": "3"}
+                }
+            },
+
+            "3": {
+                "fala": "Quando alguém passa correndo, eu fico pensando se já vi isso antes.",
+                "respostas": {
+                    "... E o que você tem a dizer sobre mim?": {"pontuacao": 0, "next_id": "4"},
+                    "...": {"pontuacao": 0, "next_id": "5"},
+                }
+            },
+
+            "4": {
+                "fala": "Você… parece meio confuso.",
+                "respostas": {
+                    "...": {"pontuacao": 0, "next_id": "5"}
+                }
+            },
+
+            "5_quieto": {  
+                "fala": "Hoje todo mundo está mais agitado que o normal. Isso me dá um frio na barriga.",
+                "respostas": {
+                    "...": {"pontuacao": 0, "next_id": "6"}
+                }
+            },
+            "5": {  
+                "fala": "Sabe, hoje todo mundo está mais agitado que o normal. Isso me dá um frio na barriga.",
+                "respostas": {
+                    "...": {"pontuacao": 0, "next_id": "6"}
+                }
+            },
+
+            "6": {
+                "fala": "Mas deve ser só impressão.",
+                "respostas": {
+                    "...": {"pontuacao": 0, "next_id": "end"}
+                }
+            },
+
+            "end": {
+                "fala": "Boa sorte hoje.",
+                "respostas": {}
+            },
+            "end_curto": {
+                "fala": "Oi.",
+                "respostas": {}
+            }
+        }
+
+        self.talks_loop_3 = {
+            "1": {  # Encontro inicial com Nina
+                "fala": "Oi… você voltou?",
+                "respostas": {
+                    "Você me conhece?": {"pontuacao": 0, "next_id": "2"},
+                    "Voltei... Sabe quem eu sou?": {"pontuacao": 0, "next_id": "2"},
+                    "Oi.": {"pontuacao": 0, "next_id": "end_curto"}
+                }
+            },
+            "2": {  
+                "fala": "Desculpa. Achei que já tinha te visto antes.",
+                "respostas": {
+                    "Onde eu estou?": {"pontuacao": 0, "next_id": "2_vale"},
+                }
+            },
+            "2_vale": {  
+                "fala": "Vale do Retorno. Nome estranho, né? Quase ninguém volta",
+                "respostas": {
+                    "...": {"pontuacao": 0, "next_id": "2_conversa"},
+                }
+            },
+
+            "2_conversa": {
+                "fala": "Eu fico aqui de manhã. Alguém sempre passa por aqui cedo.",
+                "respostas": {
+                    "O que você vê daí?": {"pontuacao": 0, "next_id": "5_quieto"},
+                    "É um bom lugar.": {"pontuacao": 0, "next_id": "3"}
+                }
+            },
+
+            "3": {
+                "fala": "Quando alguém corre, eu tento lembrar de onde conheço o passo.",
+                "respostas": {
+                    "Você reconhece os meus?": {"pontuacao": 0, "next_id": "4"},
+                    "Você parece gostar daqui.": {"pontuacao": 0, "next_id": "5"},
+                    "Faz sentido.": {"pontuacao": 0, "next_id": "5"}
+                }
+            },
+
+            "4": {
+                "fala": "Um pouco... Como se eu já tivesse ouvido antes.",
+                "respostas": {
+                    "...": {"pontuacao": 0, "next_id": "5"}
+                }
+            },
+
+            "5_quieto": {  
+                "fala": "Hoje tá agitado… de novo.",
+                "respostas": {
+                    "...": {"pontuacao": 0, "next_id": "6"}
+                }
+            },
+            "5": {  
+                "fala": "Hoje tá agitado… de novo.",
+                "respostas": {
+                    "...": {"pontuacao": 0, "next_id": "6"}
+                }
+            },
+
+            "6": {
+                "fala": "Não gosto quando fica assim.",
+                "respostas": {
+                    "...": {"pontuacao": 0, "next_id": "end"}
+                }
+            },
+
+            "end": {
+                "fala": "Se cuida hoje.",
+                "respostas": {}
+            },
+            "end_curto": {
+                "fala": "Oi.",
+                "respostas": {}
+            }
+        }
+        
+        self.talks_loop_4 = {
+            "1": {  # Encontro inicial com Nina
+                "fala": "Você chegou cedo hoje.",
+                "respostas": {
+                    "Você me conhece?": {"pontuacao": 0, "next_id": "2"},
+                    "Cheguei... Sabe quem eu sou?": {"pontuacao": 0, "next_id": "2"},
+                    "Oi.": {"pontuacao": 0, "next_id": "end_curto"}
+                }
+            },
+            "2": {  
+                "fala": "Conheço todo mundo daqui… menos você. Ainda.",
+                "respostas": {
+                    "Onde eu estou?": {"pontuacao": 0, "next_id": "2_vale"},
+                }
+            },
+            "2_vale": {  
+                "fala": "Vale do Retorno. Talvez o nome faça sentido pra alguns.",
+                "respostas": {
+                    "...": {"pontuacao": 0, "next_id": "2_conversa"},
+                }
+            },
+
+            "2_conversa": {
+                "fala": "De manhã tudo parece possível.",
+                "respostas": {
+                    "Como estão as coisas hoje?": {"pontuacao": 0, "next_id": "5_quieto"},
+                    "Você é esperta. Tem alguma coisa pra dizer pra mim?": {"pontuacao": 0, "next_id": "3"}
+                }
+            },
+
+            "3": {
+                "fala": "Quando alguém corre, geralmente já tá atrasado.",
+                "respostas": {
+                    "E o que tem a dizer sobre mim?": {"pontuacao": 0, "next_id": "4"},
+                    "Tem razao...": {"pontuacao": 0, "next_id": "5"},
+                }
+            },
+
+            "4": {
+                "fala": "Você não devia ficar parado.",
+                "respostas": {
+                    "...": {"pontuacao": 0, "next_id": "5"}
+                }
+            },
+
+            "5_quieto": {  
+                "fala": "Hoje tá agitado… de novo.",
+                "respostas": {
+                    "...": {"pontuacao": 0, "next_id": "6"}
+                }
+            },
+            "5": {  
+                "fala": "Hoje tá agitado… de novo.",
+                "respostas": {
+                    "...": {"pontuacao": 0, "next_id": "6"}
+                }
+            },
+
+            "6": {
+                "fala": "Não gosto quando fica assim.",
+                "respostas": {
+                    "...": {"pontuacao": 0, "next_id": "end"}
+                }
+            },
+
+            "end": {
+                "fala": "Se cuida hoje.",
+                "respostas": {}
+            },
+            "end_curto": {
+                "fala": "Oi.",
+                "respostas": {}
+            }
+        }
+
+        self.talks_loop_5 = {
+            "1": {  # Encontro inicial com Nina
+                "fala": "Ah… é você.",
+                "respostas": {
+                    "Você me conhece?": {"pontuacao": 0, "next_id": "2"},
+                    "Sim... Sou eu.": {"pontuacao": 0, "next_id": "2"},
+                    "Oi.": {"pontuacao": 0, "next_id": "end_curto"}
+                }
+            },
+            "2": {  
+                "fala": "Você sempre aparece quando o vale tá assim.",
+                "respostas": {
+                    "O que quer dizer?": {"pontuacao": 0, "next_id": "2_vale"},
+                }
+            },
+            "2_vale": {  
+                "fala": "Vale do Retorno. Alguns voltam porque precisam.",
+                "respostas": {
+                    "...": {"pontuacao": 0, "next_id": "2_conversa"},
+                }
+            },
+
+            "2_conversa": {
+                "fala": "Eu fico aqui de manhã. Depois disso… não gosto.",
+                "respostas": {
+                    "...": {"pontuacao": 0, "next_id": "5_quieto"},
+                    "Vai dar tudo certo dessa vez.": {"pontuacao": 0, "next_id": "3"}
+                }
+            },
+
+            "3": {
+                "fala": "Você sabe pra onde tá indo. Dá pra ver.",
+                "respostas": {
+                    "Dessa vez eu sei.": {"pontuacao": 0, "next_id": "5_quieto"},
+                }
+            },
+
+            "4": {
+                "fala": "Você não devia ficar parado.",
+                "respostas": {
+                    "...": {"pontuacao": 0, "next_id": "5"}
+                }
+            },
+
+            "5_quieto": {  
+                "fala": "Hoje tá agitado demais.",
+                "respostas": {
+                    "...": {"pontuacao": 0, "next_id": "5"}
+                }
+            },
+            "5": {  
+                "fala": "Quando fica assim… algo já foi decidido.",
+                "respostas": {
+                    "...": {"pontuacao": 0, "next_id": "6"}
+                }
+            },
+
+            "6": {
+                "fala": "Não gosto quando fica assim.",
+                "respostas": {
+                    "...": {"pontuacao": 0, "next_id": "end"}
+                }
+            },
+
+            "end": {
+                "fala": "Não chega tarde.",
+                "respostas": {}
+            },
+            "end_curto": {
+                "fala": "Oi.",
+                "respostas": {}
+            }
+        }
+
 
 class Dash(Villager):
     def __init__(self, *groups, collision_sprites, creatures_sprites, npc_name="Nina", house_point=(0, 0), is_ranged=False, attack_hitbox_list={ "Front": (150, 70),"Back": (150, 70),"Left": (70, 150),"Right": (70, 150) }, range_distance=36, default_size=HDCS + HHDCS, team_members=[], original_speed = 200, actions_to_add=[]):
