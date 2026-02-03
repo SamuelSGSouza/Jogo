@@ -254,7 +254,7 @@ class Game:
             self.changing_music = True
 
             
-            game_clock = GameClock(start_hour=8, game_hour_in_real_seconds=60)
+            game_clock = GameClock(start_hour=8, game_hour_in_real_seconds=10)
         
             #LUZ
             LIGHT_RADIUS = 550
@@ -716,6 +716,7 @@ class Game:
         initial_position = (5866, 5918)
         explorer_orc = ExplorerOrc(self.all_sprites, collision_sprites=self.collision_sprites, initial_position=initial_position, creatures_sprites=self.creatures, )
         self.creatures.add(explorer_orc)
+        explorer_orc.player = self.player
         explorer_orc.hp = 0 
         explorer_orc.is_dying = True
 

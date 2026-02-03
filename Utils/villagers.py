@@ -734,6 +734,32 @@ class Nina(Villager):
             }
         }
 
+    def escolhe_fala(self, ):
+
+        loop = self.player.loop
+
+        falas = {
+            1: self.talks,
+            2: self.talks_loop_2,
+            3: self.talks_loop_3,
+            4: self.talks_loop_4,
+            5: self.talks_loop_5,
+        }
+        if loop not in falas.keys():
+            loop = choice(list(falas.keys()))
+
+        
+
+        fala_data = falas[loop].get(self.current_id)
+        if not fala_data:
+            return "", []
+        
+        # Verifica se é fim (sem respostas) e aplica reputação
+        if not fala_data["respostas"]:
+            delta_rep = self.pontuacao * 20  # Exemplo: pontuação alta -> +rep, baixa -> -rep
+            return fala_data["fala"], []  # Mostra fala final e encerra
+        
+        return fala_data["fala"], list(fala_data["respostas"].keys())
 
 class Dash(Villager):
     def __init__(self, *groups, collision_sprites, creatures_sprites, npc_name="Nina", house_point=(0, 0), is_ranged=False, attack_hitbox_list={ "Front": (150, 70),"Back": (150, 70),"Left": (70, 150),"Right": (70, 150) }, range_distance=36, default_size=HDCS + HHDCS, team_members=[], original_speed = 200, actions_to_add=[]):

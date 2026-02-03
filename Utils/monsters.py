@@ -419,9 +419,10 @@ class Ghost(Monster):
 
 
 class ExplorerOrc(Monster):
-    def __init__(self, *groups, collision_sprites, creatures_sprites, monster_name="Chefe dos Orcs do Gelo", house_point=(0, 0), initial_position, boss_chance=20):
+    def __init__(self, *groups, collision_sprites, creatures_sprites, monster_name="Orc", house_point=(0, 0), initial_position, boss_chance=20):
         actions = ["Walk", "Idle", "Hurt", "Run", "Attack_1","Attack_2", "Dying", "Dead", "Beg", "Begging", "WakeUp"]
         original_speed = randint(125, 150)
+        self.player = None
         default_character_size = DCS
         if randint(0,100)>boss_chance:
             max_hp = randint(80,120)
@@ -458,70 +459,212 @@ class ExplorerOrc(Monster):
         self.specie = "ORC"
         self.delete_sprites_on_death = False
 
-        self.talks = {
-            "1": {  # Introdução
-                "fala": "Urgh... Humano... Eu... orc... ferido. Saí pra caçar... pro meu povo... fome... Ajuda?",
-                "respostas": {
-                    "Claro, o que precisa? Posso te dar comida ou curar sua ferida.": {"pontuacao": 0.8, "next_id": "2_positiva"},
-                    "Por que eu ajudaria um orc? Vocês são selvagens.": {"pontuacao": -0.6, "next_id": "2_negativa"},
-                    "Onde está caçando? Talvez eu possa ajudar... por um preço.": {"pontuacao": 0.2, "next_id": "2_neutra"},
-                    "Fique quieto e morra aí.": {"pontuacao": -1.0, "next_id": "end_negativo"}
-                }
-            },
-            "2_positiva": {
-                "fala": "Bom... humano bondoso. Preciso ervas cura... ou carne fresca. Dá pra mim?",
-                "respostas": {
-                    "Aqui, pegue isso. (Dá item)": {"pontuacao": 0.7, "next_id": "end_positivo"},
-                    "Não tenho nada agora, mas volto depois.": {"pontuacao": 0.3, "next_id": "3_positiva"},
-                    "Só se me contar segredos da sua tribo.": {"pontuacao": -0.4, "next_id": "2_negativa"}
-                }
-            },
-            "2_negativa": {
-                "fala": "Selvagens?! Nós lutamos pela sobrevivência! Você... fraco... covarde!",
-                "respostas": {
-                    "Desculpe, não quis ofender. Deixe-me ajudar.": {"pontuacao": 0.4, "next_id": "3_neutra"},
-                    "Exato, fiquem na floresta e morram de fome!": {"pontuacao": -0.8, "next_id": "end_negativo"},
-                    "Tudo bem, me diga o que precisa.": {"pontuacao": 0.1, "next_id": "2_neutra"}
-                }
-            },
-            "2_neutra": {
-                "fala": "Caço javali... rio seco... nada. Preço? Ouro? Informação?",
-                "respostas": {
-                    "Te ajudo de graça, irmão da floresta.": {"pontuacao": 0.5, "next_id": "end_positivo"},
-                    "50 moedas e te levo pro acampamento.": {"pontuacao": -0.2, "next_id": "3_neutra"},
-                    "Sem chance, boa sorte.": {"pontuacao": -0.5, "next_id": "end_negativo"}
-                }
-            },
-            "3_positiva": {
-                "fala": "Obrigado... humano honrado. Volte... tribo lembra favores.",
-                "respostas": {
-                    "Fico feliz em ajudar. Cuide-se!": {"pontuacao": 0.4, "next_id": "end_positivo"}
-                }
-            },
-            "3_neutra": {
-                "fala": "Preço alto... mas aceito. Ajuda salva vida.",
-                "respostas": {
-                    "Feito. Aqui está.": {"pontuacao": 0.0, "next_id": "end_neutro"}
-                }
-            },
-            "end_positivo": {
-                "fala": "Você... bom aliado! Orcs bem-vindos você! Gruul agradece! (Elogia e sorri)",
-                "respostas": {}
-            },
-            "end_negativo": {
-                "fala": "Maldito humano traiçoeiro! Orcs esmagam você! Saia! (Ofende e rosna)",
-                "respostas": {}
-            },
-            "end_neutro": {
-                "fala": "Transação feita. Sem dívidas.",
+        self.talks = {}
+        self.talks_morto_pouco_tempo = {
+            "1": {
+                "fala": "Parece que ele morreu agora pouco. Deve ter sido atacado pelos fantasmas do labirinto",
                 "respostas": {}
             }
         }
+        
+        self.talks_morto_muito_tempo = {
+            "1": {
+                "fala": "Parece que ele morreu a várias horas. Já está quase se tornando um dos fantasmas desse labirinto.",
+                "respostas": {}
+            }
+        }
+        
+        self.talks_vivo_loop_1 = {
+            "1": {
+                "fala": "Droga... Eu fracassei...",
+                "respostas": {}
+            },
+        }
+        
+        self.talks_vivo_loop_2 = {
+            "1": {
+                "fala": "…",
+                "respostas": {
+                    "Você consegue falar?": {"next_id": "2"}
+                }
+            },
+
+            "2": {
+                "fala": "Droga... eu falhei.",
+                "respostas": {
+                    "...": {"next_id": "3"}
+                }
+            },
+
+            "3": {
+                "fala": "Eles vão se mover quando o dia cair.",
+                "respostas": {
+                    "Quem?": {"next_id": "4"}
+                }
+            },
+
+            "4": {
+                "fala": "Você chegou tarde.",
+                "respostas": {
+                    "...": {"next_id": "5"}
+                }
+            },
+
+            "5": {
+                "fala": "Não muda nada agora.",
+                "respostas": {}
+            }
+        }
+
+        self.talks_vivo_loop_3 = {
+            "1": {
+                "fala": "Você… de novo.",
+                "respostas": {
+                    "...": {"next_id": "2"}
+                }
+            },
+
+            "2": {
+                "fala": "Achei que fosse chegar antes.",
+                "respostas": {
+                    "Antes do quê?": {"next_id": "3"}
+                }
+            },
+
+            "3": {
+                "fala": "Antes de decidirem.",
+                "respostas": {
+                    "...": {"next_id": "4"}
+                }
+            },
+
+            "4": {
+                "fala": "Eu vim falar.",
+                "respostas": {
+                    "Falar sobre o quê?": {"next_id": "5"}
+                }
+            },
+
+            "5": {
+                "fala": "Sobre não fazer isso.",
+                "respostas": {}
+            }
+
+        }
+
+        self.talks_vivo_loop_4 = {
+            "1": {
+                "fala": "Você chegou cedo hoje.",
+                "respostas": {
+                    "...": {"next_id": "2"}
+                }
+            },
+
+            "2": {
+                "fala": "Ainda não passou.",
+                "respostas": {
+                    "O quê?": {"next_id": "3"}
+                }
+            },
+
+            "3": {
+                "fala": "O ponto sem volta.",
+                "respostas": {
+                    "...": {"next_id": "4"}
+                }
+            },
+
+            "4": {
+                "fala": "Não marchamos por raiva.",
+                "respostas": {
+                    "...": {"next_id": "5"}
+                }
+            },
+
+            "5": {
+                "fala": "Marchamos porque o frio não espera.",
+                "respostas": {}
+            }
+        }
+        
+        self.talks_vivo_loop_5 = {
+            "1": {
+                "fala": "Você chegou...",
+                "respostas": {
+                    "...": {"next_id": "2"}
+                }
+            },
+
+            "2": {
+                "fala": "Era isso que eu tentei fazer.",
+                "respostas": {
+                    "Tentar o quê?": {"next_id": "3"}
+                }
+            },
+
+            "3": {
+                "fala": "Evitar que crianças passem o inverno com fome.",
+                "respostas": {
+                    "...": {"next_id": "4"}
+                }
+            },
+
+            "4": {
+                "fala": "Se dividissem antes…",
+                "respostas": {
+                    "...": {"next_id": "5"}
+                }
+            },
+
+            "5": {
+                "fala": "Ninguém precisaria tomar nada.",
+                "respostas": {
+                    "...": {"next_id": "5"}
+                }
+            },
+        }
+        
         self.current_id = "1"
         self.pontuacao = 0.0
         self.reputacao_orcs = 0.0  # Variável global do jogo, ex: de -1.0 a +1.0
         self.can_talk = True
     
+    def escolhe_fala(self, ):
+
+        loop = self.player.loop
+        hora = self.get_hour()
+        if hora > 12:
+            falas = {
+                1: self.talks_morto_pouco_tempo
+            }
+            if hora > 14:
+                falas = {
+                    1: self.talks_morto_muito_tempo
+                }
+        else:
+            falas = {
+                1: self.talks_vivo_loop_1,
+                2: self.talks_vivo_loop_2,
+                3: self.talks_vivo_loop_3,
+                4: self.talks_vivo_loop_4,
+                5: self.talks_vivo_loop_5,
+            }
+
+        if loop not in falas.keys():
+            loop = choice(list(falas.keys()))
+
+        
+
+        fala_data = falas[loop].get(self.current_id)
+        if not fala_data:
+            return "", []
+        
+        # Verifica se é fim (sem respostas) e aplica reputação
+        if not fala_data["respostas"]:
+            delta_rep = self.pontuacao * 20  # Exemplo: pontuação alta -> +rep, baixa -> -rep
+            return fala_data["fala"], []  # Mostra fala final e encerra
+        
+        return fala_data["fala"], list(fala_data["respostas"].keys())
 
     def processa_escolha(self, escolha: str):
         if escolha == "None":
@@ -547,7 +690,8 @@ class ChiefOrc(Monster):
         max_hp = randint(800,1200)
 
         attack_damage = randint(30,50)
-            
+        
+        
 
         super().__init__(*groups, 
             collision_sprites=collision_sprites, 
@@ -574,6 +718,16 @@ class ChiefOrc(Monster):
         self.delete_sprites_on_death = True
         self.specie = "ORC"
         self.delete_sprites_on_death = False
+
+        human_village_rect = pygame.Rect(3800,1400,2200, 2000)
+        self.locais_vila_humana = []
+        vr = human_village_rect #village rect
+        matriz_mundo = self.groups()[0].world_matriz
+
+        for _ in range(0,200):
+            x, y = randint(vr.left, vr.right), randint(vr.top, vr.bottom)
+            if matriz_mundo[x//GRID_SIZE][y//GRID_SIZE] != 1 and (x,y) not in self.locais_vila_humana:
+                self.locais_vila_humana.append((x,y))
 
         self.talks = {
                 "1": {  # Introdução
@@ -964,7 +1118,15 @@ class Orc(Monster):
             x, y = randint(0, 2000), randint(5000, 6000)
             if matriz_mundo[x//GRID_SIZE][y//GRID_SIZE] != 1 and (x,y) not in self.locais_patrulha:
                 self.locais_patrulha.append((x,y))
+        human_village_rect = pygame.Rect(3800,1400,2200, 2000)
+        self.locais_vila_humana = []
+        vr = human_village_rect #village rect
+        matriz_mundo = self.groups()[0].world_matriz
 
+        for _ in range(0,200):
+            x, y = randint(vr.left, vr.right), randint(vr.top, vr.bottom)
+            if matriz_mundo[x//GRID_SIZE][y//GRID_SIZE] != 1 and (x,y) not in self.locais_vila_humana:
+                self.locais_vila_humana.append((x,y))
     def __str__(self):
         return self.personal_name
 

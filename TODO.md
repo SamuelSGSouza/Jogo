@@ -75,4 +75,5 @@ Econtra o jogador
 
 ## O lider da vila deve ser carismático e agir como se soubesse de algo sobre o retorno. 
 ## Após falar com o Orc Chefe e convencer ele a não atacar, deve falar com o chefe da vila e convencer ele a dar metade do estoque de comida, alegando que vão sim precisar racionar a comida durante o resto do inverno, mas que isso vai salvar os dois lados, e quando o inverno passar eles podem decidir o que fazer. Não é uma solução permanente, mas sim, uma solução imediata para um problema imediato
-# Descobrir por que o Holz não está indo cortar árvores
+# Remover a maldição do gelo. Ela só atrapalha
+# Ajustar o KeepDistance para considerar os obstaculos antes de decidir pra onde se mover

@@ -26,7 +26,7 @@ class Player(Character):
         
         
         self.image = pygame.transform.scale(self.frames[self.action][self.state][0], (self.default_size, self.default_size))
-        self.rect = self.image.get_frect(center = (5000, 3000))
+        self.rect = self.image.get_frect(center = (5866, 5918))
         self.hitbox = pygame.FRect(
             self.rect.left + self.rect.width/2,
             self.rect.top + self.rect.height/3+50,
@@ -101,6 +101,8 @@ class Player(Character):
         #    pygame.mixer.Sound("Sounds/step_sound_2.mp3"),
            pygame.mixer.Sound("Sounds/step_sound_3.mp3")
         ]
+
+        self.loop = 1
         
         
     @property
