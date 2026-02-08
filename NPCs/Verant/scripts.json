@@ -1,0 +1,60 @@
+{
+    "iniciando":[
+        [
+            "Ora, {nome_character}, venha cá um instante. Você está pálido.",
+            "Estou bem, vovó, só um pouco cansado.",
+            "Cansado nada, isso é começo de exaustão. Vou preparar um tônico.",
+            "Está bem… obrigado."
+        ],
+        [
+            "{nome_character}, querido, você mancou agora há pouco?",
+            "Acho que torci um pouco o pé durante a patrulha.",
+            "Tsc, tsc… sabia! Sente-se aqui e deixe eu ver isso.",
+            "Eu aceito, suas curas sempre ajudam."
+        ],
+        [
+            "Oi, meu bem. Senti um cheiro de sangue… não me diga que é seu.",
+            "É só um arranhão, vovó.",
+            "Arranhão vira ferida se ignorar. Mostre aqui para a vovó.",
+            "Certo, pode cuidar."
+        ],
+        [
+            "{nome_character}, meu filho, está tremendo… tomou um susto?",
+            "Um pouco, quase fui emboscado.",
+            "Quase já é demais. Sente-se para eu acalmar seu espírito.",
+            "Obrigadx… eu realmente preciso disso."
+        ],
+        [
+            "Ei, {nome_character}, você está respirando estranho.",
+            "Corri demais atrás de um batedor inimigo.",
+            "Pois pare com essa teimosia. Vou abrir seus pulmões com erva-do-ar.",
+            "Tudo bem, confio em você."
+        ]
+    ],
+    "respondendo":[
+        [
+            "Vovó, acho que cortei o braço mais do que deveria.",
+            "Deixe-me ver… hm! Isso precisa de cura agora mesmo.",
+            "É sério assim?",
+            "Sério o bastante para você ficar quietinho enquanto eu trato."
+        ],
+        [
+            "Vovó, estou tonto… a visão está estranha.",
+            "Isso é perda de energia vital, meu bem. Fique parado.",
+            "Consegue me ajudar?",
+            "Claro que sim. A vovó está aqui — e ninguém desmaia perto de mim."
+        ],
+        [
+            "Vovó, acho que uma flecha passou raspando em mim.",
+            "E você só me conta isso agora? Venha, sente-se.",
+            "Está doendo um pouco.",
+            "Eu sei, querido. Essa dor vai embora quando eu terminar."
+        ],
+        [
+            "Vovó, acho que tomei um golpe forte demais.",
+            "Ora, meu anjo… venha logo antes que esse roxo crie vida própria.",
+            "Você sempre exagera.",
+            "E você sempre ignora seus limites. Agora deixe eu curar isso."
+        ]
+    ]
+}

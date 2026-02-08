@@ -10,7 +10,7 @@ from typing import Optional, Tuple, Union
 from PIL import Image
 from pathlib import Path
 from collections import deque
-from json import load
+from json import load, dump
 import sys,textwrap
 from time import time, perf_counter
 
@@ -104,41 +104,107 @@ class Button:
             return self.rect.collidepoint(pos)
         return False
 
-def draw_menu(screen, play_button, quit_button, title_font):
-    # Fundo com gradiente simples
-    for y in range(WINDOW_HEIGHT):
-        color_value = int(25 + (y / WINDOW_HEIGHT) * 25)
-        pygame.draw.line(screen, (25, 25, color_value), (0, y), (WINDOW_WIDTH, y))
+TITLE_COLOR = (30, 60, 120)  # Azul escuro para bom contraste com fundo branco
+SHADOW_COLOR = (180, 180, 200, 180)  # Azul claro com transparência
+HIGHLIGHT_COLOR = (100, 150, 220)  # Azul mais claro para realce
+
+
+def draw_gradient_title(screen, title_font, title_text):
+    # Cria superfície para o título
+    title = title_font.render(title_text, True, TITLE_COLOR)
+    base_x = WINDOW_WIDTH // 2 - title.get_width() // 2
+    base_y = 100
+    
+    # Desenha múltiplas camadas para efeito de profundidade
+    offsets = [
+        (3, 3, (150, 150, 180, 150)),  # Sombra principal
+        (2, 2, (180, 180, 210, 120)),  # Sombra secundária
+        (1, 1, (210, 210, 230, 80)),   # Borda externa
+    ]
+    
+    for dx, dy, color in offsets:
+        shadow = title_font.render(title_text, True, color)
+        screen.blit(shadow, (base_x + dx, base_y + dy))
+    
+    # Desenha o título principal
+    screen.blit(title, (base_x, base_y))
+    
+    # Adiciona um leve realce na parte superior
+    highlight = title_font.render(title_text, True, HIGHLIGHT_COLOR)
+    screen.blit(highlight, (base_x, base_y - 1))
+
+
+def draw_menu(screen, play_button,continuar_button, quit_button, title_font, bg_image, bg_pos, loop):
+    
+
+    
+
     
     # Título
-    title = title_font.render("MEU JOGO", True, TITLE_COLOR)
-    title_shadow = title_font.render("MEU JOGO", True, (150, 150, 150))
-    screen.blit(title_shadow, (WINDOW_WIDTH//2 - title.get_width()//2 + 5, 105))
-    screen.blit(title, (WINDOW_WIDTH//2 - title.get_width()//2, 100))
+    title = title_font.render("A Décima Primeira Hora do Inverno", True, TITLE_COLOR)
+    title_shadow = title_font.render("A Décima Primeira Hora do Inverno", True, (150, 150, 150))
     
-    # Subtítulo
-    subtitle_font = pygame.font.SysFont('arial', 24)
-    subtitle = subtitle_font.render("Uma aventura épica!", True, (200, 200, 200))
-    screen.blit(subtitle, (WINDOW_WIDTH//2 - subtitle.get_width()//2, 180))
-    
-    # Desenha botões
-    play_button.draw(screen)
-    quit_button.draw(screen)
     
     # Instrução
     instruction_font = pygame.font.SysFont('arial', 18)
     instruction = instruction_font.render("Use o mouse para navegar no menu", True, (180, 180, 180))
     screen.blit(instruction, (WINDOW_WIDTH//2 - instruction.get_width()//2, WINDOW_HEIGHT - 40))
 
-def main_menu(screen, title_font, button_font):
+    screen.fill((10, 10, 15)) 
+    screen.blit(bg_image, bg_pos)
+
+    draw_gradient_title(screen, title_font, "A Décima Primeira Hora do Inverno")
+
+
+    # Desenha botões
+    play_button.draw(screen)
+    if loop != 1:
+        continuar_button.draw(screen)
+    quit_button.draw(screen)
+
+def scale_and_center(image, target_size):
+    target_w, target_h = target_size
+    img_w, img_h = image.get_size()
+
+    # Calcula o fator de escala mantendo proporção
+    scale = max(target_w / img_w, target_h / img_h)
+    new_w = int(img_w * scale)
+    new_h = int(img_h * scale)
+
+    scaled_image = pygame.transform.smoothscale(image, (new_w, new_h))
+
+    # Centraliza
+    x = (target_w - new_w) // 2
+    y = (target_h - new_h) // 2
+
+    return scaled_image, (x, y)
+
+def main_menu(screen, title_font, button_font, snow):
+    with open(join(getcwd(),"save.json"), "r", encoding="utf-8") as f:
+        loop = load(f)["loop"]
     # Cria botões centralizados
+    continue_button_width = 300
+    quit_button_y_pos = 400 if loop == 1 else 500
     button_width, button_height = 250, 60
-    play_button = Button(WINDOW_WIDTH//2 - button_width//2, 300, button_width, button_height, "JOGAR",button_font=button_font)
-    quit_button = Button(WINDOW_WIDTH//2 - button_width//2, 400, button_width, button_height, "SAIR",button_font=button_font)
+    novo_jogo_button = Button(WINDOW_WIDTH//2 - button_width//2, 300, button_width, button_height, "NOVO JOGO",button_font=button_font)
+    continuar_button = Button(WINDOW_WIDTH//2 - continue_button_width//2, 400, continue_button_width, button_height, f"CONTINUAR LOOP {loop}",button_font=button_font)
+    quit_button = Button(WINDOW_WIDTH//2 - button_width//2, quit_button_y_pos, button_width, button_height, "SAIR",button_font=button_font)
     
     clock = pygame.time.Clock()
     
+    bg_image = pygame.image.load('Utils/Background_3.png').convert_alpha()
+
+    bg_image, bg_pos = scale_and_center(
+        bg_image,
+        (WINDOW_WIDTH, WINDOW_HEIGHT)
+    )
+
+    bg_image.set_alpha(70)
+
+
+
     while True:
+        dt = clock.tick(240) / 1000  
         mouse_pos = pygame.mouse.get_pos()
         
         # Verifica eventos
@@ -148,22 +214,32 @@ def main_menu(screen, title_font, button_font):
                 sys.exit()
                 
             # Verifica clique nos botões
-            if play_button.is_clicked(mouse_pos, event):
-                return "JOGAR"  # Retorna para iniciar o jogo
+            if novo_jogo_button.is_clicked(mouse_pos, event):
+                return "NOVO JOGO"  # Retorna para iniciar o jogo
+            
+            if continuar_button.is_clicked(mouse_pos, event):
+                return "CONTINUAR"  # Retorna para iniciar o jogo
                 
             if quit_button.is_clicked(mouse_pos, event):
                 pygame.quit()
                 sys.exit()
         
         # Atualiza estado dos botões (hover)
-        play_button.check_hover(mouse_pos)
+        novo_jogo_button.check_hover(mouse_pos)
+        continuar_button.check_hover(mouse_pos)
         quit_button.check_hover(mouse_pos)
         
         # Desenha tudo
-        draw_menu(screen, play_button, quit_button, title_font)
+        draw_menu(screen, novo_jogo_button,continuar_button, quit_button, title_font, bg_image, bg_pos, loop)
         
+
+        snow.update(dt, )
+        snow.draw(screen)
+
         # Atualiza display
         pygame.display.flip()
+              
+        
         clock.tick(60)
  
 #FIM DO JOGO
@@ -975,7 +1051,7 @@ def show_modal_old(screen, font, main_text, options, max_width=400, padding=20, 
                     hovered = new_hovered
                     draw_modal(hovered)
 
-def show_modal(screen, font, main_text, options, max_width=500, padding=30, chat_end=False):
+def show_modal(screen, font, main_text, options, max_width=500, padding=30, chat_end=False, name=""):
     """
     Exibe um modal com textos e botões centralizados.
     """
@@ -984,6 +1060,7 @@ def show_modal(screen, font, main_text, options, max_width=500, padding=30, chat
         'bg': (238, 221, 185),
         'border': (64, 38, 18),
         'text': (38, 24, 12),
+        'text_name': (120, 82, 28),
         'option_bg': (214, 187, 138),
         'option_hover': (198, 163, 96),
         'accent': (191, 144, 0),
@@ -1019,7 +1096,10 @@ def show_modal(screen, font, main_text, options, max_width=500, padding=30, chat
 
     # --- CÁLCULOS DE DIMENSÃO ---
     usable_width = max_width - (padding * 2)
-    main_lines = wrap_text(main_text, usable_width, font)
+    main_lines = []
+    if name:
+        main_lines.append(f"{name}: \n")
+    main_lines += wrap_text(main_text, usable_width, font)
     
     # Encontra a largura da maior linha ou opção para definir o tamanho do modal
     max_content_width = 0
@@ -1043,12 +1123,21 @@ def show_modal(screen, font, main_text, options, max_width=500, padding=30, chat
         
         # 1. Desenha Texto Principal CENTRALIZADO
         y_offset = padding
-        for line in main_lines:
-            text_surf = font.render(line, True, COLORS['text'])
-            # Cálculo do X centralizado: (Largura Total - Largura da Linha) / 2
-            text_x = (total_width - text_surf.get_width()) // 2
-            bg_surf.blit(text_surf, (text_x, y_offset))
-            y_offset += line_height
+
+
+        for index, line in enumerate(main_lines):
+            if name and index == 0: 
+                text_surf = font.render(line, True, COLORS['text_name'])
+                text_x = (total_width - text_surf.get_width()) // 2
+                bg_surf.blit(text_surf, (10, 12))
+                y_offset += line_height
+            else:
+                text_surf = font.render(line, True, COLORS['text'])
+                
+                # Cálculo do X centralizado: (Largura Total - Largura da Linha) / 2
+                text_x = (total_width - text_surf.get_width()) // 2
+                bg_surf.blit(text_surf, (text_x, y_offset))
+                y_offset += line_height
         
         y_offset += 20 
         
@@ -1079,7 +1168,7 @@ def show_modal(screen, font, main_text, options, max_width=500, padding=30, chat
             option_rects.append(global_rect)
             
             y_offset += line_height + 15
-            
+ 
         screen.blit(bg_surf, modal_rect.topleft)
         return option_rects
 
@@ -1638,3 +1727,10 @@ def play_noise(char, noise_options: list, cooldown=300, volume=None):
     canal.set_volume(left, right)
     canal.play(som)
 
+def som_loop():
+    som = pygame.mixer.Sound("Sounds/loop_concluded.mp3")
+    canal = pygame.mixer.find_channel()
+    if not canal:
+        return
+    canal.set_volume(22, 22)
+    canal.play(som)

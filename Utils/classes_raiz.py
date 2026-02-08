@@ -405,7 +405,7 @@ class Character(pygame.sprite.Sprite):
             return pygame.Vector2(-1, 0)
         return pygame.Vector2(1, 0)  # "Right" ou default
 
-    def get_hour(self):
+    def get_hour(self) -> int:
         hour = self.groups()[0].hour
         return hour
 

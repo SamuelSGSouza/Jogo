@@ -10,7 +10,7 @@ from Utils.actions import *
 from Utils.classes_raiz import *
 from Utils.villagers import *
 from Utils.monsters import *
-import threading, json
+import threading
 
 class Mundo:
     def __init__(self, LARGURA_MAPA, ALTURA_MAPA, GRID_SIZE, objetos_fixos):
@@ -159,6 +159,7 @@ class Game:
         self.lights_on = False
 
         #groups
+        self.creatures_to_add = []
         self.all_sprites = AllSprites()
         self.collision_sprites = pygame.sprite.Group()
         self.creatures = pygame.sprite.Group()
@@ -176,9 +177,10 @@ class Game:
         self.music_vol = 0.0
         self.village_music = join(getcwd(), "Sounds", "village_background.mp3")
         self.florest_music = join(getcwd(), "Sounds", "blizzard.mp3")
-        self.maze_music = join(getcwd(), "Sounds", "maze_background.mp3")
+        self.maze_music = join(getcwd(), "Sounds", "maze_background_2.mp3")
         self.ice_florest_music = join(getcwd(), "Sounds", "icy_wind_3.mp3")
         self.background_music = join(getcwd(), "Sounds", "florest_background.mp3")
+        self.battle_music = join(getcwd(), "Sounds", "battle_sound_2.mp3")
         self.music_fading = "out"
         self.changing_music = False
         
@@ -231,18 +233,27 @@ class Game:
     def game_init(self,):
         min_fps = 999
         
-
-        title_font = pygame.font.SysFont('arial', 64, bold=True)
-        button_font = pygame.font.SysFont('arial', 36)
-        opcao = main_menu(self.screen, title_font, button_font)
-        intensidade_congelamento = 0
-
         snow_folder = join(getcwd(), "Ecosystem", "Winter", "animated_objects", "snow")
         snow_images = load_snow_images(snow_folder)  # pasta com teus flocos
         snow = Snow(self.screen.get_rect(), snow_images, max_flakes=120)
+
+        title_font = pygame.font.Font(join(getcwd(), "fonts/sansita/SansitaSwashed-Bold.ttf"), 60)
+        button_font =  pygame.font.Font(join(getcwd(), "fonts/sansita/SansitaSwashed-Medium.ttf"), 24)
+        opcao = main_menu(self.screen, title_font, button_font, snow)
+        intensidade_congelamento = 0
+
+        
         self.setup()
-        if opcao == "JOGAR":
-            
+        if opcao == "NOVO JOGO" or opcao == "CONTINUAR":
+            if opcao == "NOVO JOGO":
+                dados = {
+                    "loop": 1,
+                }
+
+                with open(join(getcwd(), "save.json"), "w", encoding="utf-8") as f:
+                    dump(dados, f, ensure_ascii=False, indent=4)
+                self.player.loop=1
+                
             light_sprites = [sp for sp in self.all_sprites if hasattr(sp, "has_light")]
               
             #NEVE
@@ -254,7 +265,7 @@ class Game:
             self.changing_music = True
 
             
-            game_clock = GameClock(start_hour=8, game_hour_in_real_seconds=10)
+            game_clock = GameClock(start_hour=8, game_hour_in_real_seconds=90)
         
             #LUZ
             LIGHT_RADIUS = 550
@@ -274,7 +285,7 @@ class Game:
                 
                 now = pygame.time.get_ticks()
                 if self.player.is_dead and self.player.death_time and now - self.player.death_time > 4000:
-                    
+                    self.player.define_loop()
                     credits_folder = "credits_txts"  # coloque seus arquivos .txt aqui
 
                     options = {
@@ -300,7 +311,13 @@ class Game:
                 esta_vila = self.human_village_rect.colliderect(self.player.rect)
                 esta_labirinto = self.player.inside_maze
                 esta_floresta_gelo = self.player.inside_ice_florest
-                if esta_vila and self.background_music != self.village_music:
+                passou_18h = int(game_clock.get_time_str().split(":")[0]) > 18
+                
+                if passou_18h and self.background_music != self.battle_music:
+                    self.changing_music = True
+                    self.background_music = self.battle_music
+
+                elif esta_vila and self.background_music != self.village_music:
                     self.changing_music = True
                     self.background_music = self.village_music
 
@@ -312,7 +329,7 @@ class Game:
                     self.changing_music = True
                     self.background_music = self.ice_florest_music
 
-                elif not esta_labirinto and not esta_vila and not esta_floresta_gelo and self.background_music != self.florest_music:
+                elif not esta_labirinto and not esta_vila and not esta_floresta_gelo and self.background_music != self.florest_music and self.background_music != self.battle_music:
                     self.changing_music = True
                     self.background_music = self.florest_music
 
@@ -554,7 +571,7 @@ class Game:
                                 self.player.player_chatting_to = None
 
                         if opcoes != [] or self.player.is_chatting == True :
-                            opcao_escolhida = show_modal(self.screen,font=game_defaul_font, main_text=fala, options=opcoes, max_width=800, chat_end=chat_end)
+                            opcao_escolhida = show_modal(self.screen,font=game_defaul_font, main_text=fala, options=opcoes, max_width=800, chat_end=chat_end, name=str(self.player.player_chatting_to))
                             
                             self.player.player_chatting_to.processa_escolha(str(opcao_escolhida))  
                 
@@ -647,9 +664,11 @@ class Game:
                     fade.fill((255, 255, 255, int(alpha)))
 
                     self.screen.blit(fade, (0, 0))
-                    opcao_escolhida = show_modal(self.screen,font=game_defaul_font, main_text="Mais uma vez.", options=[], max_width=800, chat_end=elapsed < DURATION)
+                    opcao_escolhida = show_modal(self.screen,font=game_defaul_font, main_text="Mais uma vez.", options=[], max_width=800, chat_end=elapsed < DURATION, name="Niemand")
 
 
+                if pygame.time.get_ticks() - starter_time%60 == 0:
+                    self.creatures.add(self.creatures_to_add.pop())
                 pygame.display.flip()
 
              
@@ -660,24 +679,22 @@ class Game:
         inicio_setup = perf_counter()
         self.mapa = Map(self.all_sprites, self.collision_sprites, self.creatures, player_group=self.player_group, winter_curse_group = self.winter_curse_group)
 
-        # inicio = perf_counter()
-        # objetos_fixos =[sprite for sprite in self.collision_sprites if isinstance(sprite, CollisionSprites) and sprite.is_getable ==False]
+        inicio = perf_counter()
+        objetos_fixos =[sprite for sprite in self.collision_sprites if isinstance(sprite, CollisionSprites) and sprite.is_getable ==False]
         
         
-        # self.matriz_mapa = gerar_matriz_mapa(LARGURA_MAPA, ALTURA_MAPA, GRID_SIZE, objetos_fixos)
-        # matriz = {
-        #     "matriz": self.matriz_mapa,
-        # }
+        self.matriz_mapa = gerar_matriz_mapa(LARGURA_MAPA, ALTURA_MAPA, GRID_SIZE, objetos_fixos)
+        matriz = {
+            "matriz": self.matriz_mapa,
+        }
 
-        # with open("matriz_mapa.json", "w", encoding="utf-8") as f:
-        #     json.dump(matriz, f, ensure_ascii=False, indent=4)
+        with open("matriz_mapa.json", "w", encoding="utf-8") as f:
+            dump(matriz, f, ensure_ascii=False, indent=4)
 
-        # print(f"Tempo para gerar a matriz: {perf_counter() - inicio}")
         inicio = perf_counter()
         with open("matriz_mapa.json", "r", encoding="utf-8") as f:
-            matriz = json.load(f)["matriz"]
+            matriz = load(f)["matriz"]
 
-        print(f"Tempo para ler a matriz: {perf_counter() - inicio}")
 
         self.matriz_mapa = matriz
         self.all_sprites.world_matriz = self.matriz_mapa
@@ -710,8 +727,9 @@ class Game:
         dash.team_members = [nash,]
 
         rose = Rose(self.all_sprites, self.player_group,self.creatures, collision_sprites=self.collision_sprites, creatures_sprites=self.creatures, npc_name="Rose", is_ranged=False, default_size=HDCS +HHDCS - 7, original_speed=120, actions_to_add=["SpellCast",])
-        # holz = Holz(self.all_sprites, self.player_group,self.creatures, collision_sprites=self.collision_sprites, creatures_sprites=self.creatures, npc_name="Holz", is_ranged=False, default_size=HDCS +HHDCS + 7, )
+        holz = Holz(self.all_sprites, self.player_group,self.creatures, collision_sprites=self.collision_sprites, creatures_sprites=self.creatures, npc_name="Holz", is_ranged=False, default_size=HDCS +HHDCS + 7, )
         Fischerin = Villager(self.all_sprites, self.player_group,self.creatures, collision_sprites=self.collision_sprites, creatures_sprites=self.creatures, npc_name="Fischerin", is_ranged=False, default_size=HDCS +HHDCS -3,actions_to_add=["Fishing",] )
+        verant = Verant(self.all_sprites, self.player_group,self.creatures, collision_sprites=self.collision_sprites, creatures_sprites=self.creatures, npc_name="Verant", is_ranged=False, default_size=HDCS +HHDCS -3,player=self.player, )
         
         initial_position = (5866, 5918)
         explorer_orc = ExplorerOrc(self.all_sprites, collision_sprites=self.collision_sprites, initial_position=initial_position, creatures_sprites=self.creatures, )
@@ -752,7 +770,6 @@ class Game:
             orc_cacador = Orc(self.all_sprites, collision_sprites=self.collision_sprites, initial_position=initial_position, creatures_sprites=self.creatures, creature_images=creature_images)
             self.creatures.add(orc_cacador)
         
-        print(f"Tempo para criar os monstros: {perf_counter() - inicio}")
 
         initial_position = (1271,5368)
         orc = OrcMensageiro(self.all_sprites, collision_sprites=self.collision_sprites, initial_position=initial_position, creatures_sprites=self.creatures, )
@@ -779,7 +796,6 @@ class Game:
             if creat.specie in list(creats_groups.keys()):
                 creat.specie_group = creats_groups[creat.specie]
                 creats_groups[creat.specie].add(creat)
-        print(f"Tempo para iterar sobre criaturas = {perf_counter() - inicio}")
         golem = CrystalGolem(self.all_sprites, collision_sprites=self.collision_sprites, initial_position=(953,1860), creatures_sprites=self.creatures, )
         self.creatures.add(golem)
 
@@ -794,7 +810,6 @@ class Game:
         mimezation.mimetize()
         original_player.hp = 0
         original_player.is_dying = True
-        sammy = Sammy(self.all_sprites, self.player_group,self.creatures, collision_sprites=self.collision_sprites, creatures_sprites=self.creatures, npc_name="Sammy", initial_position=(3672, 115))
 
         self.player.original_form = orc
         
@@ -821,11 +836,14 @@ class Game:
         som_slime_andando_1 = pygame.mixer.Sound("Sounds/slime-step-1.mp3")
         som_slime_andando_2 = pygame.mixer.Sound("Sounds/slime-step-2.mp3")
         som_slime_atacando = pygame.mixer.Sound("Sounds/iced_magic.mp3")
+        som_golem_atacando = pygame.mixer.Sound("Sounds/golem_attack.mp3")
 
         for creat in self.creatures:
             creat.player_sprite = self.player
             if creat.specie == "SLIME":
                 creat.attack_sounds = [som_slime_atacando,]
+            elif creat.specie == "GOLEM":
+                creat.attack_sounds = [som_golem_atacando,]
             else:
                 creat.attack_sounds = [som_ataque_espada_1, som_ataque_espada_2]
             creat.arrow_sounds = [som_flecha_voando, ]
@@ -837,7 +855,6 @@ class Game:
         
         fim_setup = perf_counter()
 
-        print(f"Tempo total de setup: {fim_setup - inicio_setup}")
 
 if __name__ == "__main__":
     game = Game()

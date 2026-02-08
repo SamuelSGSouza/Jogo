@@ -327,65 +327,31 @@ class NinaBrain(Brain):
         self.can_attack = can_attack
         self.target = None
         self.final_dest = ()
-    
-    def esbarrar_em_character(self,):
-        if self.character.is_chatting == True or self.character.is_begging==True:
-            return None
-        proximos = pygame.sprite.spritecollide(self.character, self.character.creatures_sprites, False)
-        if proximos:
-            for creature in proximos: 
-                if creature != self.character:
-                    if creature.specie == self.character.specie:
-                        if creature.is_player :
-                            self.character.player.is_interacting = True
-                            self.character.player.is_chatting = True
-                            self.character.player.player_chatting_to = self.character
-                            self.character.encontrou_player = True
-                            return None
-                        if self.character.now - self.character.last_talk_time > self.character.talk_delay and self.character.can_talk == True and self.character.scripts:
-                            self.character.last_talk_time = self.character.now
-                            self.character.is_chatting = True
-                            creature.is_chatting = True
-                            tipo_conversa = choice(self.character.talk_options)
-                            try:
-                                script = [t.replace(r"{nome_character}", creature.personal_name) for t in choice(self.character.scripts[tipo_conversa]) ]
-                            except:
-                                raise Exception(f"Falha ao iniciar conversa entre: {self.character} X {creature}")
-                            if tipo_conversa == "respondendo":
-                                action_a,action_b,conv = start_chat(creature, self.character,script=script)
-                                creature.current_action = action_a
-                                self.character.current_action = action_b
-                            else:
-                                action_a,action_b,conv = start_chat(self.character,creature,script=script)
-                                creature.current_action = action_b
-                                self.character.current_action = action_a
-                            self.conversation = conv
-                            return self.character.current_action
-                    elif not creature.is_dead and self.have_mercy(creature)==False:# se a criatura não está morta
-                        if self.character.confiabilidades[self.character.specie] <= MARGEM_DE_ATAQUE:# se a confiabilidade para com a espécie for menor que a margem, ataca
-                            self.character.attacking_character = creature
-                            return Combat(self.character, creature,ranged=self.character.is_ranged, attack_range=self.character.range_distance)
-                        return None
-
-        return None
 
     def rotina_diaria(self):
-        encontrou = self.character.encontrou_player
-        player = self.character.player
-        if not encontrou:
-            self.final_dest = player.rect.center
+        hora = self.character.get_hour()
+        if hora < 17:
+            if not self.final_dest:
+                self.final_dest = choice(self.character.locais_montanha)
+        else:
+            if not self.final_dest:
+                self.final_dest = choice(self.character.locais_patrulha)
+        move = self.move_to(self.final_dest)
+        return move
+    
+class VerantBrain(Brain):
+    def __init__(self, character, can_attack=False):
+        super().__init__(character,mental_type="raivoso")
+        self.can_attack = can_attack
+        self.target = None
+        self.final_dest = ()
 
-            move = self.move_to(self.final_dest)
-            return move
+    def rotina_diaria(self):
         
-            
-        #se ja encontrou player
-            #se player escolheu "vá sozinha"
-                #vai para área dos na esquerda onde tem vários slimes. 
-
-            #se player escolheu "te levo em casa" ou "pode acompanhar"
-
-                #segue os passos do player
+        if not self.final_dest:
+            self.final_dest = choice(self.character.locais_patrulha)
+        move = self.move_to(self.final_dest)
+        return move
 
 
 class ObiBrain(Brain):
@@ -416,18 +382,21 @@ class LaRochBrothers(Brain):
     def rotina_diaria(self):
         vr = self.character.village_rect #village rect
         if not self.final_dest:
-            
-            self.final_dest = ()
-            for _ in range(20):
-                self.final_dest = (randint(0, vr.right), randint(vr.top, 6000))
+            hora = self.character.get_hour()
+            if hora >19:
+                self.final_dest = (vr.right, vr.top)
+            else:
+                self.final_dest = ()
+                for _ in range(20):
+                    self.final_dest = (randint(0, vr.right), randint(vr.top, 6000))
 
-                if not (self.final_dest[0] < 460+1500 and self.final_dest[1] > 4358+1500):
-                    break
+                    if not (self.final_dest[0] < 460+1500 and self.final_dest[1] > 4358+1500):
+                        break
 
-            if self.character.team_members != None:
-                for team_member in self.character.team_members:
-                    team_member.brain.final_dest = self.final_dest
-
+                if self.character.team_members != None:
+                    for team_member in self.character.team_members:
+                        team_member.brain.final_dest = self.final_dest
+        
 
         move = self.move_to(self.final_dest)
         return move
@@ -1074,7 +1043,13 @@ class KeepDistance(Action):
             else:
                 # Sem órbita: permaneça mirando um ponto estável na banda
                 dest = tgt + r.normalize() * self.ideal_radius
-
+        
+        grupo = self.character.groups()[0]
+        if hasattr(grupo, "world_matriz"):
+            matriz_mundo = grupo.world_matriz
+            if matriz_mundo[int(dest[0])//GRID_SIZE][int(dest[1])//GRID_SIZE] == 1:
+                return False
+        
         self._move.dest = dest
         self._move.update(dt)
         return True

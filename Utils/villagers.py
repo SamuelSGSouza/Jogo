@@ -4,7 +4,7 @@ from Utils.actions import *
 
 class Villager(Character):
     
-    def __init__(self, *groups, collision_sprites:pygame.sprite.Group,creatures_sprites:pygame.sprite.Group, npc_name="Nina", house_point=(0,0), is_ranged=False, attack_hitbox_list={"Front": (150,70), "Back": (150,70), "Left": (70,150), "Right": (70,150),}, range_distance=36, default_size = HDCS + HHDCS, team_members = [], original_speed:int=200, actions_to_add=[], forma_character:str=""):
+    def __init__(self, *groups, collision_sprites:pygame.sprite.Group,creatures_sprites:pygame.sprite.Group, npc_name="Nina", house_point=(0,0), is_ranged=False, attack_hitbox_list={"Front": (150,70), "Back": (150,70), "Left": (70,150), "Right": (70,150),}, range_distance=36, default_size = HDCS + HHDCS, team_members = [], original_speed:int=200, actions_to_add=[], forma_character:str="", initial_position=None):
         scale_attacks = {
             "Obi": 3,
             "Dash": 1,
@@ -13,7 +13,8 @@ class Villager(Character):
             "Holz": 2,
             "Fischerin": 2,
             "Sammy": 3,
-            "Nina": 1
+            "Nina": 1,
+            "Verant":1
         }
         super().__init__(*groups, collision_sprites=collision_sprites,creatures_sprites=creatures_sprites, personal_name=npc_name, scale_on_attack_value=scale_attacks[npc_name], is_ranged=is_ranged, range_distance=range_distance, team_members=team_members)
         self.all_groups= groups
@@ -68,7 +69,8 @@ class Villager(Character):
             "Holz": HolzBrain(self, can_attack=True),
             "Fischerin": FischerinBrain(self, ),
             "Sammy": SammyBrain(self, ),
-            "Nina": NinaBrain(self,)
+            "Nina": NinaBrain(self,),
+            "Verant": VerantBrain(self,)
         }
         self.brain = self.brains[npc_name]
         
@@ -104,6 +106,9 @@ class Villager(Character):
         self.confiabilidades["ORC"] = 0.3
 
         self.can_talk =True
+
+        if initial_position:
+            self.rect = self.image.get_frect(center = initial_position)
     # ---------------------------------------------------------
     # Direção “para onde está olhando”. Se tiver direction != 0,
     # usa ela; senão usa self.state.
@@ -306,8 +311,8 @@ class Villager(Character):
             if self.brain != None:
                 try:
                     choosen_action = self.brain.choose_action(**important_infos)
-                except:
-                    raise Exception(f"Erro ao escolher ação com cérebro {self.brain} do usuário {self}")
+                except Exception as e:
+                    raise Exception(f"Erro ao escolher ação com cérebro {self.brain} do usuário {self}: \n {e}")
                 self.current_action = choosen_action
         self.handle_effects()
         
@@ -355,6 +360,384 @@ class Villager(Character):
 
     def __str__(self):
         return self.npc_name
+
+class Verant(Villager):
+    def __init__(self, *groups, collision_sprites, creatures_sprites, npc_name="Verant", house_point=(0, 0), is_ranged=False, attack_hitbox_list={ "Front": (150, 70),"Back": (150, 70),"Left": (70, 150),"Right": (70, 150) }, range_distance=36, default_size=HDCS + HHDCS, team_members=[], original_speed = 80, actions_to_add=[], player=None):
+        super().__init__(*groups, collision_sprites=collision_sprites, creatures_sprites=creatures_sprites, npc_name=npc_name, house_point=house_point, is_ranged=is_ranged, attack_hitbox_list=attack_hitbox_list, range_distance=range_distance, default_size=default_size, team_members=team_members, original_speed=original_speed, actions_to_add=actions_to_add)
+
+        self.max_hp = randint(20,30)
+        self.hp=self.max_hp
+        self.attack_damage = randint(12,20)
+
+        self.encontrou_player = False
+        self.player = player
+        
+        #Falas loop 1 - primeiro encontro
+        self.talks_loop_1 = {
+            "1": {
+                "fala": "Olha só o que os ventos do sul trouxeram. Bem-vindo viajante, à vila de Tod. A vila mais ao norte do continente!",
+                "respostas": {
+                    "Obrigado. É um lugar bonito.": {"next_id": "2"},
+                    "Vocês parecem isolados aqui.": {"next_id": "2_clima"}
+                }
+            },
+            "2": {
+                "fala": "Bonito e resistente, como meu povo. Sou o Chefe, responsável por manter todos alimentados e seguros.",
+                "respostas": {
+                    "Parece uma tarefa difícil.": {"next_id": "end"}
+                }
+            },
+            "2_clima": {
+                "fala": "Isolados, mas autossuficientes. O frio é rigoroso, mas nossos estoques são o orgulho deste vale.",
+                "respostas": {
+                    "Entendo.": {"next_id": "end"}
+                }
+            },
+            "end": {
+                "fala": "Aproveite a estadia. Só não se perca no labirinto ao entardecer.",
+                "respostas": {}
+            }
+        }
+
+        self.talks_loop_2 = {
+            "1": {
+                "fala": "Olha só o que os ventos do sul trouxeram. Bem-vindo viajante, à vila de Tod. A vila mais ao norte do continente!",
+                "respostas": {
+                    "Obrigado. Não pude deixar de notar que a vila está bem agitada.": {"next_id": "2_tensao"},
+                    "Obrigado pela hospitalidade, mas sabe, pela minha experiência um sorriso sempre esconde algo por trás. E você chefe, o que você está escondendo?": {"next_id": "2_direto"}
+                }
+            },
+            "2_tensao": {
+                "fala": "Olhos aguçados. O inverno está chegando e os estoques precisam estar trancados. Segurança é nossa prioridade.",
+                "respostas": {
+                    "Segurança contra o frio ou contra o que está lá fora?": {"next_id": "end"}
+                }
+            },
+            "2_direto": {
+                "fala": "Cuidado com as palavras. Um convidado não deve questionar a hospitalidade de quem o protege.",
+                "respostas": {
+                    "Entendo.": {"next_id": "end"}
+                }
+            },
+            "end": {
+                "fala": "Apenas aproveite o dia. Ele costuma ser curto por aqui.",
+                "respostas": {}
+            }
+        }
+
+        self.talks_loop_3 = {
+            "1": {
+                "fala": "Olha só o que os ventos do sul trouxeram. Bem-vindo viajante, à vila de Tod. A vila mais ao norte do continente!",
+                "respostas": {
+                    "Obrigado, chefe. Eu vi uma movimentação estranha dos Orcs enquanto vinha para cá. Sabe o que está acontecendo?": {"next_id": "2_tensao"},
+                }
+            },
+            "2_tensao": {
+                "fala": "Foi um ano difícil de caça e as tempestades de inverno estão chegando. Mas não precisa se preocupar, nós somos muito melhores nisso então nossos estoques estão cheios!",
+                "respostas": {
+                    "Uns morrem de sede enquanto outros se afogam...": {"next_id": "end"}
+                }
+            },
+            "end": {
+                "fala": "Não é problema meu! Meus deveres acabam nos limites dessa vila. Aproveite sua estada aqui.",
+                "respostas": {}
+            }
+        }
+        
+        self.talks_loop_4 = {
+            "1": {
+                "fala": "Olha só o que os ventos do sul trouxeram. Bem-vindo viajante, à vila de Tod. A vila mais ao norte do continente!",
+                "respostas": {
+                    "Obrigado, chefe, mas eu trago más notícias: essa vila vai ser atacada pelos Orcs essa noite.": {"next_id": "2_alerta"},
+                    "Chefe, eu preciso falar com você com urgência. É sobre os Orcs.": {"next_id": "2_alerta_sutil"}
+                }
+            },
+
+            "2_alerta": {
+                "fala": "Atacada? Orcs não marcham até aqui por acaso. São criaturas selvagens demais para tamanha organização.",
+                "respostas": {
+                    "Eles estão famintos. Não é um ataque por ódio.": {"next_id": "3_fome"},
+                    "Você está subestimando o desespero deles.": {"next_id": "3_desespero"}
+                }
+            },
+
+            "2_alerta_sutil": {
+                "fala": "Se isso for mais uma história para assustar meu povo, poupe seu fôlego. Já temos medo suficiente.",
+                "respostas": {
+                    "Não é história. Eu vi um Orc cair na floresta.": {"next_id": "3_orc"},
+                }
+            },
+
+            "3_fome": {
+                "fala": "Fome? Todos passam fome no inverno. A diferença é que nós nos preparamos.",
+                "respostas": {
+                    "Vocês se prepararam… eles não.": {"next_id": "4_frio"}
+                }
+            },
+
+            "3_desespero": {
+                "fala": "Desespero não justifica atravessar minhas muralhas com machados.",
+                "respostas": {
+                    "Então prepare suas muralhas. Eles virão de qualquer forma.": {"next_id": "4_preparo"}
+                }
+            },
+
+            "3_orc": {
+                "fala": "Um Orc morto não é novidade. A floresta sempre cobra seu preço.",
+                "respostas": {
+                    "Esse não morreu lutando.": {"next_id": "4_frio"}
+                }
+            },
+
+            "4_frio": {
+                "fala": "Mesmo que fosse verdade… o que espera que eu faça? Abrir meus celeiros para monstros?",
+                "respostas": {
+                    "Espero que você sobreviva à noite.": {"next_id": "end"},
+                }
+            },
+
+            "4_preparo": {
+                "fala": "Se eles ousarem chegar até aqui, encontrarão lanças e fogo.",
+                "respostas": {
+                    "Então essa noite vai ser longa.": {"next_id": "end"}
+                }
+            },
+
+            "end": {
+                "fala": "A vila de Tod já enfrentou coisas piores do que boatos. Agora, se me der licença, tenho um povo para proteger.",
+                "respostas": {}
+            }
+        }
+
+        self.talks_loop_5 = {
+            "1": {
+                "fala": "Olha só o que os ventos do sul trouxeram. Bem-vindo viajante, à vila de Tod. A vila mais ao norte do continente!",
+                "respostas": {
+                    "Obrigado, chefe, mas eu trago más notícias: essa vila vai ser atacada pelos Orcs essa noite.": {"next_id": "2_alerta"},
+                    "Chefe, eu preciso falar com você com urgência. É sobre os Orcs.": {"next_id": "2_alerta_sutil"}
+                }
+            },
+
+            "2_alerta": {
+                "fala": "Atacada? Orcs não marcham até aqui por acaso. São criaturas selvagens demais para tamanha organização.",
+                "respostas": {
+                    "Eles estão famintos. Não é um ataque por ódio.": {"next_id": "3_fome"},
+                    "Você está subestimando o desespero deles.": {"next_id": "3_desespero"}
+                }
+            },
+
+            "2_alerta_sutil": {
+                "fala": "Se isso for mais uma história para assustar meu povo, poupe seu fôlego. Já temos medo suficiente.",
+                "respostas": {
+                    "Não é história. Eu vi um Orc cair na floresta.": {"next_id": "3_orc"},
+                }
+            },
+
+            "3_fome": {
+                "fala": "Fome? Todos passam fome no inverno. A diferença é que nós nos preparamos.",
+                "respostas": {
+                    "Vocês se prepararam… eles não.": {"next_id": "4_frio"}
+                }
+            },
+
+            "3_desespero": {
+                "fala": "Desespero não justifica atravessar minhas muralhas com machados.",
+                "respostas": {
+                    "Então prepare suas muralhas. Eles virão de qualquer forma.": {"next_id": "4_preparo"}
+                }
+            },
+
+            "3_orc": {
+                "fala": "Um Orc morto não é novidade. A floresta sempre cobra seu preço.",
+                "respostas": {
+                    "Esse não morreu lutando.": {"next_id": "4_frio"}
+                }
+            },
+
+            "4_frio": {
+                "fala": "Mesmo que fosse verdade… o que espera que eu faça? Abrir meus celeiros para monstros?",
+                "respostas": {
+                    "Espero que você sobreviva à noite.": {"next_id": "end"},
+                }
+            },
+
+            "4_preparo": {
+                "fala": "Se eles ousarem chegar até aqui, encontrarão lanças e fogo.",
+                "respostas": {
+                    "Então essa noite vai ser longa.": {"next_id": "end"}
+                }
+            },
+
+            "end": {
+                "fala": "A vila de Tod já enfrentou coisas piores do que boatos. Agora, se me der licença, tenho um povo para proteger.",
+                "respostas": {}
+            }
+        }
+
+        self.talks_loop_5_sucesso = {
+            "1": {
+                "fala": (
+                    "Vejo pelo seu rosto que algo mudou. \n"
+                    "Ou você traz boas notícias… ou veio me dizer que eu estava certo desde o início."
+                ),
+                "respostas": {
+                    "O ataque foi suspenso.": {"next_id": "2_suspenso"},
+                    "Eu falei com o chefe dos orcs.": {"next_id": "2_suspenso"}
+                }
+            },
+
+            "2_suspenso": {
+                "fala": (
+                    "Suspenso? \n"
+                    "Orcs não suspendem ataques. Eles vencem ou morrem tentando."
+                ),
+                "respostas": {
+                    "Eles estão famintos, não sedentos por guerra.": {"next_id": "3_fome"},
+                    "Eles recuaram porque ainda há uma saída sem sangue.": {"next_id": "3_saida"}
+                }
+            },
+
+            "3_fome": {
+                "fala": (
+                    "Fome… \n"
+                    "Meu povo também passa fome no inverno. A diferença é que eu os preparei."
+                ),
+                "respostas": {
+                    "Preparou alguns, enquanto outros morrem do lado de fora.": {"next_id": "4_confronto"},
+                }
+            },
+
+            "3_saida": {
+                "fala": (
+                    "E essa saída exige o quê? \n"
+                    "Que eu abra meus celeiros para monstros?"
+                ),
+                "respostas": {
+                    "Exige racionamento. Para todos.": {"next_id": "4_racionamento"},
+                    "Exige que você governe, não acumule.": {"next_id": "4_confronto"}
+                }
+            },
+
+            "4_confronto": {
+                "fala": (
+                    "Cuidado. \n"
+                    "Você fala como se entendesse o peso de manter uma vila inteira viva."
+                ),
+                "respostas": {
+                    "Eu entendo o peso de enterrar vilas inteiras.": {"next_id": "5_verdade"},
+                    "Você não está protegendo seu povo. Está protegendo seu controle.": {"next_id": "5_verdade"}
+                }
+            },
+
+            "4_racionamento": {
+                "fala": (
+                    "Racionamento causa pânico. \n"
+                    "Pânico vira revolta. Revolta derruba chefes."
+                ),
+                "respostas": {
+                    "A guerra derruba tudo.": {"next_id": "5_verdade"},
+                    "Dividir comida custa menos do que reconstruir cinzas.": {"next_id": "5_verdade"}
+                }
+            },
+
+            "5_verdade": {
+                "fala": (
+                    "… \n"
+                    "Se meu povo souber que eu escondi comida enquanto outros morriam…"
+                ),
+                "respostas": {
+                    "Então seja lembrado como quem mudou o curso da história.": {"next_id": "end_positivo"},
+                    "Ou seja lembrado como o último chefe de Tod.": {"next_id": "end_positivo"}
+                }
+            },
+
+            "end_positivo": {
+                "fala": (
+                    "Você me colocou diante de uma escolha que evitei por tempo demais. \n"
+                    "Se os Orcs ficarem… haverá regras. Vigilância. Troca justa."
+                    "\n\nMas se houver paz esta noite… será porque alguém teve coragem de dividir."
+                ),
+                "respostas": {}
+            }
+        }
+
+        self.talks_loop_5_fracasso = {
+            "1": {
+                "fala": (
+                    "Vejo pelo seu rosto que algo mudou. \n"
+                    "Aquelas criaturas não aceitaram um acordo, não é?."
+                ),
+                "respostas": {
+                    "Eu falhei em convencê-lo.": {"next_id": "2_suspenso"},
+                    "Você é um tolo se está mais preocupado em estar certo do que com o futuro da vila.": {"next_id": "2_suspenso"}
+                }
+            },
+
+            "2_suspenso": {
+                "fala": (
+                    "Nem por um segundo eu acreditei que seria possível dialogar com aquelas criaturas."
+                ),
+                "respostas": {
+                    "Então agora só resta o derramamento de sangue...": {"next_id": "3_fome"},
+                }
+            },
+
+            "3_fome": {
+                "fala": "Exato! E Tod irá impedir esses selvagens!",
+                "respostas": {}
+            },
+
+
+        }
+
+        vr = self.village_rect #village rect
+        matriz_mundo = self.groups()[0].world_matriz
+
+        self.locais_patrulha = []
+        for _ in range(0,200):
+            x, y = randint(vr.left, vr.right), randint(vr.top, vr.bottom)
+            if matriz_mundo[x//GRID_SIZE][y//GRID_SIZE] != 1 and (x,y) not in self.locais_patrulha:
+                self.locais_patrulha.append((x,y))
+        
+    def escolhe_fala(self, ):
+        #falas 1 a 4 dependem do loop de morte do jogador. 
+        #falas 5 só são desbloqueadas depois de falar com o chefe dos orcs e conseguir convencer ele a suspender o ataque.
+    
+        loop = self.player.loop
+
+        if self.player.falou_chefe_orcs:
+            if self.player.convenceu_chefe_orcs:
+                falas = {
+                    1: self.talks_loop_5_sucesso,
+                }
+            else:
+                falas = {
+                    1: self.talks_loop_5_fracasso,
+                }
+        else:
+            falas = {
+                1: self.talks,
+                2: self.talks_loop_2,
+                3: self.talks_loop_3,
+                4: self.talks_loop_4,
+                5: self.talks_loop_5,
+            }
+        if loop not in falas.keys():
+            loop = choice(list(falas.keys()))
+
+        
+
+        fala_data = falas[loop].get(self.current_id)
+        if not fala_data:
+            return "", []
+        
+        # Verifica se é fim (sem respostas) e aplica reputação
+        if not fala_data["respostas"]:
+            delta_rep = self.pontuacao * 20  # Exemplo: pontuação alta -> +rep, baixa -> -rep
+            return fala_data["fala"], []  # Mostra fala final e encerra
+        
+        return fala_data["fala"], list(fala_data["respostas"].keys())
+
 
 class Nina(Villager):
     def __init__(self, *groups, collision_sprites, creatures_sprites, npc_name="Nina", house_point=(0, 0), is_ranged=False, attack_hitbox_list={ "Front": (150, 70),"Back": (150, 70),"Left": (70, 150),"Right": (70, 150) }, range_distance=36, default_size=HDCS - HHDCS, team_members=[], original_speed = 200, actions_to_add=[], player):
@@ -452,7 +835,7 @@ class Nina(Villager):
             "2_vale": {  
                 "fala": "Vale do Retorno. Nome estranho, né? Quase ninguém volta",
                 "respostas": {
-                    "...": {"pontuacao": 0, "next_id": "2_conversa"},
+                    "Você ficaria surpresa.": {"pontuacao": 0, "next_id": "2_conversa"},
                 }
             },
 
@@ -480,7 +863,7 @@ class Nina(Villager):
             },
 
             "5_quieto": {  
-                "fala": "Hoje todo mundo está mais agitado que o normal. Isso me dá um frio na barriga.",
+                "fala": "Eu vi um orc entrando no labirinto da floresta mas ele ainda não saiu. Foi bem estranho.",
                 "respostas": {
                     "...": {"pontuacao": 0, "next_id": "6"}
                 }
@@ -488,7 +871,7 @@ class Nina(Villager):
             "5": {  
                 "fala": "Sabe, hoje todo mundo está mais agitado que o normal. Isso me dá um frio na barriga.",
                 "respostas": {
-                    "...": {"pontuacao": 0, "next_id": "6"}
+                    "...": {"pontuacao": 0, "next_id": "5_quieto"}
                 }
             },
 
@@ -734,6 +1117,27 @@ class Nina(Villager):
             }
         }
 
+        self.locais_patrulha = []
+        vr_left = 3972 #village rect
+        vr_right = 6000
+        vr_top = 0
+        vr_bottom = 1075
+        vr = self.village_rect #village rect
+        matriz_mundo = self.groups()[0].world_matriz
+
+        self.locais_patrulha = []
+        self.locais_montanha = []
+
+        for _ in range(0,200):
+            x, y = randint(vr_left, vr_right), randint(vr_top, vr_bottom)
+            if matriz_mundo[x//GRID_SIZE][y//GRID_SIZE] != 1 and (x,y) not in self.locais_patrulha:
+                self.locais_montanha.append((x,y))
+
+        for _ in range(0,200):
+            x, y = randint(vr.left, vr.right), randint(vr.top, vr.bottom)
+            if matriz_mundo[x//GRID_SIZE][y//GRID_SIZE] != 1 and (x,y) not in self.locais_patrulha:
+                self.locais_patrulha.append((x,y))
+
     def escolhe_fala(self, ):
 
         loop = self.player.loop
@@ -824,6 +1228,9 @@ class Dash(Villager):
             "respostas": {}
         }
     }
+        
+        self.max_hp = randint(20,30)
+        self.attack_damage = randint(12,20)
 
 class Nash(Villager):
     def __init__(self, *groups, collision_sprites, creatures_sprites, npc_name="Nina", house_point=(0, 0), is_ranged=False, attack_hitbox_list={ "Front": (150, 70),"Back": (150, 70),"Left": (70, 150),"Right": (70, 150) }, range_distance=36, default_size=HDCS + HHDCS, team_members=[], original_speed = 200, actions_to_add=[]):
@@ -889,6 +1296,9 @@ class Nash(Villager):
             }
         }
         
+        self.max_hp = randint(20,30)
+        self.attack_damage = randint(12,20)
+
 class Obi(Villager):
     def __init__(self, *groups, collision_sprites, creatures_sprites, npc_name="Nina", house_point=(0, 0), is_ranged=False, attack_hitbox_list={ "Front": (150, 70),"Back": (150, 70),"Left": (70, 150),"Right": (70, 150) }, range_distance=36, default_size=HDCS + HHDCS, team_members=[], original_speed = 200, actions_to_add=[]):
         super().__init__(*groups, collision_sprites=collision_sprites, creatures_sprites=creatures_sprites, npc_name=npc_name, house_point=house_point, is_ranged=is_ranged, attack_hitbox_list=attack_hitbox_list, range_distance=range_distance, default_size=default_size, team_members=team_members, original_speed=original_speed, actions_to_add=actions_to_add)
@@ -962,6 +1372,9 @@ class Obi(Villager):
         }
     }
     
+        self.max_hp = randint(40,60)
+        self.attack_damage = randint(24,40)
+
 class Rose(Villager):
     def __init__(self, *groups, collision_sprites, creatures_sprites, npc_name="Nina", house_point=(0, 0), is_ranged=False, attack_hitbox_list={ "Front": (150, 70),"Back": (150, 70),"Left": (70, 150),"Right": (70, 150) }, range_distance=36, default_size=HDCS + HHDCS, team_members=[], original_speed = 200, actions_to_add=[]):
         super().__init__(*groups, collision_sprites=collision_sprites, creatures_sprites=creatures_sprites, npc_name=npc_name, house_point=house_point, is_ranged=is_ranged, attack_hitbox_list=attack_hitbox_list, range_distance=range_distance, default_size=default_size, team_members=team_members, original_speed=original_speed, actions_to_add=actions_to_add)
@@ -1090,6 +1503,9 @@ class Holz(Villager):
                 "respostas": {}
             }
         }
+
+        self.max_hp = randint(20,30)
+        self.attack_damage = randint(12,20)
 
 class Sammy(Villager):
     def __init__(self, *groups, collision_sprites, creatures_sprites, npc_name="Sammy", house_point=(0, 0), is_ranged=False, attack_hitbox_list={ "Front": (150, 70),"Back": (150, 70),"Left": (70, 150),"Right": (70, 150) }, range_distance=36, default_size=HDCS + HHDCS, team_members=[], original_speed = 200, actions_to_add=[], initial_position:set=()):

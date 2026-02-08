@@ -338,8 +338,8 @@ class Slime(Monster):
         original_speed = randint(125, 150)
         default_character_size = DCS
 
-        max_hp = randint(20,40)
-        attack_damage = randint(4,6)
+        max_hp = randint(10,15)
+        attack_damage = randint(2,4)
 
             
 
@@ -371,20 +371,13 @@ class Slime(Monster):
     def __str__(self):
         return self.personal_name
     
-
 class Ghost(Monster):
     def __init__(self, *groups, collision_sprites, creatures_sprites, monster_name="Winter Ghost", house_point=(0, 0), initial_position, boss_chance=20):
         actions = ["Walk", "Idle", "Hurt", "Run", "Attack_1","Attack_2", "Dying", "Dead"]
         original_speed = randint(125, 150)
         default_character_size = DCS
-        if randint(0,100)>boss_chance:
-            max_hp = randint(10,20)
-            attack_damage = randint(2,5)
-
-        else:
-            max_hp = randint(20,30)
-            attack_damage = randint(5,7)
-            default_character_size = randint(DCS, DCS*max(max_hp//80, 1))
+        max_hp = randint(10,20)
+        attack_damage = randint(5,8)
             
 
         super().__init__(*groups, 
@@ -415,22 +408,14 @@ class Ghost(Monster):
     def __str__(self):
         return self.personal_name
 
-
-
-
 class ExplorerOrc(Monster):
     def __init__(self, *groups, collision_sprites, creatures_sprites, monster_name="Orc", house_point=(0, 0), initial_position, boss_chance=20):
         actions = ["Walk", "Idle", "Hurt", "Run", "Attack_1","Attack_2", "Dying", "Dead", "Beg", "Begging", "WakeUp"]
         original_speed = randint(125, 150)
         self.player = None
         default_character_size = DCS
-        if randint(0,100)>boss_chance:
-            max_hp = randint(80,120)
-            attack_damage = randint(8,10)
-
-        else:
-            max_hp = randint(120,160)
-            attack_damage = randint(12,20)
+        max_hp = randint(10,20)
+        attack_damage = randint(4,6)
             
 
         super().__init__(*groups, 
@@ -518,14 +503,14 @@ class ExplorerOrc(Monster):
 
         self.talks_vivo_loop_3 = {
             "1": {
-                "fala": "Você… de novo.",
+                "fala": "Humano... Você chegou tarde.",
                 "respostas": {
                     "...": {"next_id": "2"}
                 }
             },
 
             "2": {
-                "fala": "Achei que fosse chegar antes.",
+                "fala": "Eu precisava agir antes.",
                 "respostas": {
                     "Antes do quê?": {"next_id": "3"}
                 }
@@ -554,35 +539,35 @@ class ExplorerOrc(Monster):
 
         self.talks_vivo_loop_4 = {
             "1": {
-                "fala": "Você chegou cedo hoje.",
+                "fala": "Droga... eu falhei...",
                 "respostas": {
-                    "...": {"next_id": "2"}
+                    "Você não falhou! Ainda dá tempo de consertar as coisas. Mas preciso da sua ajuda. O que eu tenho que fazer?": {"next_id": "2"}
                 }
             },
 
             "2": {
-                "fala": "Ainda não passou.",
+                "fala": "O chefe... também não quer isso...",
                 "respostas": {
-                    "O quê?": {"next_id": "3"}
+                    "Mas como eu falo com ele?": {"next_id": "3"}
                 }
             },
 
             "3": {
-                "fala": "O ponto sem volta.",
+                "fala": "Pegue isso. Esse emblema faz você ser reconhecido como um Orc e os guardas vão te deixar passar.",
                 "respostas": {
                     "...": {"next_id": "4"}
                 }
             },
 
             "4": {
-                "fala": "Não marchamos por raiva.",
+                "fala": "Vá, humano... Não há tempo pra mim, mas talvez dê para impedir o banho de sangue...",
                 "respostas": {
                     "...": {"next_id": "5"}
                 }
             },
 
             "5": {
-                "fala": "Marchamos porque o frio não espera.",
+                "fala": "Assim, ao menos, minha morte não será em vão...",
                 "respostas": {}
             }
         }
@@ -679,19 +664,16 @@ class ExplorerOrc(Monster):
     
     def __str__(self):
         return "Orc Explorador"
-    
-    
+     
 class ChiefOrc(Monster):
-    def __init__(self, *groups, collision_sprites, creatures_sprites, monster_name="Chefe dos Orcs do Gelo", house_point=(0, 0), initial_position, boss_chance=20):
+    def __init__(self, *groups, collision_sprites, creatures_sprites, monster_name="Chefe dos Orcs do Gelo", house_point=(0, 0), initial_position, boss_chance=20, player=None):
         actions = ["Walk", "Idle", "Hurt", "Run", "Attack_1","Attack_2", "Dying", "Dead", "Beg", "Begging", "WakeUp"]
         original_speed = 140
         default_character_size = DCS
+        max_hp = 100
+        attack_damage = 20
         
-        max_hp = randint(800,1200)
-
-        attack_damage = randint(30,50)
-        
-        
+        self.player= player
 
         super().__init__(*groups, 
             collision_sprites=collision_sprites, 
@@ -738,22 +720,11 @@ class ChiefOrc(Monster):
                     ),
                     "respostas": {
                         
-
-                        # Jogador neutro / cauteloso
-                        "Procuro entender estas terras antes de seguir viagem.": {
-                            "pontuacao": 0.0,
-                            "next_id": "2_neutro"
-                        },
                         # Jogador que JÁ SABE do ataque
                         "Eu sei dos seus planos para hoje. Vim tentar um caminho que não termine num banho de sangue.": {
                             "pontuacao": 0.7,
                             "next_id": "2_positivo"
                         },
-                        # Jogador sincero, mas fraco aos olhos orcs
-                        "Estou perdido… não sabia que esse lugar tinha um chefe.": {
-                            "pontuacao": -0.3,
-                            "next_id": "2_negativo"
-                        }
                     }
                 },
 
@@ -791,66 +762,6 @@ class ChiefOrc(Monster):
                         "Eu sei mais do que você imagina, chefe.": {
                             "pontuacao": -10,
                             "next_id": "end_negativo"
-                        }
-                    }
-                },
-
-                "2_negativo": {
-                    "fala": (
-                        "Perdido? Então você atravessou Skarrfrost vivo por sorte.\n "
-                        "Aqui, quem não sabe onde pisa vira presa. \n"
-                        "E agora você está diante de mim sem propósito."
-                    ),
-                    "respostas": {
-                        # Tentativa de recuperar dignidade → pode voltar ao neutro
-                        "Não vim causar problemas. Só preciso seguir meu caminho.": {
-                            "pontuacao": -0.1,
-                            "next_id": "end_neutro"
-                        },
-
-                        # Jogador admite fraqueza (mal visto, mas honesto)
-                        "Eu errei. Se ofendi, peço desculpas.": {
-                            "pontuacao": 0.0,
-                            "next_id": "end_neutro"
-                        },
-
-                        # Continua fraco / indeciso → piora
-                        "Eu… não sei o que fazer agora.": {
-                            "pontuacao": -0.5,
-                            "next_id": "3_negativo"
-                        },
-
-                        # Resposta que ensina cultura orc: firmeza
-                        "Então me diga o que devo fazer para sair vivo daqui.": {
-                            "pontuacao": 0.2,
-                            "next_id": "end_neutro"
-                        }
-                    }
-                },
-
-                "2_neutro": {
-                    "fala": (
-                        "Entender Skarrfrost não mantém ninguém vivo por muito tempo. \n"
-                        "Aqui, quem observa demais vira problema… ou recurso. \n"
-                        "Então diga, viajante: o que exatamente você quer entender?"
-                    ),
-                    "respostas": {
-                        # Neutro → pode ir para positivo se o jogador for cuidadoso
-                        "Quero saber por que o clima entre orcs e humanos está piorando.": {
-                            "pontuacao": 0.2,
-                            "next_id": "end_neutro"
-                        },
-
-                        # Mantém neutro, conversa mais superficial
-                        "As rotas, os perigos… para não cruzar caminhos errados.": {
-                            "pontuacao": 0.0,
-                            "next_id": "end_neutro"
-                        },
-
-                        # Escorrega para negativo (parece espionagem)
-                        "Quero saber como vocês vivem… e como lutam.": {
-                            "pontuacao": -0.3,
-                            "next_id": "3_negativo"
                         }
                     }
                 },
@@ -1034,13 +945,14 @@ class ChiefOrc(Monster):
                     ),
                     "respostas": {}
                 },
+                
                 "end_positivo": {
                     "fala": (
                         "O inverno ensinou minha tribo a não confiar em promessas. "
                         "Ainda assim… você veio. Falou como chefe. Trouxe algo além de medo."
-                        "\n\nEu vou cancelar o ataque. Não por fé em humanos, "
+                        "\n\nEu vou adiar o ataque. Não por fé em humanos, "
                         "mas pela chance de um amanhã diferente."
-                        "\n\nNão desperdice isso. Se Skarrfrost passar fome outra vez, "
+                        "\n\nNão desperdice isso. Se até a segunda hora da noite o acordo não estiver firmado, "
                         "não haverá segunda conversa."
                     ),
                     "respostas": {}
@@ -1062,20 +974,24 @@ class ChiefOrc(Monster):
         info = respostas[escolha]
         self.pontuacao += info["pontuacao"]
         self.current_id = info["next_id"]
+        self.player.falou_chefe_orcs = True
+        if self.current_id == "end_positivo":
+            self.player.convenceu_chefe_orcs = True
         return True
     
+
+    
+
     def __str__(self):
         return "Ghorak"
-    
-    
     
 class Orc(Monster):
     def __init__(self, *groups, collision_sprites, creatures_sprites, monster_name="Orc", house_point=(0, 0), initial_position, boss_chance=20, creature_images):
         actions = ["Walk", "Idle", "Hurt", "Run", "Attack_1","Attack_2", "Dying", "Dead","Beg", "Begging", "WakeUp"]
         original_speed = randint(125, 150)
         default_character_size = DCS
-        max_hp = randint(20,40)
-        attack_damage = randint(4,6)
+        max_hp = randint(16,25)
+        attack_damage = randint(6,8)
 
             
 
@@ -1105,7 +1021,7 @@ class Orc(Monster):
         self.delete_sprites_on_death = True
         self.specie = "ORC"
         self.confiabilidades["HUMAN"] = 0.3
-        self.can_talk = True
+        self.can_talk = False
         self.default_folder_path = join(getcwd(), "Ecosystem", "Winter","Monsters", "Orc", "soldier")
         self.scripts = load_scripts(self.default_folder_path)
         self.talk_options = ["iniciando",]
@@ -1136,8 +1052,8 @@ class OrcCacador(Monster):
         original_speed = randint(125, 150)
         default_character_size = DCS
 
-        max_hp = randint(80,120)
-        attack_damage = randint(12,20)
+        max_hp = randint(30,45)
+        attack_damage = randint(8,12)
 
         
             
@@ -1220,8 +1136,8 @@ class OrcMensageiro(Monster):
         original_speed = randint(230, 280)
         default_character_size = DCS
 
-        max_hp = randint(80,100)
-        attack_damage = randint(12,20)
+        max_hp = 30
+        attack_damage = 2
 
         
             
@@ -1270,6 +1186,19 @@ class OrcMensageiro(Monster):
         self.scripts = load_scripts(self.default_folder_path)
         self.talk_options = ["iniciando",]
         self.falou_mensageiro = False
+
+        human_village_rect = pygame.Rect(3800,1400,2200, 2000)
+        self.locais_vila_humana = []
+        vr = human_village_rect #village rect
+        matriz_mundo = self.groups()[0].world_matriz
+
+        for _ in range(0,200):
+            x, y = randint(vr.left, vr.right), randint(vr.top, vr.bottom)
+            if matriz_mundo[x//GRID_SIZE][y//GRID_SIZE] != 1 and (x,y) not in self.locais_vila_humana:
+                self.locais_vila_humana.append((x,y))
+
+
+                
     def __str__(self):
         return self.personal_name
 
@@ -1279,8 +1208,8 @@ class OrcGuarda(Monster):
         original_speed = 120
         default_character_size = DCS
 
-        max_hp = 300
-        attack_damage = 8
+        max_hp = 25
+        attack_damage = 10
 
         
             
@@ -1329,8 +1258,8 @@ class CrystalGolem(Monster):
         actions = ["Walk", "Idle", "Hurt", "Run", "Attack_1","Attack_2", "Dying", "Dead"]
         original_speed = randint(125, 150)
         default_character_size = DCS*2.5
-        max_hp = 400
-        attack_damage = 80
+        max_hp = 100
+        attack_damage = 100
 
             
 
@@ -1376,14 +1305,9 @@ class Goblin(Monster):
         actions = ["Walk", "Idle", "Hurt", "Run", "Attack_1","Attack_2", "Dying", "Dead"]
         original_speed = randint(125, 150)
         default_character_size = DCS
-        if randint(0,100)>boss_chance:
-            max_hp = randint(20,40)
-            attack_damage = randint(4,6)
+        max_hp = randint(15,20)
+        attack_damage = randint(4,6)
 
-        else:
-            max_hp = randint(80,120)
-            attack_damage = randint(10,30)
-            default_character_size = randint(DCS, DCS*max_hp//80)
             
 
         super().__init__(*groups, 

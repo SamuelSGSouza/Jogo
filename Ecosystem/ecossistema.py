@@ -115,7 +115,7 @@ class Map:
         AnimatedSprite(all_sprites,collision_sprites,root=water,obj = image_surf, use_center=True,pos=(4817, 4222))
         
         
-        WinterCurseSprites(all_sprites, collision_sprites, winter_curse_group, pos=(4617, 4322), duration=4000, stacks=3)
+        # WinterCurseSprites(all_sprites, collision_sprites, winter_curse_group, pos=(4617, 4322), duration=4000, stacks=3)
         # getable_objects_layer =  self.map.get_layer_by_name("Getable_Objects")
         # inventory_objects_layer =  self.map.get_layer_by_name("Inventory_Objects")
         # moveable_objects_layer =  self.map.get_layer_by_name("Moveable_Objects")

@@ -26,7 +26,7 @@ class Player(Character):
         
         
         self.image = pygame.transform.scale(self.frames[self.action][self.state][0], (self.default_size, self.default_size))
-        self.rect = self.image.get_frect(center = (5866, 5918))
+        self.rect = self.image.get_frect(center = (2459, 4434))
         self.hitbox = pygame.FRect(
             self.rect.left + self.rect.width/2,
             self.rect.top + self.rect.height/3+50,
@@ -65,7 +65,8 @@ class Player(Character):
         self.box_6 = pygame.Rect(2040,5435, 10, 100)
         self.inside_maze = False
         self.inside_ice_florest = False
-        self.max_hp =200
+        self.max_hp = randint(20,30)
+        self.attack_damage = randint(12,20)
         self.hp=self.max_hp
 
         self.player_chatting_to: Character=None
@@ -102,8 +103,14 @@ class Player(Character):
            pygame.mixer.Sound("Sounds/step_sound_3.mp3")
         ]
 
-        self.loop = 1
-        
+        self.loop = self.le_infos_loop()
+
+        self.falou_chefe_vila = False
+        self.falou_chefe_orcs = False
+        self.convenceu_chefe_orcs = False
+        self.convenceu_chefe_vila = False
+        self.viu_vila_destruida = False
+        self.falou_orc_caido = False
         
     @property
     def speed(self):
@@ -153,6 +160,35 @@ class Player(Character):
                 transformations.append(transformations_confiabilidades[conf])
         self.transformations = transformations
 
+
+    def salva_infos_loop(self, new_loop):
+        dados = {
+            "loop": new_loop,
+        }
+
+        with open(join(getcwd(), "save.json"), "w", encoding="utf-8") as f:
+            dump(dados, f, ensure_ascii=False, indent=4)
+
+    def le_infos_loop(self) -> int:
+        with open(join(getcwd(),"save.json"), "r", encoding="utf-8") as f:
+            loop = load(f)["loop"]
+        return loop
+
+    def define_loop(self):
+        if self.loop == 1:
+            self.salva_infos_loop(2)
+        
+        elif self.loop == 2:
+            if self.falou_orc_caido and self.viu_vila_destruida:
+                self.salva_infos_loop(3)
+        
+        elif self.loop == 3:
+            if self.falou_chefe_vila:
+                self.salva_infos_loop(4)
+
+        elif self.loop == 4:
+            if self.falou_orc_caido and self.falou_chefe_orcs:
+                self.salva_infos_loop(5)
 
     def update(self, dt):
         if not self.handle_states(dt):
