@@ -210,9 +210,10 @@ class Game:
         # Variável para ligar/desligar o debug
         self.mostrar_grid_debug = False
         self.mostrar_rects = False
+        self.contou_loop = False
 
     def change_background_music(self, dt):
-        changing_speed = 0.16 #TODO: turn on volume
+        changing_speed = 0.32 #TODO: turn on volume
         # changing_speed = 0.00#
         if self.changing_music == True:
             if self.music_fading == "out": #diminuindo
@@ -231,449 +232,482 @@ class Game:
 
 
     def game_init(self,):
-        min_fps = 999
-        
-        snow_folder = join(getcwd(), "Ecosystem", "Winter", "animated_objects", "snow")
-        snow_images = load_snow_images(snow_folder)  # pasta com teus flocos
-        snow = Snow(self.screen.get_rect(), snow_images, max_flakes=120)
+        while True:
+            self.__init__()
 
-        title_font = pygame.font.Font(join(getcwd(), "fonts/sansita/SansitaSwashed-Bold.ttf"), 60)
-        button_font =  pygame.font.Font(join(getcwd(), "fonts/sansita/SansitaSwashed-Medium.ttf"), 24)
-        opcao = main_menu(self.screen, title_font, button_font, snow)
-        intensidade_congelamento = 0
-
-        
-        self.setup()
-        if opcao == "NOVO JOGO" or opcao == "CONTINUAR":
-            if opcao == "NOVO JOGO":
-                dados = {
-                    "loop": 1,
-                }
-
-                with open(join(getcwd(), "save.json"), "w", encoding="utf-8") as f:
-                    dump(dados, f, ensure_ascii=False, indent=4)
-                self.player.loop=1
-                
-            light_sprites = [sp for sp in self.all_sprites if hasattr(sp, "has_light")]
-              
-            #NEVE
+            min_fps = 999
             
+            snow_folder = join(getcwd(), "Ecosystem", "Winter", "animated_objects", "snow")
+            snow_images = load_snow_images(snow_folder)  # pasta com teus flocos
+            snow = Snow(self.screen.get_rect(), snow_images, max_flakes=120)
 
-            game_defaul_font = pygame.font.Font(None, 30)
-            name_font = pygame.font.SysFont('arial', 18, bold=True)
-            last_hour = 0
-            self.changing_music = True
+            title_font = pygame.font.Font(join(getcwd(), "fonts/sansita/SansitaSwashed-Bold.ttf"), 60)
+            button_font =  pygame.font.Font(join(getcwd(), "fonts/sansita/SansitaSwashed-Medium.ttf"), 24)
+            opcao = main_menu(self.screen, title_font, button_font, snow)
+            intensidade_congelamento = 0
 
             
-            game_clock = GameClock(start_hour=8, game_hour_in_real_seconds=90)
-        
-            #LUZ
-            LIGHT_RADIUS = 550
-            LIGHT_SPRITE = create_light_sprite(LIGHT_RADIUS)
-            lighting = self.light = lighting = LightingSystem(
-                screen_size=(WINDOW_WIDTH, WINDOW_HEIGHT),
-                game_clock=game_clock,
-                light_sprite=LIGHT_SPRITE,
-                light_radius=LIGHT_RADIUS,
-                max_dark_alpha=220,  # quão escuro é o máximo da noite
-            )
-            
-            
-            starter_time = pygame.time.get_ticks()
-            intensity = 1
-            while self.game_running:
-                
-                now = pygame.time.get_ticks()
-                if self.player.is_dead and self.player.death_time and now - self.player.death_time > 4000:
-                    self.player.define_loop()
-                    credits_folder = "credits_txts"  # coloque seus arquivos .txt aqui
-
-                    options = {
-                        "font_size": 24,
-                        "title_size": 56,
-                        "scroll_speed": 50,
-                        "music_path": "Sounds/village_background.mp3",
-                        "bg_color": (6, 6, 20),
-                        "text_color": (240, 240, 240),
-                        "title_color": (255, 180, 60),
+            self.setup()
+            if opcao == "NOVO JOGO" or opcao == "CONTINUAR":
+                if opcao == "NOVO JOGO":
+                    dados = {
+                        "loop": 1,
                     }
-                    final = FINAIS[define_final(self.player)]
-                    ev = EndingEvent(self.screen,final["titulo"], final["texto"], credits_folder, options)
-                    ev.run()
-                    pygame.quit()
-                
-                lighting.clear_lights()
-                dt = self.clock.tick(120) / 1000
 
-                
+                    with open(join(getcwd(), "save.json"), "w", encoding="utf-8") as f:
+                        dump(dados, f, ensure_ascii=False, indent=4)
+                    self.player.loop=1
                     
-
-                esta_vila = self.human_village_rect.colliderect(self.player.rect)
-                esta_labirinto = self.player.inside_maze
-                esta_floresta_gelo = self.player.inside_ice_florest
-                passou_18h = int(game_clock.get_time_str().split(":")[0]) > 18
+                light_sprites = [sp for sp in self.all_sprites if hasattr(sp, "has_light")]
                 
-                if passou_18h and self.background_music != self.battle_music:
-                    self.changing_music = True
-                    self.background_music = self.battle_music
-
-                elif esta_vila and self.background_music != self.village_music:
-                    self.changing_music = True
-                    self.background_music = self.village_music
-
-                elif esta_labirinto and self.background_music != self.maze_music:
-                    self.changing_music = True
-                    self.background_music = self.maze_music
-
-                elif esta_floresta_gelo and self.background_music != self.ice_florest_music:
-                    self.changing_music = True
-                    self.background_music = self.ice_florest_music
-
-                elif not esta_labirinto and not esta_vila and not esta_floresta_gelo and self.background_music != self.florest_music and self.background_music != self.battle_music:
-                    self.changing_music = True
-                    self.background_music = self.florest_music
-
-                self.change_background_music(dt)
-
-                self.screen.fill("#3a2e3f")
-                # Relógio na tela
-                time_str = game_clock.get_time_str()
-                
-                hour = int(time_str.split(":")[0])
-                self.all_sprites.hour = hour
-                if hour > 19 and not self.lights_on:
-                    self.lights_on = True
-                    for sprite in self.all_sprites:
-                        if hasattr(sprite, "has_light") and getattr( sprite, "has_light", False):
-                            sprite.turn_on()
-                elif hour> 6 and hour < 19 and self.lights_on:
-                    self.lights_on = False
-                    for sprite in self.all_sprites:
-                        if hasattr(sprite, "has_light") and getattr( sprite, "has_light", False):
-                            sprite.turn_off()
-                text_surf = game_defaul_font.render(time_str, True, (255, 255, 255))
-                
+                #NEVE
                 
 
-                #atualizando coisas
-                
+                game_defaul_font = pygame.font.Font(None, 30)
+                name_font = pygame.font.SysFont('arial', 18, bold=True)
+                last_hour = 0
+                self.changing_music = True
 
                 
-                mouse_click = False
-                #event loop
-                for event in pygame.event.get():
-                    if event.type == pygame.QUIT:
-                        self.game_running = False
-                    if event.type == pygame.KEYDOWN:
-                        if event.key == pygame.K_g:
-                            self.mostrar_grid_debug = not self.mostrar_grid_debug
-                        if event.key == pygame.K_h:
-                            self.mostrar_rects = not self.mostrar_rects
-                    if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                        mouse_click = True
-                #updates
-                self.all_sprites.draw(self.player.rect.center)
-                # print(self.player.rect.center)   
+                game_clock = GameClock(start_hour=8, game_hour_in_real_seconds=90)
+            
+                #LUZ
+                LIGHT_RADIUS = 550
+                LIGHT_SPRITE = create_light_sprite(LIGHT_RADIUS)
+                lighting = self.light = lighting = LightingSystem(
+                    screen_size=(WINDOW_WIDTH, WINDOW_HEIGHT),
+                    game_clock=game_clock,
+                    light_sprite=LIGHT_SPRITE,
+                    light_radius=LIGHT_RADIUS,
+                    max_dark_alpha=220,  # quão escuro é o máximo da noite
+                )
+                
+                
+                starter_time = pygame.time.get_ticks()
+                intensity = 1
+                while self.game_running:
                     
-
-                
-                offset = self.all_sprites.offset 
-
-
-                # if self.player.rect:
-                #     orr = self.player.hitbox
-                #     new_hitbox = pygame.FRect(orr.left + offset.x, orr.top + offset.y, orr.width, orr.height)
-                #     pygame.draw.rect(self.screen, (255, 255, 0), new_hitbox, 1)
-                    
-                # if self.player.attack_hitbox:
-                #     orr = self.player.attack_hitbox
-                #     new_hitbox = pygame.FRect(orr.left + offset.x, orr.top + offset.y, orr.width, orr.height)
-                #     # pygame.draw.rect(self.screen, (255, 0, 0), new_hitbox, 1)
-
-                
-
-                bx = self.box_1
-                box_rect = pygame.Rect(bx.left + offset.x, bx.top + offset.y, bx.width, bx.height)
-                pygame.draw.rect(self.screen, (122, 122, 122), box_rect, 1)  
-                
-                bx = self.box_2
-                box_rect = pygame.Rect(bx.left + offset.x, bx.top + offset.y, bx.width, bx.height)
-                pygame.draw.rect(self.screen, (122, 122, 122), box_rect, 1)  
-                
-                bx = self.box_3
-                box_rect = pygame.Rect(bx.left + offset.x, bx.top + offset.y, bx.width, bx.height)
-                pygame.draw.rect(self.screen, (122, 122, 122), box_rect, 1)  
-                
-                bx = self.box_4
-                box_rect = pygame.Rect(bx.left + offset.x, bx.top + offset.y, bx.width, bx.height)
-                pygame.draw.rect(self.screen, (122, 122, 122), box_rect, 1)  
-                
-                bx = self.box_5
-                box_rect = pygame.Rect(bx.left + offset.x, bx.top + offset.y, bx.width, bx.height)
-                pygame.draw.rect(self.screen, (122, 122, 122), box_rect, 1)  
-                
-                bx = self.box_6
-                box_rect = pygame.Rect(bx.left + offset.x, bx.top + offset.y, bx.width, bx.height)
-                pygame.draw.rect(self.screen, (122, 122, 122), box_rect, 1)  
-                
-
-                fps = int(self.clock.get_fps())
-                if fps < min_fps:
-                    if fps <= 10:
-                        fps = 100
-                    min_fps = fps
-                fps_text = game_defaul_font.render(f"FPS: {fps}", True, (0, 255, 255))  # verde
-                min_fps_text = game_defaul_font.render(f"Min FPS: {min_fps}", True, (0, 144, 144))  # verde
-                creatures = game_defaul_font.render(f"Criaturas: {len(self.creatures)}", True, (12, 144, 12))  # verde
-                self.screen.blit(fps_text, (10, 30))
-                self.screen.blit(min_fps_text, (10, 50))
-                self.screen.blit(text_surf, (10, 10))
-                self.screen.blit(creatures, (10, 80))
-                
-                
-                # --- UPDATE ---
-                # desenhar mapa e objetos
-                lights_on = [sp for sp in light_sprites if sp.on]
-
-                for l in lights_on:
-                    lighting.add_light(Light(l.rect.centerx+offset.x,l.rect.centery+offset.y))
-
-
-                
-
-
-                snow.update(dt, )
-                snow.draw(self.screen)
-
-                # --- ILUMINAÇÃO ---
-                lighting.draw(self.screen)
-
-                player_vect = pygame.Vector2(self.player.rect.center)
-                for creat in self.creatures:
-                    creat.daytime = hour
-
-                    # if creat.is_player:
-                    #     continue
-                    # if creat.is_combating == False:
-                    #     continue
-                    new_hitbox = pygame.FRect(creat.rect.left + offset.x, creat.rect.top + offset.y, creat.rect.width, creat.rect.height)
-                    pygame.draw.rect(self.screen, (255, 244, 0), new_hitbox, 1)
-
-                    new_hitbox = pygame.FRect(creat.hitbox.left + offset.x, creat.hitbox.top + offset.y, creat.hitbox.width, creat.hitbox.height)
-                    pygame.draw.rect(self.screen, (0, 244, 0), new_hitbox, 1)
-                    
-                    if creat.is_attacking and creat.attack_hitbox:
-                        new_hitbox = pygame.FRect(creat.attack_hitbox.left + offset.x, creat.attack_hitbox.top + offset.y, creat.attack_hitbox.width, creat.attack_hitbox.height)
-                        pygame.draw.rect(self.screen, (255, 0, 0), new_hitbox, 1)
-                    # print("Desenhando: ", creat)
-
-                    # if creat.is_player:
-                    #     continue
-                    if (creat.position_vector - player_vect).length() > WINDOW_WIDTH//2:
-                        continue
-                    if creat.is_invisible:
-                        continue
-                    if creat.is_dead:
-                        continue
-                    
-                    
-                    # Configurações da barra de vida
-                    bar_width = 160
-                    bar_height = 14
-                    
-                    # Posição acima do personagem
-                    bar_x = creat.hitbox.centerx - bar_width // 2 + offset.x
-                    bar_y = creat.hitbox.top - 15 + offset.y
-
-                    # 2. Obtenha o texto do personagem
-                    if creat.speech_text:
-                        draw_simple_speech_bubble(
-                            screen=self.screen,
-                            font=game_defaul_font,
-                            text=str(creat.speech_text),
-                            x=bar_x + bar_width // 2,  # Posição base do personagem
-                            y=bar_y+15,  # Posição base do personagem
-                            max_width=bar_width,  # Ajuste conforme necessidade
-                            padding=15,
-                        )
-                    # Calcula a porcentagem de vida
-                    health_ratio = creat.hp / creat.max_hp
-                    
-                    # Define a cor baseada na vida (verde -> amarelo -> vermelho)
-                    if health_ratio > 0.6:
-                        health_color = (50, 200, 50)    # Verde
-                    elif health_ratio > 0.3:
-                        health_color = (255, 200, 50)   # Amarelo
-                    else:
-                        health_color = (220, 50, 50)    # Vermelho
-                    
-                    # Desenha a barra de vida
-                    # Fundo da barra (vazia)
-                    if creat.specie != "SAMMY":
-                        draw_health_bar(
-                            surf=self.screen,
-                            x=creat.hitbox.centerx + offset.x, y=bar_y,
-                            height=bar_height,
-                            current=creat.hp, maximum=creat.max_hp,
-                            health_color=health_color,   # vermelho
-                            empty_color=(55,55,55),
-                            bg_color=(30,30,30),
-                            border_color=(15,15,15)
-                        )
-
-                    
-                    txt = str(creat.current_action)
-                    fps_text = game_defaul_font.render(txt, True, (12, 12, 12))  # verde
-                    self.screen.blit(fps_text, (bar_x, bar_y-20))
-                    
-                    txt = str(creat.action) +": " + str(int(creat.frame_index))
-                    fps_text = game_defaul_font.render(txt, True, (12, 12, 12))  # verde
-                    self.screen.blit(fps_text, (bar_x, bar_y-40))
-
-                    txt = "Ação - " + str(creat.current_action)
-                    fps_text = game_defaul_font.render(txt, True, (153, 12, 13))  # verde
-                    self.screen.blit(fps_text, (bar_x, bar_y-70))
-
-                
-                
-
-                if self.mostrar_grid_debug:
-                    offset_x = int(self.all_sprites.offset[0])
-                    offset_y = int(self.all_sprites.offset[1])
-                    self.screen.blit(self.debug_grid_surface, (offset_x, offset_y))
-
-                if self.mostrar_rects:
-                    for spr in self.collision_sprites:
-                    
-                        new_hitbox = pygame.FRect(spr.hitbox.left + offset.x, spr.hitbox.top + offset.y, spr.hitbox.width, spr.hitbox.height)
-                        new_rect= pygame.FRect(spr.rect.left + offset.x, spr.rect.top + offset.y, spr.rect.width, spr.rect.height)
-                        pygame.draw.rect(self.screen, (255, 255, 0), new_hitbox, 1)
-                        pygame.draw.rect(self.screen, (255, 0, 255), new_rect, 1)
-                # desenhar_matriz_mapa(self.screen, self.matriz_mapa, GRID_SIZE, offset)
-
-                if not self.player.is_chatting and now - starter_time > 5000:
-                    self.all_sprites.update(dt, )
-                    game_clock.update(dt)
-                else:
                     now = pygame.time.get_ticks()
-                    chat_end = False
-                    if self.player.player_chatting_to:
-                        fala, opcoes = self.player.player_chatting_to.escolhe_fala()
-                        if opcoes == []:
-                            chat_end = True
-                            if not self.player.player_chatting_end:
-                                self.player.player_chatting_end = now
+                    if self.player.is_dead and self.player.death_time and now - self.player.death_time > 4000:
+                        if self.player.loop == 1:
+                            som_loop()
+                        if not self.contou_loop:
+                            self.player.define_loop()
+                        
+                        self.contou_loop=False
 
-                            tempo_espera = 100 * len(str(fala))
-                            if now - self.player.player_chatting_end > tempo_espera:
-                                self.player.is_chatting = False
-                                self.player.player_chatting_end = None
-                                self.player.player_chatting_to = None
+                        credits_folder = "credits_txts"  # coloque seus arquivos .txt aqui
 
-                        if opcoes != [] or self.player.is_chatting == True :
-                            opcao_escolhida = show_modal(self.screen,font=game_defaul_font, main_text=fala, options=opcoes, max_width=800, chat_end=chat_end, name=str(self.player.player_chatting_to))
-                            
-                            self.player.player_chatting_to.processa_escolha(str(opcao_escolhida))  
+                        options = {
+                            "font_size": 24,
+                            "title_size": 56,
+                            "scroll_speed": 50,
+                            "music_path": "Sounds/village_background.mp3",
+                            "bg_color": (6, 6, 20),
+                            "text_color": (240, 240, 240),
+                            "title_color": (255, 180, 60),
+                        }
+                        final = define_final(self.player)
+                        ev = EndingEvent(self.screen,final["titulo"], final["texto"], credits_folder, options)
+                        ev.run()
+                        break
+                    
+                    lighting.clear_lights()
+                    dt = self.clock.tick(120) / 1000
+
+                    
+                        
+
+                    esta_vila = self.human_village_rect.colliderect(self.player.rect)
+                    esta_labirinto = self.player.inside_maze
+                    esta_floresta_gelo = self.player.inside_ice_florest
+                    passou_18h = int(game_clock.get_time_str().split(":")[0]) > 18
+                    
+
+                    if esta_vila and passou_18h:
+                        self.player.viu_vila_destruida == True
+
+                    #CONQUISTAS DE LOOP
+                    loop = self.player.loop
+                    if loop == 1 and passou_18h and esta_vila and not self.contou_loop :
+                        som_loop()
+                        self.contou_loop = True
+                        self.player.define_loop()
+
+                    elif loop == 2 and not self.contou_loop and self.player.falou_orc_caido:
+                        som_loop()
+                        self.contou_loop = True
+                        self.player.define_loop()
+
+                    elif loop == 3 and not self.contou_loop and self.player.falou_chefe_vila:
+                        som_loop()
+                        self.contou_loop = True
+                        self.player.define_loop()
+
+                    elif loop == 4 and not self.contou_loop and self.player.falou_orc_caido and self.player.falou_chefe_orcs:
+                        som_loop()
+                        self.contou_loop = True
+                        self.player.define_loop()
+
+                    if passou_18h and self.background_music != self.battle_music:
+                        self.changing_music = True
+                        self.background_music = self.battle_music
+
+                    elif esta_vila and self.background_music != self.village_music:
+                        self.changing_music = True
+                        self.background_music = self.village_music
+
+                    elif esta_labirinto and self.background_music != self.maze_music:
+                        self.changing_music = True
+                        self.background_music = self.maze_music
+
+                    elif esta_floresta_gelo and self.background_music != self.ice_florest_music:
+                        self.changing_music = True
+                        self.background_music = self.ice_florest_music
+
+                    elif not esta_labirinto and not esta_vila and not esta_floresta_gelo and self.background_music != self.florest_music and self.background_music != self.battle_music:
+                        self.changing_music = True
+                        self.background_music = self.florest_music
+
+                    self.change_background_music(dt)
+
+                    self.screen.fill("#3a2e3f")
+                    # Relógio na tela
+                    time_str = game_clock.get_time_str()
+                    
+                    hour = int(time_str.split(":")[0])
+                    self.all_sprites.hour = hour
+                    if hour > 19 and not self.lights_on:
+                        self.lights_on = True
+                        for sprite in self.all_sprites:
+                            if hasattr(sprite, "has_light") and getattr( sprite, "has_light", False):
+                                sprite.turn_on()
+                    elif hour> 6 and hour < 19 and self.lights_on:
+                        self.lights_on = False
+                        for sprite in self.all_sprites:
+                            if hasattr(sprite, "has_light") and getattr( sprite, "has_light", False):
+                                sprite.turn_off()
+                    text_surf = game_defaul_font.render(time_str, True, (255, 255, 255))
+                    
+                    
+
+                    #atualizando coisas
+                    
+
+                    
+                    mouse_click = False
+                    #event loop
+                    for event in pygame.event.get():
+                        if event.type == pygame.QUIT:
+                            self.game_running = False
+                        # if event.type == pygame.KEYDOWN:
+                        #     if event.key == pygame.K_g:
+                        #         self.mostrar_grid_debug = not self.mostrar_grid_debug
+                        #     if event.key == pygame.K_h:
+                        #         self.mostrar_rects = not self.mostrar_rects
+                        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                            mouse_click = True
+                    #updates
+                    self.all_sprites.draw(self.player.rect.center)
+                    # print(self.player.rect.center)   
+                        
+
+                    
+                    offset = self.all_sprites.offset 
+
+
+                    # if self.player.rect:
+                    #     orr = self.player.hitbox
+                    #     new_hitbox = pygame.FRect(orr.left + offset.x, orr.top + offset.y, orr.width, orr.height)
+                    #     pygame.draw.rect(self.screen, (255, 255, 0), new_hitbox, 1)
+                        
+                    # if self.player.attack_hitbox:
+                    #     orr = self.player.attack_hitbox
+                    #     new_hitbox = pygame.FRect(orr.left + offset.x, orr.top + offset.y, orr.width, orr.height)
+                    #     # pygame.draw.rect(self.screen, (255, 0, 0), new_hitbox, 1)
+
+                    
+
+                    # bx = self.box_1
+                    # box_rect = pygame.Rect(bx.left + offset.x, bx.top + offset.y, bx.width, bx.height)
+                    # pygame.draw.rect(self.screen, (122, 122, 122), box_rect, 1)  
+                    
+                    # bx = self.box_2
+                    # box_rect = pygame.Rect(bx.left + offset.x, bx.top + offset.y, bx.width, bx.height)
+                    # pygame.draw.rect(self.screen, (122, 122, 122), box_rect, 1)  
+                    
+                    # bx = self.box_3
+                    # box_rect = pygame.Rect(bx.left + offset.x, bx.top + offset.y, bx.width, bx.height)
+                    # pygame.draw.rect(self.screen, (122, 122, 122), box_rect, 1)  
+                    
+                    # bx = self.box_4
+                    # box_rect = pygame.Rect(bx.left + offset.x, bx.top + offset.y, bx.width, bx.height)
+                    # pygame.draw.rect(self.screen, (122, 122, 122), box_rect, 1)  
+                    
+                    # bx = self.box_5
+                    # box_rect = pygame.Rect(bx.left + offset.x, bx.top + offset.y, bx.width, bx.height)
+                    # pygame.draw.rect(self.screen, (122, 122, 122), box_rect, 1)  
+                    
+                    # bx = self.box_6
+                    # box_rect = pygame.Rect(bx.left + offset.x, bx.top + offset.y, bx.width, bx.height)
+                    # pygame.draw.rect(self.screen, (122, 122, 122), box_rect, 1)  
+                    
+
+                    fps = int(self.clock.get_fps())
+                    if fps < min_fps:
+                        if fps <= 10:
+                            fps = 100
+                        min_fps = fps
+                    fps_text = game_defaul_font.render(f"FPS: {fps}", True, (0, 255, 255))  # verde
+                    min_fps_text = game_defaul_font.render(f"Min FPS: {min_fps}", True, (0, 144, 144))  # verde
+                    creatures = game_defaul_font.render(f"Criaturas: {len(self.creatures)}", True, (12, 144, 12))  # verde
+                    self.screen.blit(fps_text, (10, 30))
+                    # self.screen.blit(min_fps_text, (10, 50))
+                    # self.screen.blit(text_surf, (10, 10))
+                    # self.screen.blit(creatures, (10, 80))
+                    
+                    
+                    # --- UPDATE ---
+                    # desenhar mapa e objetos
+                    lights_on = [sp for sp in light_sprites if sp.on]
+
+                    for l in lights_on:
+                        lighting.add_light(Light(l.rect.centerx+offset.x,l.rect.centery+offset.y))
+
+
+                    
+
+
+                    snow.update(dt, )
+                    snow.draw(self.screen)
+
+                    # --- ILUMINAÇÃO ---
+                    lighting.draw(self.screen)
+
+                    player_vect = pygame.Vector2(self.player.rect.center)
+                    for creat in self.creatures:
+                        creat.daytime = hour
+
+                        # if creat.is_player:
+                        #     continue
+                        # if creat.is_combating == False:
+                        #     continue
+                        # new_hitbox = pygame.FRect(creat.rect.left + offset.x, creat.rect.top + offset.y, creat.rect.width, creat.rect.height)
+                        # pygame.draw.rect(self.screen, (255, 244, 0), new_hitbox, 1)
+
+                        # new_hitbox = pygame.FRect(creat.hitbox.left + offset.x, creat.hitbox.top + offset.y, creat.hitbox.width, creat.hitbox.height)
+                        # pygame.draw.rect(self.screen, (0, 244, 0), new_hitbox, 1)
+                        
+                        # if creat.is_attacking and creat.attack_hitbox:
+                        #     new_hitbox = pygame.FRect(creat.attack_hitbox.left + offset.x, creat.attack_hitbox.top + offset.y, creat.attack_hitbox.width, creat.attack_hitbox.height)
+                        #     pygame.draw.rect(self.screen, (255, 0, 0), new_hitbox, 1)
+                        # print("Desenhando: ", creat)
+
+                        # if creat.is_player:
+                        #     continue
+                        if (creat.position_vector - player_vect).length() > WINDOW_WIDTH//2:
+                            continue
+                        if creat.is_invisible:
+                            continue
+                        if creat.is_dead:
+                            continue
+                        
+                        
+                        # Configurações da barra de vida
+                        bar_width = 160
+                        bar_height = 14
+                        
+                        # Posição acima do personagem
+                        bar_x = creat.hitbox.centerx - bar_width // 2 + offset.x
+                        bar_y = creat.hitbox.top - 15 + offset.y
+
+                        # 2. Obtenha o texto do personagem
+                        if creat.speech_text:
+                            draw_simple_speech_bubble(
+                                screen=self.screen,
+                                font=game_defaul_font,
+                                text=str(creat.speech_text),
+                                x=bar_x + bar_width // 2,  # Posição base do personagem
+                                y=bar_y+15,  # Posição base do personagem
+                                max_width=bar_width,  # Ajuste conforme necessidade
+                                padding=15,
+                            )
+                        # Calcula a porcentagem de vida
+                        health_ratio = creat.hp / creat.max_hp
+                        
+                        # Define a cor baseada na vida (verde -> amarelo -> vermelho)
+                        if health_ratio > 0.6:
+                            health_color = (50, 200, 50)    # Verde
+                        elif health_ratio > 0.3:
+                            health_color = (255, 200, 50)   # Amarelo
+                        else:
+                            health_color = (220, 50, 50)    # Vermelho
+                        
+                        # Desenha a barra de vida
+                        # Fundo da barra (vazia)
+                        if creat.specie != "SAMMY" and creat.specie != "GHOST":
+                            draw_health_bar(
+                                surf=self.screen,
+                                x=creat.hitbox.centerx + offset.x, y=bar_y,
+                                height=bar_height,
+                                current=creat.hp, maximum=creat.max_hp,
+                                health_color=health_color,   # vermelho
+                                empty_color=(55,55,55),
+                                bg_color=(30,30,30),
+                                border_color=(15,15,15)
+                            )
+
+                        
+                        # txt = str(creat.current_action)
+                        # fps_text = game_defaul_font.render(txt, True, (12, 12, 12))  # verde
+                        # self.screen.blit(fps_text, (bar_x, bar_y-20))
+                        
+                        # txt = str(creat.action) +": " + str(int(creat.frame_index))
+                        # fps_text = game_defaul_font.render(txt, True, (12, 12, 12))  # verde
+                        # self.screen.blit(fps_text, (bar_x, bar_y-40))
+
+                        # txt = "Ação - " + str(creat.current_action)
+                        # fps_text = game_defaul_font.render(txt, True, (153, 12, 13))  # verde
+                        # self.screen.blit(fps_text, (bar_x, bar_y-70))
+
+                    
+                    
+
+                    if self.mostrar_grid_debug:
+                        offset_x = int(self.all_sprites.offset[0])
+                        offset_y = int(self.all_sprites.offset[1])
+                        self.screen.blit(self.debug_grid_surface, (offset_x, offset_y))
+
+                    if self.mostrar_rects:
+                        for spr in self.collision_sprites:
+                        
+                            new_hitbox = pygame.FRect(spr.hitbox.left + offset.x, spr.hitbox.top + offset.y, spr.hitbox.width, spr.hitbox.height)
+                            new_rect= pygame.FRect(spr.rect.left + offset.x, spr.rect.top + offset.y, spr.rect.width, spr.rect.height)
+                            pygame.draw.rect(self.screen, (255, 255, 0), new_hitbox, 1)
+                            pygame.draw.rect(self.screen, (255, 0, 255), new_rect, 1)
+                    # desenhar_matriz_mapa(self.screen, self.matriz_mapa, GRID_SIZE, offset)
+
+                    if not self.player.is_chatting and now - starter_time > 5000:
+                        self.all_sprites.update(dt, )
+                        game_clock.update(dt)
+                    else:
+                        now = pygame.time.get_ticks()
+                        chat_end = False
+                        if self.player.player_chatting_to:
+                            fala, opcoes = self.player.player_chatting_to.escolhe_fala()
+                            if opcoes == []:
+                                chat_end = True
+                                if not self.player.player_chatting_end:
+                                    self.player.player_chatting_end = now
+
+                                tempo_espera = 100 * len(str(fala))
+                                if now - self.player.player_chatting_end > tempo_espera:
+                                    self.player.is_chatting = False
+                                    self.player.player_chatting_end = None
+                                    self.player.player_chatting_to = None
+
+                            if opcoes != [] or self.player.is_chatting == True :
+                                opcao_escolhida = show_modal(self.screen,font=game_defaul_font, main_text=fala, options=opcoes, max_width=800, chat_end=chat_end, name=str(self.player.player_chatting_to))
+                                
+                                self.player.player_chatting_to.processa_escolha(str(opcao_escolhida))  
+                    
+                    def efeito_resfriamento(tela: pygame.Surface, intensidade: int):                    
+                        """
+                        Aplica um efeito visual de congelamento na tela.
+                        
+                        Args:
+                            tela: A surface principal do Pygame (geralmente a 'screen').
+                            intensidade: Valor inteiro de 0 a 100 indicando a força do efeito.
+                        """
+                        if intensidade <= 0:
+                            return
+                        
+                        # Limita a intensidade ao intervalo válido
+                        intensidade = max(0, min(100, intensidade))
+                        
+                        largura, altura = tela.get_size()
+                        
+                        # Cria uma surface transparente para o overlay
+                        overlay = pygame.Surface((largura, altura), pygame.SRCALPHA)
+                        
+                        # Tom azul-gelo (quanto maior a intensidade, mais opaco)
+                        alpha_azul = int(intensidade / 100 * 180)  # até ~180 de opacidade
+                        overlay.fill((100, 180, 255, alpha_azul))
+                        
+                        # Adiciona cristais de gelo (pontos brancos semi-transparentes)
+                        num_cristais = int(intensidade * 15)  # mais intensidade = mais cristais
+                        for _ in range(num_cristais):
+                            x = randint(0, largura - 1)
+                            y = randint(0, altura - 1)
+                            raio = randint(1, 4)
+                            alpha_cristal = randint(80, 180)
+                            pygame.draw.circle(overlay, (255, 255, 255, alpha_cristal), (x, y), raio)
+                        
+                        # Aplica o overlay na tela
+                        tela.blit(overlay, (0, 0))
+
+                    resf_value = 0.02
+                    if self.player.aplicar_resfriamento == True:
+                        efeito_resfriamento(self.screen,int(intensidade_congelamento))
+                        intensidade_congelamento += resf_value
+                    else:
+                        intensidade_congelamento -= resf_value * 4
+                        intensidade_congelamento = 0 if intensidade_congelamento < 0 else intensidade_congelamento
+                    self.player.intensidade_resfriamento = intensidade_congelamento
+                    
+                    
+                    mouse_pos = pygame.mouse.get_pos()
+
+                    if self.player.transformations:
+                        desenhar_menu_transformacoes(
+                            screen=self.screen,
+                            sprites=self.player.transformations,
+                            mouse_pos=mouse_pos,
+                            mouse_click=mouse_click,
+                            estado_info={"aberto": True},
+                            player=self.player
+                        )
+                    if self.decided_path != self.char_monitored.rota:
+                        self.decided_path = self.char_monitored.rota
+                        caminhos = []
+                        for c in self.decided_path:
+                            x,y = int(c[0]//GRID_SIZE), int(c[1]//GRID_SIZE)
+                            caminhos.append((x,y))
+
+                        finais = []
+                        for c in self.char_monitored.locais_patrulha:
+                            x,y = int(c[0]//GRID_SIZE), int(c[1]//GRID_SIZE)
+                            finais.append((x,y))
+
+                        # print(self.char_monitored.locais_patrulha)
+                        # self.debug_grid_surface = criar_surface_debug_matriz(
+                        #     self.matriz_mapa, 
+                        #     tilesize=GRID_SIZE,
+                        #     cor_obstaculo=(255, 0, 0, 80),     # Vermelho semi-transparente
+                        #     cor_caminho=(00, 0, 255, 80),     # Vermelho semi-transparente
+                        #     cor_fundo=(0, 0, 0, 0),
+                        #     caminho=caminhos,
+                        #     finais=finais
+                        # )
+
+                    DURATION = 7000  # ms
+
+                    elapsed = now - starter_time
+                    if elapsed < DURATION:
+                        alpha = 255 * (1 - elapsed / DURATION)
+
+                        fade = pygame.Surface(self.screen.get_size(), pygame.SRCALPHA)
+                        fade.fill((255, 255, 255, int(alpha)))
+
+                        self.screen.blit(fade, (0, 0))
+                        opcao_escolhida = show_modal(self.screen,font=game_defaul_font, main_text="Mais uma vez.", options=[], max_width=800, chat_end=elapsed < DURATION, )
+
+
+                    pygame.display.flip()
+
                 
-                def efeito_resfriamento(tela: pygame.Surface, intensidade: int):                    
-                    """
-                    Aplica um efeito visual de congelamento na tela.
                     
-                    Args:
-                        tela: A surface principal do Pygame (geralmente a 'screen').
-                        intensidade: Valor inteiro de 0 a 100 indicando a força do efeito.
-                    """
-                    if intensidade <= 0:
-                        return
-                    
-                    # Limita a intensidade ao intervalo válido
-                    intensidade = max(0, min(100, intensidade))
-                    
-                    largura, altura = tela.get_size()
-                    
-                    # Cria uma surface transparente para o overlay
-                    overlay = pygame.Surface((largura, altura), pygame.SRCALPHA)
-                    
-                    # Tom azul-gelo (quanto maior a intensidade, mais opaco)
-                    alpha_azul = int(intensidade / 100 * 180)  # até ~180 de opacidade
-                    overlay.fill((100, 180, 255, alpha_azul))
-                    
-                    # Adiciona cristais de gelo (pontos brancos semi-transparentes)
-                    num_cristais = int(intensidade * 15)  # mais intensidade = mais cristais
-                    for _ in range(num_cristais):
-                        x = randint(0, largura - 1)
-                        y = randint(0, altura - 1)
-                        raio = randint(1, 4)
-                        alpha_cristal = randint(80, 180)
-                        pygame.draw.circle(overlay, (255, 255, 255, alpha_cristal), (x, y), raio)
-                    
-                    # Aplica o overlay na tela
-                    tela.blit(overlay, (0, 0))
-
-                resf_value = 0.02
-                if self.player.aplicar_resfriamento == True:
-                    efeito_resfriamento(self.screen,int(intensidade_congelamento))
-                    intensidade_congelamento += resf_value
-                else:
-                    intensidade_congelamento -= resf_value * 4
-                    intensidade_congelamento = 0 if intensidade_congelamento < 0 else intensidade_congelamento
-                self.player.intensidade_resfriamento = intensidade_congelamento
-                
-                
-                mouse_pos = pygame.mouse.get_pos()
-
-                if self.player.transformations:
-                    desenhar_menu_transformacoes(
-                        screen=self.screen,
-                        sprites=self.player.transformations,
-                        mouse_pos=mouse_pos,
-                        mouse_click=mouse_click,
-                        estado_info={"aberto": True},
-                        player=self.player
-                    )
-                if self.decided_path != self.char_monitored.rota:
-                    self.decided_path = self.char_monitored.rota
-                    caminhos = []
-                    for c in self.decided_path:
-                        x,y = int(c[0]//GRID_SIZE), int(c[1]//GRID_SIZE)
-                        caminhos.append((x,y))
-
-                    finais = []
-                    for c in self.char_monitored.locais_patrulha:
-                        x,y = int(c[0]//GRID_SIZE), int(c[1]//GRID_SIZE)
-                        finais.append((x,y))
-
-                    # print(self.char_monitored.locais_patrulha)
-                    # self.debug_grid_surface = criar_surface_debug_matriz(
-                    #     self.matriz_mapa, 
-                    #     tilesize=GRID_SIZE,
-                    #     cor_obstaculo=(255, 0, 0, 80),     # Vermelho semi-transparente
-                    #     cor_caminho=(00, 0, 255, 80),     # Vermelho semi-transparente
-                    #     cor_fundo=(0, 0, 0, 0),
-                    #     caminho=caminhos,
-                    #     finais=finais
-                    # )
-
-                DURATION = 7000  # ms
-
-                elapsed = now - starter_time
-                if elapsed < DURATION:
-                    alpha = 255 * (1 - elapsed / DURATION)
-
-                    fade = pygame.Surface(self.screen.get_size(), pygame.SRCALPHA)
-                    fade.fill((255, 255, 255, int(alpha)))
-
-                    self.screen.blit(fade, (0, 0))
-                    opcao_escolhida = show_modal(self.screen,font=game_defaul_font, main_text="Mais uma vez.", options=[], max_width=800, chat_end=elapsed < DURATION, name="Niemand")
-
-
-                if pygame.time.get_ticks() - starter_time%60 == 0:
-                    self.creatures.add(self.creatures_to_add.pop())
-                pygame.display.flip()
-
-             
-                
-            pygame.quit()
+                pygame.quit()
 
     def setup(self,):
         inicio_setup = perf_counter()
@@ -683,9 +717,11 @@ class Game:
         objetos_fixos =[sprite for sprite in self.collision_sprites if isinstance(sprite, CollisionSprites) and sprite.is_getable ==False]
         
         
+        matriz_pura = gerar_matriz_mapa(LARGURA_MAPA, ALTURA_MAPA, GRID_SIZE, [])
         self.matriz_mapa = gerar_matriz_mapa(LARGURA_MAPA, ALTURA_MAPA, GRID_SIZE, objetos_fixos)
         matriz = {
             "matriz": self.matriz_mapa,
+            "matriz_pura": matriz_pura
         }
 
         with open("matriz_mapa.json", "w", encoding="utf-8") as f:
@@ -693,11 +729,14 @@ class Game:
 
         inicio = perf_counter()
         with open("matriz_mapa.json", "r", encoding="utf-8") as f:
-            matriz = load(f)["matriz"]
+            dados = load(f)
+            matriz = dados["matriz"]
+            matriz_pura = dados["matriz_pura"]
 
 
         self.matriz_mapa = matriz
         self.all_sprites.world_matriz = self.matriz_mapa
+        self.all_sprites.matriz_pura = matriz_pura
         self.all_sprites.winter_curse_group = self.winter_curse_group
 
         # Cria a surface de debug UMA ÚNICA VEZ
@@ -741,33 +780,56 @@ class Game:
         map_width = self.mapa.map.width * 16 * SCALE
         map_height = self.mapa.map.height * 16 * SCALE
 
+
+        spawn_points = [
+            (5429,4233),
+            (4748,4465),
+            (3502,4505),
+            (2911, 3922),
+            (1780, 2610),
+            (534, 3515),
+            (765, 2650),
+            (4197, 3582),
+            (3229, 2667),
+            (2266, 1742),
+            (3107, 517),
+        ]
+
+
         inicio = perf_counter()
         monster_path = join(getcwd(), "Ecosystem","Winter","Monsters", "Winter Slime",)
         slime_images = load_character_images(monster_path, False)
-        for i in range(0,30):
-            initial_position = (3347, 5384)
+        for i in range(0,20):
+            initial_position = choice(spawn_points)
             slime = Slime(self.all_sprites, collision_sprites=self.collision_sprites, initial_position=initial_position, creatures_sprites=self.creatures, creature_images=slime_images)
             self.creatures.add(slime)
 
         monster_path = join(getcwd(), "Ecosystem","Winter","Monsters", "Chefe dos Goblins",)
         creature_images = load_character_images(monster_path, False)
         for i in range(0,10):
-            initial_position = (randint(100,map_width), randint(100, map_height))
-            goblin = Goblin(self.all_sprites, collision_sprites=self.collision_sprites, initial_position=initial_position, creatures_sprites=self.creatures,creature_images=creature_images)
+            initial_position = choice(spawn_points)
+            goblin = Goblin(self.all_sprites, collision_sprites=self.collision_sprites, initial_position=initial_position, creatures_sprites=self.creatures,creature_images=[])
             self.creatures.add(goblin)
 
         monster_path = join(getcwd(), "Ecosystem","Winter","Monsters", "Orc do Gelo",)
         creature_images = load_character_images(monster_path, False)
         for i in range(0,10):
-            initial_position = (994,5384)
-            orc_cacador = OrcCacador(self.all_sprites, collision_sprites=self.collision_sprites, initial_position=initial_position, creatures_sprites=self.creatures,creature_images=creature_images )
+            initial_position = choice(spawn_points)
+            orc_cacador = OrcCacador(self.all_sprites, collision_sprites=self.collision_sprites, initial_position=initial_position, creatures_sprites=self.creatures,creature_images=[] )
+            self.creatures.add(orc_cacador)
+
+        monster_path = join(getcwd(), "Ecosystem","Winter","Monsters", "Winter Ghost",)
+        creature_images = load_character_images(monster_path, False)
+        for i in range(0,5):
+            initial_position = (5660,4928)
+            orc_cacador = Ghost(self.all_sprites, collision_sprites=self.collision_sprites, initial_position=initial_position, creatures_sprites=self.creatures,creature_images=[] )
             self.creatures.add(orc_cacador)
         
         monster_path = join(getcwd(), "Ecosystem","Winter","Monsters", "Orc",)
         creature_images = load_character_images(monster_path, False)
         for i in range(0,10):
-            initial_position = (1112,4734)
-            orc_cacador = Orc(self.all_sprites, collision_sprites=self.collision_sprites, initial_position=initial_position, creatures_sprites=self.creatures, creature_images=creature_images)
+            initial_position = (1222,4820)
+            orc_cacador = Orc(self.all_sprites, collision_sprites=self.collision_sprites, initial_position=initial_position, creatures_sprites=self.creatures, creature_images=[])
             self.creatures.add(orc_cacador)
         
 
@@ -796,7 +858,7 @@ class Game:
             if creat.specie in list(creats_groups.keys()):
                 creat.specie_group = creats_groups[creat.specie]
                 creats_groups[creat.specie].add(creat)
-        golem = CrystalGolem(self.all_sprites, collision_sprites=self.collision_sprites, initial_position=(953,1860), creatures_sprites=self.creatures, )
+        golem = CrystalGolem(self.all_sprites, collision_sprites=self.collision_sprites, initial_position=(959,1912), creatures_sprites=self.creatures, )
         self.creatures.add(golem)
 
 
@@ -805,13 +867,11 @@ class Game:
         # self.player.slime_0 = slime
         self.player.orc_0 = explorer_orc
         
-        original_player =Dash( self.player_group, collision_sprites=self.collision_sprites, creatures_sprites=self.creatures, npc_name="Dash", is_ranged=True, attack_hitbox_list={"Front": (0,0), "Back": (0,0), "Left": (0,0), "Right": (0,0)}, range_distance=550)
-        mimezation = Mimetizacao(original_player, self.player)
-        mimezation.mimetize()
+        original_player =Player(collision_sprites=[], creatures_sprites=[])
         original_player.hp = 0
         original_player.is_dying = True
 
-        self.player.original_form = orc
+        self.player.original_form = original_player
         
 
 
@@ -838,11 +898,13 @@ class Game:
         som_slime_atacando = pygame.mixer.Sound("Sounds/iced_magic.mp3")
         som_golem_atacando = pygame.mixer.Sound("Sounds/golem_attack.mp3")
 
+        som_ghost_andando = pygame.mixer.Sound("Sounds/ghost_step_2.mp3")
+        som_ghost_atacando = pygame.mixer.Sound("Sounds/ghost_attack.mp3")
+
         for creat in self.creatures:
             creat.player_sprite = self.player
-            if creat.specie == "SLIME":
-                creat.attack_sounds = [som_slime_atacando,]
-            elif creat.specie == "GOLEM":
+                
+            if creat.specie == "GOLEM":
                 creat.attack_sounds = [som_golem_atacando,]
             else:
                 creat.attack_sounds = [som_ataque_espada_1, som_ataque_espada_2]
@@ -852,6 +914,11 @@ class Game:
 
             if creat.specie == "SLIME":
                 creat.walk_sounds = [som_slime_andando_1, som_slime_andando_2]
+                creat.attack_sounds = [som_slime_atacando,]
+            
+            if creat.specie == "GHOST":
+                creat.walk_sounds = [som_ghost_andando,]
+                creat.attack_sounds = [som_ghost_atacando,]
         
         fim_setup = perf_counter()
 

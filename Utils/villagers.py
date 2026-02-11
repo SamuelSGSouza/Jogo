@@ -29,7 +29,6 @@ class Villager(Character):
         self.forma = forma_character
         self.armor_type = ""
         self.default_folder_path = join(getcwd(), "NPCs", npc_name, self.forma)
-        print(f"Caminho completo: {self.default_folder_path} -- {self.forma}")
         self.scripts = load_scripts(self.default_folder_path)
         self.default_size = default_size
         self.waking_up_hour = randint(4,7)
@@ -354,7 +353,6 @@ class Villager(Character):
         keys = list(respostas.keys())
         escolha = keys[int(escolha)]
         info = respostas[escolha]
-        self.pontuacao += info["pontuacao"]
         self.current_id = info["next_id"]
         return True
 
@@ -716,7 +714,7 @@ class Verant(Villager):
                 }
         else:
             falas = {
-                1: self.talks,
+                1: self.talks_loop_1,
                 2: self.talks_loop_2,
                 3: self.talks_loop_3,
                 4: self.talks_loop_4,
@@ -726,6 +724,10 @@ class Verant(Villager):
             loop = choice(list(falas.keys()))
 
         
+        self.talks = falas[loop]
+        print("Falas do Verant: ", {str(self.talks)})
+        print("Loop: ", {str(loop)})
+        print("Possiveis falas: ", {str(falas)})
 
         fala_data = falas[loop].get(self.current_id)
         if not fala_data:
@@ -1152,7 +1154,7 @@ class Nina(Villager):
         if loop not in falas.keys():
             loop = choice(list(falas.keys()))
 
-        
+        self.talks = falas[loop]
 
         fala_data = falas[loop].get(self.current_id)
         if not fala_data:

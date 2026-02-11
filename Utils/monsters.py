@@ -372,7 +372,7 @@ class Slime(Monster):
         return self.personal_name
     
 class Ghost(Monster):
-    def __init__(self, *groups, collision_sprites, creatures_sprites, monster_name="Winter Ghost", house_point=(0, 0), initial_position, boss_chance=20):
+    def __init__(self, *groups, collision_sprites, creatures_sprites, monster_name="Winter Ghost", house_point=(0, 0), initial_position, boss_chance=20, creature_images=[]):
         actions = ["Walk", "Idle", "Hurt", "Run", "Attack_1","Attack_2", "Dying", "Dead"]
         original_speed = randint(125, 150)
         default_character_size = DCS
@@ -390,7 +390,9 @@ class Ghost(Monster):
             original_speed=original_speed,
             attack_damage=attack_damage,
             max_hp=max_hp,
-            default_character_size=default_character_size
+            default_character_size=default_character_size,
+            creature_images=creature_images
+
             )
 
         self.attack_hitbox_list = {
@@ -405,6 +407,9 @@ class Ghost(Monster):
         self.delete_sprites_on_death = True
         self.specie = "GHOST"
         self.can_talk = False
+
+        self.step_sound_delay = 3000
+
     def __str__(self):
         return self.personal_name
 
@@ -634,11 +639,11 @@ class ExplorerOrc(Monster):
                 4: self.talks_vivo_loop_4,
                 5: self.talks_vivo_loop_5,
             }
-
+            
         if loop not in falas.keys():
-            loop = choice(list(falas.keys()))
+            raise Exception( f"Loop {loop} do tipo {type(loop)} não está na opção de falas: {falas}")
 
-        
+        self.talks = falas[loop]
 
         fala_data = falas[loop].get(self.current_id)
         if not fala_data:
@@ -646,6 +651,7 @@ class ExplorerOrc(Monster):
         
         # Verifica se é fim (sem respostas) e aplica reputação
         if not fala_data["respostas"]:
+            self.player.falou_orc_caido = True
             delta_rep = self.pontuacao * 20  # Exemplo: pontuação alta -> +rep, baixa -> -rep
             return fala_data["fala"], []  # Mostra fala final e encerra
         
@@ -654,11 +660,14 @@ class ExplorerOrc(Monster):
     def processa_escolha(self, escolha: str):
         if escolha == "None":
             return
-        respostas = self.talks[self.current_id]["respostas"]
+        try:
+            respostas = self.talks[self.current_id]["respostas"]
+        except KeyError:
+            raise Exception(f"Valor de chave '{self.current_id}' não existe nas falas: {self.talks}")
+
         keys = list(respostas.keys())
         escolha = keys[int(escolha)]
         info = respostas[escolha]
-        self.pontuacao += info["pontuacao"]
         self.current_id = info["next_id"]
         return True
     

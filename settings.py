@@ -17,7 +17,7 @@ from time import time, perf_counter
 pygame.init()
 info = pygame.display.Info()
 WINDOW_WIDTH, WINDOW_HEIGHT = info.current_w,info.current_h 
-WINDOW_WIDTH, WINDOW_HEIGHT = 1280,720 
+# WINDOW_WIDTH, WINDOW_HEIGHT = 1280,720 
 TILE_SIZE = 64
 DCS = 128 #default character size
 HDCS = DCS/2 # Half default character size
@@ -212,6 +212,10 @@ def main_menu(screen, title_font, button_font, snow):
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+
+            if event.type == pygame.MOUSEBUTTONDOWN and quit_button.check_hover(mouse_pos) == True:
+                pygame.quit()
+                sys.exit()
                 
             # Verifica clique nos botões
             if novo_jogo_button.is_clicked(mouse_pos, event):
@@ -228,7 +232,6 @@ def main_menu(screen, title_font, button_font, snow):
         novo_jogo_button.check_hover(mouse_pos)
         continuar_button.check_hover(mouse_pos)
         quit_button.check_hover(mouse_pos)
-        
         # Desenha tudo
         draw_menu(screen, novo_jogo_button,continuar_button, quit_button, title_font, bg_image, bg_pos, loop)
         
@@ -609,8 +612,8 @@ class EndingEvent:
                     if ev.key == pygame.K_SPACE:
                         paused = not paused
                     if ev.key == pygame.K_RETURN:
-                        if self.music_loaded:
-                            pygame.mixer.music.stop()
+                        # if self.music_loaded:
+                        #     pygame.mixer.music.stop()
                         return "skipped"
 
             if not paused:
@@ -626,24 +629,28 @@ class EndingEvent:
         # fade-out credits
         self._do_fade(draw_credits, self.options["fade_out"], fade_in=False)
 
-        if self.music_loaded:
-            pygame.mixer.music.stop()
+        # if self.music_loaded:
+        #     pygame.mixer.music.stop()
         return "done"
     
 def define_final(player):
-    if player.attacking_character:
-        if not player.kill_humans and not player.kill_monsters:
-            return "004"
-        
-        if player.attacking_character.is_human:
-            if player.kill_humans:
-                return "002"
-            return "001"
-        
-        if player.attacking_character.specie == "Winter Slime":
-            return "005"
-        
-    return "003"
+    if player.loop == 1:
+        Titulo = "A Primeira Morte"
+        Final = (
+            "A morte veio cedo demais para ter significado.\n"
+            "Você caiu antes de entender as regras, antes de compreender por que o sol parecia sempre nascer igual, antes mesmo de suspeitar que o mundo não avançava — apenas repetia.\n\n"
+            "A vila queimou. Gritos se misturaram ao estalar da madeira, e então… silêncio.\n"
+            "Por um instante, tudo pareceu definitivo. Seu corpo imóvel no chão frio, a tragédia consumada, o fracasso absoluto.\n"
+            "Mas algo recusou o encerramento.\n"
+            "Quando a escuridão tomou seus sentidos, ela não trouxe descanso — trouxe retorno. O mesmo céu. O mesmo dia. O mesmo começo.\n"
+            "Você morreu.\n"
+            "E ainda assim, nada terminou.\n"
+            "O ciclo apenas começou."
+        )
+    return {
+        "titulo": Titulo,
+        "texto": Final
+    }
 ####################################################
 
 
@@ -1703,7 +1710,7 @@ def play_noise(char, noise_options: list, cooldown=300, volume=None):
     char.ultimo_som = agora
 
     distancia = (char.position_vector - char.player_sprite.position_vector).length()
-    DISTANCIA_MAX = WINDOW_HEIGHT //2
+    DISTANCIA_MAX = WINDOW_HEIGHT
 
     if distancia >= DISTANCIA_MAX:
         return
@@ -1711,7 +1718,7 @@ def play_noise(char, noise_options: list, cooldown=300, volume=None):
     if not volume:
         volume = 1 - (distancia / DISTANCIA_MAX)
         volume = max(0.0, min(1.0, volume))
-        volume = volume/8
+        volume = volume/4
 
     dx = char.position_vector.x - char.player_sprite.position_vector.x
     pan = max(-1, min(1, dx / DISTANCIA_MAX))

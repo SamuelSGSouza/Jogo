@@ -15,7 +15,11 @@ Loop 4: Esse loop acaba quando o jogador falar com o orc caído na floresta e co
 
 Loop 5: Esse loop se mantém até o jogador conseguir convencer o chefe dos orcs a cancelar o ataque e em seguida convencer o chefe da vila a dividir a comida.
 
-# Adicionar Som quando o jogador desbloquear um loop
+# PARA A VERSÃO ALFA
+## descobrir por que inimigos desaparecem quando atacam
+## descobrir por que personagens ainda estão entrando em objetos
+
+
 # Fazer o Golem voltar pra posição de guarda
 # Mudar o final para refletir melhor os loops
 

@@ -377,6 +377,10 @@ class Character(pygame.sprite.Sprite):
 
         self.specie_group = pygame.sprite.Group()
 
+        self.last_step_sound = pygame.time.get_ticks()
+        self.step_sound_delay = 0
+
+
         self.rota = []
 
         if not self.is_player:
@@ -1096,7 +1100,8 @@ class Character(pygame.sprite.Sprite):
                 frame_idx = 0
             self.image = self.frames[self.action][self.state][frame_idx]
 
-            if frame_idx == 0 and self.direction:
+            if frame_idx == 0 and self.direction and now - self.last_step_sound > self.step_sound_delay:
+                self.last_step_sound = now
                 play_noise(self, self.walk_sounds,)
         except:
             raise Exception(f"Erro ao tentar acessar a imagem número {int(self.frame_index)} da ação {self.action} olhando para {self.state} no personagem {self.personal_name}")

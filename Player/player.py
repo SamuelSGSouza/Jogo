@@ -26,7 +26,7 @@ class Player(Character):
         
         
         self.image = pygame.transform.scale(self.frames[self.action][self.state][0], (self.default_size, self.default_size))
-        self.rect = self.image.get_frect(center = (2459, 4434))
+        self.rect = self.image.get_frect(center = (3030, 6040))
         self.hitbox = pygame.FRect(
             self.rect.left + self.rect.width/2,
             self.rect.top + self.rect.height/3+50,
@@ -65,7 +65,7 @@ class Player(Character):
         self.box_6 = pygame.Rect(2040,5435, 10, 100)
         self.inside_maze = False
         self.inside_ice_florest = False
-        self.max_hp = randint(20,30)
+        self.max_hp = 50
         self.attack_damage = randint(12,20)
         self.hp=self.max_hp
 
@@ -179,7 +179,7 @@ class Player(Character):
             self.salva_infos_loop(2)
         
         elif self.loop == 2:
-            if self.falou_orc_caido and self.viu_vila_destruida:
+            if self.falou_orc_caido:
                 self.salva_infos_loop(3)
         
         elif self.loop == 3:

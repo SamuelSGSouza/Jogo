@@ -7,6 +7,7 @@ class AllSprites(pygame.sprite.Group):
         self.offset = pygame.Vector2()
         self.world_w, self.world_h = (0,0)
         self.world_matriz = None
+        self.matriz_pura = None
 
         # === Visão limitada / fog ===
         self.blind_enabled = True           # usa getattr(player, "is_blind", False) no draw
@@ -118,8 +119,12 @@ class AllSprites(pygame.sprite.Group):
             r = sp.rect  # assuma r é FRect/Rect; acessos diretos e inteiros
             if r.right < vx0 or r.left > vx1 or r.bottom < vy0 or r.top > vy1:
                 continue  # fora da tela
+            
 
-            if getattr(sp, "is_ground", False):
+            if getattr(sp, "is_character", False):
+                characters.append((sp.image, (int(r.x) + dx, int(r.y) + dy)))
+
+            elif getattr(sp, "is_ground", False):
                 grounds_seq.append((sp.image, (int(r.x) + dx, int(r.y) + dy)))
             elif getattr(sp, "is_magic_circle", False):
                 magic_circle_seqs.append((sp.image, (int(r.x) + dx, int(r.y) + dy)))
@@ -150,8 +155,6 @@ class AllSprites(pygame.sprite.Group):
         if obj_details:
             blits(obj_details, False)
 
-        if characters:
-            blits(characters, False)
             
         if winter_curses:
             blits(winter_curses, False)
@@ -162,3 +165,6 @@ class AllSprites(pygame.sprite.Group):
             pcy = int(player.rect.centery) + dy
             self._apply_light_fast((pcx, pcy))
 
+
+        if characters:
+            blits(characters, False)

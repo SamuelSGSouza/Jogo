@@ -241,12 +241,18 @@ class Brain:
     def move_to(self, final_dest:set, tolerance = 2, use_manhattam=False):
         char_center = self.character.rect.center
         char_point = pygame.Vector2(char_center[0],char_center[1])
+
+        if self.character.specie == "GHOST":
+            matriz = self.character.groups()[0].matriz_pura
+        else:
+            matriz = self.character.groups()[0].world_matriz
+
         try:
             final_dest_point = pygame.Vector2(final_dest[0],final_dest[1])
         except:
             raise Exception(f"Erro ao tentar pegar o ponto final do personagem {self.character}")
         if not self.rota or self.last_dest != final_dest:
-            self.rota = calcula_rota_correta(self.character.groups()[0].world_matriz, char_center, final_dest) or []
+            self.rota = calcula_rota_correta(matriz, char_center, final_dest) or []
             self.character.rota = self.rota
             if not self.rota:
                 self.final_dest = None
@@ -423,7 +429,7 @@ class RoseBrain(Brain):
         if proximos:
             for creature in proximos: 
                 if creature != self.character:
-                    if creature.is_human == True:
+                    if creature.is_human == True and creature.is_player == False:
 
                         if creature.hp < creature.max_hp:
                             frases_vovo = [
