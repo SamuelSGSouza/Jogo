@@ -172,20 +172,20 @@ class Villager(Character):
         self.seeing = ""
         self.hearing = ""
 
-        
+        hits = pygame.sprite.spritecollide(self, self.creatures_sprites, dokill=False)        
+        for hit in hits:
+            if hit.personal_name == self.personal_name:
+                continue
+            if hit == self:
+                continue
+            if hit.is_human == True:
+                continue
+            if hit.is_dead == True:
+                continue
+            return hit
+        return None
         for creature in self.creatures_sprites:
-            if creature.personal_name == self.personal_name:
-                continue
-            if creature == self:
-                continue
-            if creature.is_human == True:
-                continue
-            if creature.is_dead == True:
-                continue
-                
-            if self.rect.colliderect(creature.rect):
-                return creature
-
+            
             if self.has_vision:
                     
                 # Para manter a "leveza", a condição mais simples é a criatura estar visível
@@ -305,7 +305,7 @@ class Villager(Character):
             self.last_called_senses_time = self.now
 
             important_infos = {
-                "percepted_enemy": percepted_monster
+                "percepted_enemy": None
             }
             if self.brain != None:
                 try:

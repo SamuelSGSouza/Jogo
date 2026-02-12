@@ -313,7 +313,7 @@ class Game:
                         break
                     
                     lighting.clear_lights()
-                    dt = self.clock.tick(120) / 1000
+                    dt = self.clock.tick(240) / 1000
 
                     
                         

@@ -147,6 +147,19 @@ class Monster(Character):
 
     #SENSES
     def sensed_creature(self,) -> Character:
+
+        hits = pygame.sprite.spritecollide(self, self.creatures_sprites, dokill=False)        
+        for hit in hits:
+            if hit.personal_name == self.personal_name:
+                continue
+            if hit == self:
+                continue
+            if hit.is_human == True:
+                continue
+            if hit.is_dead == True:
+                continue
+            return hit
+        return None
         self.seeing = ""
         self.hearing = ""
 

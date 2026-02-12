@@ -53,25 +53,6 @@ class AnimatedSprite(pygame.sprite.Sprite):
 
         return on_surfs, off_surfs
 
-    def update(self, *args, **kwargs):
-        # Lógica de atualização de dt (mantida como no original)
-        if "dt" in kwargs:
-            dt = kwargs["dt"]
-        elif len(args) > 0:
-            dt = args[0]
-        else:
-            dt = self.dt
-
-        self.frame_index += self.animation_speed * dt
-        original_centerx = self.rect.centerx
-        original_centery = self.rect.centery
-        self.image = self.frames[int(self.frame_index) % len(self.frames)]
-        self.rect = self.image.get_frect(center = (original_centerx, original_centery))
-        
-    
-        
-        # A subclasse AnimatedGrowingSprite irá chamar super().update()
-        return super().update(*args, **kwargs)
     
     def turn_on(self,):
         
