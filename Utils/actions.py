@@ -307,15 +307,15 @@ class GhostBrain(Brain):
     def rotina_diaria(self,):
         locais = {
             "local_1":{
-                "x_min": 5660,
+                "x_min": 4654,
                 "x_max": 6101,
-                "y_min":3809,
-                "y_max":4600
+                "y_min":4892,
+                "y_max":6000
             },
             "local_2": {
-                "x_min": 4598,
-                "x_max": 5800,
-                "y_min":4928,
+                "x_min": 5592,
+                "x_max": 6000,
+                "y_min":3809,
                 "y_max":6109
             },
         }

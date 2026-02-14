@@ -15,14 +15,13 @@ Loop 4: Esse loop acaba quando o jogador falar com o orc caído na floresta e co
 
 Loop 5: Esse loop se mantém até o jogador conseguir convencer o chefe dos orcs a cancelar o ataque e em seguida convencer o chefe da vila a dividir a comida.
 
-# PARA A VERSÃO ALFA
-## descobrir por que inimigos desaparecem quando atacam
-## descobrir por que personagens ainda estão entrando em objetos
+# PARA A VERSÃO BETA
+# Fazer o Holz ir cortar as árvores dele
+# Adicionar dicas flutuantes no começo do primeiro loop do jogo para andar, correr, interagir e atacar
+# Adicionar 3 elevações no mapa com pareder invisíveis
+# Adicionar paredes invisiveis nas elevações do mapa
+# Adicionar mais flores, bonecos e detalhes pelo mapa
+# Consertar as músicas de fundo
+# Otimizar o jogo para rodar acima de 100 fps
+# ao andar, personagens deixam "pegadas" que somem depois de alguns segundos
 
-
-# Fazer o Golem voltar pra posição de guarda
-# Mudar o final para refletir melhor os loops
-
-# A frase no novo jogo deve ser algo como "Droga, eu não lembro nem o que estou fazendo aqui. É sempre assim depois que eu volto..."
-
-# 

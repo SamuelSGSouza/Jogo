@@ -121,10 +121,7 @@ class AllSprites(pygame.sprite.Group):
                 continue  # fora da tela
             
 
-            if getattr(sp, "is_character", False):
-                characters.append((sp.image, (int(r.x) + dx, int(r.y) + dy)))
-
-            elif getattr(sp, "is_ground", False):
+            if getattr(sp, "is_ground", False):
                 grounds_seq.append((sp.image, (int(r.x) + dx, int(r.y) + dy)))
             elif getattr(sp, "is_magic_circle", False):
                 magic_circle_seqs.append((sp.image, (int(r.x) + dx, int(r.y) + dy)))
@@ -166,5 +163,4 @@ class AllSprites(pygame.sprite.Group):
             self._apply_light_fast((pcx, pcy))
 
 
-        if characters:
-            blits(characters, False)
+        

@@ -1305,7 +1305,7 @@ def gerar_matriz_mapa(largura_mapa: int, altura_mapa: int, tilesize: int, grupo_
             # 3. Verifica se este retângulo colide com QUALQUER obstáculo no grupo
             for obstaculo in grupo_de_obstaculos:
                 # Usamos colliderect para uma verificação rápida de colisão entre retângulos
-                if celula_rect.colliderect(obstaculo.rect):
+                if celula_rect.colliderect(obstaculo.hitbox):
                     # Se houver colisão, marca a célula como 1 (obstáculo)
                     matriz[y][x] = 1
                     # Uma vez que encontramos uma colisão para esta célula,

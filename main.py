@@ -151,7 +151,7 @@ class Game:
         #setup
         pygame.init()
 
-        self.screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+        self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
         self.overlay = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT), pygame.SRCALPHA)
         pygame.display.set_caption("Dungeon Exploration")
         self.game_running = True
@@ -400,16 +400,16 @@ class Game:
                     for event in pygame.event.get():
                         if event.type == pygame.QUIT:
                             self.game_running = False
-                        # if event.type == pygame.KEYDOWN:
-                        #     if event.key == pygame.K_g:
-                        #         self.mostrar_grid_debug = not self.mostrar_grid_debug
-                        #     if event.key == pygame.K_h:
-                        #         self.mostrar_rects = not self.mostrar_rects
+                        if event.type == pygame.KEYDOWN:
+                            if event.key == pygame.K_g:
+                                self.mostrar_grid_debug = not self.mostrar_grid_debug
+                            if event.key == pygame.K_h:
+                                self.mostrar_rects = not self.mostrar_rects
                         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                             mouse_click = True
                     #updates
                     self.all_sprites.draw(self.player.rect.center)
-                    # print(self.player.rect.center)   
+                    print(self.player.rect.center)   
                         
 
                     
@@ -702,11 +702,11 @@ class Game:
                         self.screen.blit(fade, (0, 0))
                         opcao_escolhida = show_modal(self.screen,font=game_defaul_font, main_text="Mais uma vez.", options=[], max_width=800, chat_end=elapsed < DURATION, )
 
-
                     pygame.display.flip()
 
                 
-                    
+                
+
                 pygame.quit()
 
     def setup(self,):
