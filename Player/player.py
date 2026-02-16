@@ -26,6 +26,7 @@ class Player(Character):
         
         
         self.image = pygame.transform.scale(self.frames[self.action][self.state][0], (self.default_size, self.default_size))
+        # self.rect = self.image.get_frect(center = (5000, 3000))
         self.rect = self.image.get_frect(center = (3030, 6040))
         self.hitbox = pygame.FRect(
             self.rect.left + self.rect.width/2,

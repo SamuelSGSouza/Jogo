@@ -967,7 +967,7 @@ class Character(pygame.sprite.Sprite):
         if not self.is_attacking and any([attack_1_button,attack_2_button]) and attack_passed_time > self.attack_delay:
             
             
-            self.action = "Attack_1" 
+            self.action = "Attack_2" 
             self.is_attacking = True
             self.last_attack_time = now
             self.frame_index = 0
@@ -979,7 +979,7 @@ class Character(pygame.sprite.Sprite):
        
         if self.is_attacking:#encerra ataque
 
-            self.action = "Attack_1"
+            self.action = "Attack_2"
             #Os alvos sempre vão estar dentro da rect do atacante, então filtro os que se chocam
             on_range_creatures = pygame.sprite.spritecollide(self, self.creatures_sprites, False)
             if on_range_creatures:

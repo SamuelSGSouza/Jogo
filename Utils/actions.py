@@ -475,6 +475,7 @@ class HolzBrain(Brain):
     
     def rotina_diaria(self):
         if self.iniciar_corte == True:
+            print("Iniciando corte")
             self.character.action = "Attack_1"
             dist = (self.character.position_vector - pygame.Vector2(self.final_dest)).length()
             if dist >= self.character.rect.width // 2 or not self.arvore_destino:
@@ -483,8 +484,12 @@ class HolzBrain(Brain):
                 return Idle(self.character)
             
 
-            if pygame.time.get_ticks() - self.momento_inicio_corte >= self.arvore_destino.rect.width*1000:
-                self.arvore_destino.kill()
+            if pygame.time.get_ticks() - self.momento_inicio_corte >= 40*1000:
+                arvores_rects = [sp for sp in self.character.collision_sprites if hasattr(sp, "is_tree") and sp.is_tree]
+                pygame.sprite.spritecollide(self.character, arvores_rects, dokill=True)
+
+                
+                self.character.arvores.pop(self.character.arvores.index(self.arvore_destino))
                 self.arvore_destino = None
                 self.momento_inicio_corte = None
                 self.iniciar_corte = False
@@ -492,19 +497,11 @@ class HolzBrain(Brain):
                 return Idle(self.character)
             return Idle(self.character)
         
-        arvores = [sp for sp in self.character.collision_sprites if hasattr(sp, "is_tree") and sp.is_tree]
-        menor_dist = 9999
-        arvore_prox = None
-        for arvore in arvores[:100]:
-            arvore_vector = pygame.Vector2(arvore.rect.center)
-            dist = (self.character.position_vector - arvore_vector).length()
-            if dist < menor_dist:
-                menor_dist = dist
-                arvore_prox = arvore
 
         if not self.final_dest:
-            self.arvore_destino = arvore_prox
-            self.final_dest = arvore_prox.rect.center
+            arvore = choice(self.character.arvores)
+            self.arvore_destino = arvore
+            self.final_dest = arvore
         
         dist = (self.character.position_vector - pygame.Vector2(self.final_dest)).length()
         if dist <= self.character.rect.width //2:

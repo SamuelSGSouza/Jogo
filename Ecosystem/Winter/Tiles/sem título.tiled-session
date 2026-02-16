@@ -5,8 +5,8 @@
     },
     "activeFile": "tileset/Winter.tmx",
     "expandedProjectPaths": [
-        ".",
-        "tileset"
+        "tileset",
+        "."
     ],
     "fileStates": {
         "": {
@@ -27,7 +27,7 @@
         },
         "tileset/Ground Ice.tsx": {
             "dynamicWrapping": false,
-            "scaleInDock": 0.5,
+            "scaleInDock": 1.5,
             "scaleInEditor": 3
         },
         "tileset/House.tsx": {
@@ -119,11 +119,11 @@
             "scaleInEditor": 2
         },
         "tileset/Winter.tmx": {
-            "scale": 0.125,
-            "selectedLayer": 7,
+            "scale": 0.5,
+            "selectedLayer": 1,
             "viewCenter": {
-                "x": 2180,
-                "y": 2300
+                "x": 3087,
+                "y": 2419
             }
         },
         "tileset/Winter.tmx#Ground Ice": {

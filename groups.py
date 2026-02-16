@@ -119,9 +119,10 @@ class AllSprites(pygame.sprite.Group):
             r = sp.rect  # assuma r é FRect/Rect; acessos diretos e inteiros
             if r.right < vx0 or r.left > vx1 or r.bottom < vy0 or r.top > vy1:
                 continue  # fora da tela
-            
+            if getattr(sp, "is_invisible", False):
+                continue
 
-            if getattr(sp, "is_ground", False):
+            elif getattr(sp, "is_ground", False):
                 grounds_seq.append((sp.image, (int(r.x) + dx, int(r.y) + dy)))
             elif getattr(sp, "is_magic_circle", False):
                 magic_circle_seqs.append((sp.image, (int(r.x) + dx, int(r.y) + dy)))
@@ -131,8 +132,7 @@ class AllSprites(pygame.sprite.Group):
                 winter_curses.append((sp.image, (int(r.x) + dx, int(r.y) + dy)))
             
             else:
-                if getattr(sp, "is_invisible", False):
-                    continue
+                
                 obj_visible.append(sp)
 
         # --- chão: 1 chamada em lote ---

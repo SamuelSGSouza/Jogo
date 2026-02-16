@@ -151,7 +151,8 @@ class Game:
         #setup
         pygame.init()
 
-        self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+        # self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+        self.screen = pygame.display.set_mode((1280, 720), )
         self.overlay = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT), pygame.SRCALPHA)
         pygame.display.set_caption("Dungeon Exploration")
         self.game_running = True
@@ -242,14 +243,16 @@ class Game:
             snow = Snow(self.screen.get_rect(), snow_images, max_flakes=120)
 
             title_font = pygame.font.Font(join(getcwd(), "fonts/sansita/SansitaSwashed-Bold.ttf"), 60)
-            button_font =  pygame.font.Font(join(getcwd(), "fonts/sansita/SansitaSwashed-Medium.ttf"), 24)
+            button_font =tutorial_font =  pygame.font.Font(join(getcwd(), "fonts/sansita/SansitaSwashed-Medium.ttf"), 24)
             opcao = main_menu(self.screen, title_font, button_font, snow)
             intensidade_congelamento = 0
 
+            exibir_tutorial = False
             
             self.setup()
             if opcao == "NOVO JOGO" or opcao == "CONTINUAR":
                 if opcao == "NOVO JOGO":
+                    exibir_tutorial = True
                     dados = {
                         "loop": 1,
                     }
@@ -257,7 +260,136 @@ class Game:
                     with open(join(getcwd(), "save.json"), "w", encoding="utf-8") as f:
                         dump(dados, f, ensure_ascii=False, indent=4)
                     self.player.loop=1
+                    width = self.screen.get_rect().width
+                    height = self.screen.get_rect().height
+
+                    COLORS = {
+                        'bg': (244, 230, 200),
+                        'border': (92, 64, 36),
+                        'text': (42, 28, 16),
+                        'text_name': (138, 94, 42),
+                        'option_bg': (222, 196, 150),
+                        'option_hover': (206, 172, 112),
+                        'accent': (176, 126, 48),
+                        'white': (250, 248, 245)
+                    }
                     
+                    
+
+                    tutorial_border = pygame.Surface((width+10, height+10), pygame.SRCALPHA)
+                    tutorial_suface = pygame.Surface((width, height), pygame.SRCALPHA)
+                    pygame.draw.rect(
+                    tutorial_border,
+                        COLORS["border"],
+                        (0, 0, width * 0.8 + 10, height * 0.8 + 10),
+                        border_radius=14
+                    )
+
+                        # Fundo interno (mais claro)
+                    pygame.draw.rect(
+                        tutorial_suface,
+                        COLORS["bg"],
+                        (0, 0, width * 0.8, height * 0.8),
+                        border_radius=12
+                    )
+                
+                    self.screen.blit(tutorial_border, (width*0.1-5,height*0.1-5))
+                    self.screen.blit(tutorial_suface, (width*0.1,height*0.1))
+                    
+
+                    font_title = pygame.font.Font(None, 42)
+                    font_text = pygame.font.Font(None, 28)
+
+                    # Área do modal
+                    modal_w = int(width * 0.8)
+                    modal_h = int(height * 0.8)
+                    modal_x = int(width * 0.1)
+                    modal_y = int(height * 0.1)
+
+                    # Instruções
+                    instructions = [
+                        ("Mover", "W  A  S  D", "Walk", ),
+                        ("Atacar", "K", "Attack_2", ),
+                        ("Correr", "SHIFT", "Run", ),
+                        ("Interagir", "SPACE", "Hurt",  ),
+                    ]
+
+                    card_w = modal_w - 80
+                    card_h = 90
+                    card_x = modal_x + 40
+                    start_y = modal_y + 80
+                    spacing = 20
+
+                    # Título
+                    title_surf = font_title.render("CONTROLES", True, COLORS["accent"])
+                    self.screen.blit(title_surf, (modal_x + modal_w // 2 - title_surf.get_width() // 2, modal_y + 20))
+
+                    
+
+                    # Dica para fechar
+                    hint = font_text.render("Pressione qualquer tecla para fechar", True, COLORS["text"])
+                    self.screen.blit(
+                        hint,
+                        (modal_x + modal_w // 2 - hint.get_width() // 2, modal_y + modal_h - 40)
+                    )
+                    indexes = {
+                        "Walk": 0,
+                        "Attack_2": 0,
+                        "Run": 0,
+                        "Hurt": 0,
+                    }
+                    
+                    while exibir_tutorial:
+                        dt = self.clock.tick(240) / 1000
+                        for i, (label, key, action) in enumerate(instructions):
+                            images = self.player.frames[action]["Front"]
+
+                            index = indexes[action]
+                            animation_speed = len(images)
+
+                            if index > len(images )-1:
+                                indexes[action] = 0
+                                index = 0
+                            indexes[action] += animation_speed * dt
+
+                            size = 120 if action == "Attack_2" else 60
+                            y = start_y + i * (card_h + spacing)
+
+                            # Card
+                            card_rect = pygame.Rect(card_x, y, card_w, card_h)
+                            pygame.draw.rect(self.screen, COLORS["option_bg"], card_rect, border_radius=10)
+
+                            # Espaço da imagem (placeholder)
+                            img_rect = pygame.Rect(card_x + 10, y + 10, 70, 70)
+                            pygame.draw.rect(self.screen, COLORS["bg"], img_rect, border_radius=8)
+                            pygame.draw.rect(self.screen, COLORS["border"], img_rect, 2, border_radius=8)
+                            
+                            label_surf = font_text.render(label, True, COLORS["text_name"])
+                            key_surf = font_text.render(key, True, COLORS["border"])
+
+                            self.screen.blit(label_surf, (img_rect.right + 15, y + 20))
+                            self.screen.blit(key_surf, (img_rect.right + 15, y + 50))
+
+                            icon = images[int(index)].convert_alpha()
+                            icon = pygame.transform.scale(icon, (size, size))
+                            if size == 60:
+                                self.screen.blit(icon, (img_rect.x + 5, img_rect.y + 5))
+                            else:
+                                self.screen.blit(icon, (img_rect.x + 5-30, img_rect.y + 5-30))
+
+                            
+
+                            
+                            
+
+                        for event in pygame.event.get():
+                            if event.type == pygame.KEYDOWN:
+                                exibir_tutorial=False
+                            if event.type == pygame.QUIT:
+                                exibir_tutorial = False
+                                self.game_running = False
+                        pygame.display.flip()
+                                
                 light_sprites = [sp for sp in self.all_sprites if hasattr(sp, "has_light")]
                 
                 #NEVE
@@ -409,7 +541,7 @@ class Game:
                             mouse_click = True
                     #updates
                     self.all_sprites.draw(self.player.rect.center)
-                    print(self.player.rect.center)   
+                    # print(self.player.rect.center)   
                         
 
                     
@@ -701,6 +833,8 @@ class Game:
 
                         self.screen.blit(fade, (0, 0))
                         opcao_escolhida = show_modal(self.screen,font=game_defaul_font, main_text="Mais uma vez.", options=[], max_width=800, chat_end=elapsed < DURATION, )
+
+                    
 
                     pygame.display.flip()
 

@@ -40,6 +40,10 @@ class Map:
         for obj in fixed_objects_layer:
             CollisionSprites(all_sprites, collision_sprites, pos=(obj.x*SCALE, obj.y*SCALE), surface=pygame.transform.scale(obj.image, (obj.image.width*SCALE, obj.image.height*SCALE)))
         
+        fixed_objects_layer =  self.map.get_layer_by_name("Invisible Objects")
+        for obj in fixed_objects_layer:
+            CollisionSprites(all_sprites, collision_sprites, pos=(obj.x*SCALE, obj.y*SCALE), surface=pygame.transform.scale(obj.image, (obj.image.width*SCALE, obj.image.height*SCALE)), is_invisible=True)
+        
         fixed_objects_layer =  self.map.get_layer_by_name("Fixed Houses")
         for obj in fixed_objects_layer:
             CollisionSprites(all_sprites, collision_sprites, pos=(obj.x*SCALE, obj.y*SCALE), surface=pygame.transform.scale(obj.image, (obj.image.width*SCALE, obj.image.height*SCALE)), is_fixed_house=True)

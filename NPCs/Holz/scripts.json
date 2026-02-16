@@ -1,60 +1,25 @@
 {
     "iniciando":[
         [
-            "Ei, {nome_character}, viu meu machado por aí?",
-            "Não, você perdeu de novo?",
-            "Perder não… só deixei em algum tronco por aí.",
-            "Vou te ajudar a procurar depois."
+            "Ei {nome_character}! O que um lenhador disse para o outro quando viu uma árvore torta?",
+            "Ah não Holz, de novo",
+            "'A gente se vê na queda!'",
+            "Sabia que viria uma dessas..."
         ],
         [
-            "{nome_character}, você ouviu aquele barulho na mata?",
-            "Ouvi sim, parecia algo grande.",
-            "Se for urso de novo, vou ter que mostrar quem manda.",
-            "Espero que seja só vento."
-        ],
-        [
-            "Bom dia, {nome_character}. A trilha está segura hoje?",
-            "Por enquanto, sim.",
-            "Ótimo. Vou cortar umas árvores perto do rio.",
-            "Cuidado por lá."
-        ],
-        [
-            "Ei, {nome_character}! Sente esse cheiro de madeira queimada?",
-            "Senti… algum incêndio?",
-            "Talvez fogo antigo. Vou verificar para garantir que não se espalhe.",
-            "Se precisar de ajuda, me chame."
-        ],
-        [
-            "{nome_character}, você sabe afiar machado?",
-            "Um pouco, por quê?",
-            "Este aqui está mais cego que mula teimosa. Preciso dar um trato nele.",
-            "Eu posso ajudar depois."
+            "Salve {nome_character}! Por que o lenhador nunca se perde na floresta?",
+            "Ai pelos deuses!",
+            "Porque ele sempre segue o tronco da questão.",
+            "Holz, ninguém entendeu essa até hoje."
         ]
+        
     ],
     "respondendo":[
         [
-            "{nome_character}, você sabe onde está a trilha velha?",
-            "A trilha? Fica atrás do morro leste.",
-            "Ah, achei que tinha sumido.",
-            "Ainda existe, só quase ninguém usa."
-        ],
-        [
-            "Ei, lenhador! Está tudo bem? Você parece preocupado.",
-            "A mata está estranha hoje… silenciosa demais.",
-            "Isso não é bom.",
-            "Pois é. Quando a floresta cala, é porque algo grande acordou."
-        ],
-        [
-            "Lenhador, você viu alguém passar por aqui?",
-            "Só uma sombra correndo entre as árvores. Rápida demais pra ser gente.",
-            "Isso me preocupa.",
-            "A mim também. Vou ficar de olho."
-        ],
-        [
-            "Lenhador, preciso de madeira resistente. Alguma sugestão?",
-            "Carvalho negro. Forte como pedra.",
-            "Você tem por perto?",
-            "Tenho sim, colhi algumas toras ontem. Posso separar uma pra você."
+            "Ei holz, ficou sabendo que os Orcs estão com uma movimentação estranha hoje?",
+            "É bom eles não estarem pensando em nos atacar de novo. Eu vi o que eles fazem na guerra quando era criança e não vou deixar que se repita.",
+            "Sempre bom saber que temos você e o Obi por aqui.",
+            "HÓ! HÓ! HÓ! O que seria de vocês sem mim!"
         ]
     ]
 }

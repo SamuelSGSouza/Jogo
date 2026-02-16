@@ -1444,6 +1444,13 @@ class Rose(Villager):
 
 class Holz(Villager):
     def __init__(self, *groups, collision_sprites, creatures_sprites, npc_name="Nina", house_point=(0, 0), is_ranged=False, attack_hitbox_list={ "Front": (150, 70),"Back": (150, 70),"Left": (70, 150),"Right": (70, 150) }, range_distance=36, default_size=HDCS + HHDCS, team_members=[], original_speed = 200, actions_to_add=[]):
+        arvore_1 = (5217,2837)
+        arvore_2 = (5533,1566)
+        arvore_3 = (4564, 1294)
+        arvore_4 = (5158, 1084)
+        self.arvores = [arvore_1, arvore_2, arvore_3, arvore_4]
+        self.arvore_escolhida = None
+        
         super().__init__(*groups, collision_sprites=collision_sprites, creatures_sprites=creatures_sprites, npc_name=npc_name, house_point=house_point, is_ranged=is_ranged, attack_hitbox_list=attack_hitbox_list, range_distance=range_distance, default_size=default_size, team_members=team_members, original_speed=original_speed, actions_to_add=actions_to_add)
 
         self.talks = {
@@ -1508,6 +1515,8 @@ class Holz(Villager):
 
         self.max_hp = randint(20,30)
         self.attack_damage = randint(12,20)
+
+        
 
 class Sammy(Villager):
     def __init__(self, *groups, collision_sprites, creatures_sprites, npc_name="Sammy", house_point=(0, 0), is_ranged=False, attack_hitbox_list={ "Front": (150, 70),"Back": (150, 70),"Left": (70, 150),"Right": (70, 150) }, range_distance=36, default_size=HDCS + HHDCS, team_members=[], original_speed = 200, actions_to_add=[], initial_position:set=()):
