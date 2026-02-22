@@ -647,8 +647,47 @@ def define_final(player):
             "E ainda assim, nada terminou.\n"
             "O ciclo apenas começou."
         )
+    elif player.loop == 2:
+        Titulo = "Ignorância Persistente"
+        Final = (
+            "Você o encontrou caído entre as árvores, respirando com dificuldade, cercado pelo cheiro de sangue e folhas úmidas."
+            "Havia palavras ali. Havia respostas."
+            "Mas você se foi."
+            "A vila ardeu novamente. As chamas subiram com a mesma fúria de sempre, indiferentes à sua presença ou ausência. Pessoas morreram, outras fugiram, e o mundo seguiu seu roteiro imutável."
+            "Desta vez, porém, a morte não parecia surpresa — parecia negligência."
+            "Enquanto sua visão escurecia, uma sensação incômoda o acompanhou: a certeza de que algo importante havia sido deixado para trás, apodrecendo na floresta junto com um orc que nunca foi ouvido."
+            "O loop recomeça.\nE a pergunta permanece:\nquantas vezes será preciso repetir o erro antes de enxergá-lo?"
+        )
+    elif player.loop == 3:
+        
+        Titulo = "Fome Revelada"
+        Final = (
+            "As peças começaram a se encaixar tarde demais."
+            "O orc ferido falou. O chefe da vila respondeu. Entre palavras duras e justificativas frágeis, uma verdade emergiu — simples, cruel e terrivelmente humana."
+            "Eles não atacam por ódio."
+            "Atacam porque têm fome."
+            "Esse conhecimento, porém, não salvou ninguém."
+            "Quando a destruição chegou, ela veio com o peso da ironia. Agora você entendia o problema… mas não tinha feito nada para mudá-lo."
+            "Ao cair, seu corpo não carregava apenas feridas — carregava a culpa de quem finalmente compreendeu, mas compreendeu tarde demais."
+            "O mundo se desfaz mais uma vez."
+            "A informação sobrevive."
+            "Você, não."
+        )
+    elif player.loop == 4:
+        
+        Titulo = "Dois Lados da Mesma Ruína"
+        Final = (
+            "Pela primeira vez, você ouviu ambos os lados.\n"
+            "O orc caído. O líder da horda. Histórias de escassez, crianças famintas, promessas quebradas e uma guerra que não começou por escolha, mas por desespero.\n"
+            "Eles não eram monstros.\n"
+            "E isso tornava tudo pior.\n"
+            "Quando o fim chegou, não houve ódio nos olhos que o encaravam — apenas resignação. O ataque não era pessoal. Era inevitável.\n"
+            "Enquanto a vida escapava, você percebeu a cruel simetria: humanos protegendo o que têm, orcs lutando pelo que precisam.\n"
+            "Nenhum lado venceu.\n" 
+            "Apenas repetiram o erro.\n"
+        )
     return {
-        "titulo": Titulo,
+       "titulo": Titulo,
         "texto": Final
     }
 ####################################################
@@ -1741,3 +1780,20 @@ def som_loop():
         return
     canal.set_volume(22, 22)
     canal.play(som)
+
+def embaralha_palavras(txt:str) -> str:
+    resultado = []
+
+    for char in txt:
+        if 'a' <= char <= 'z':
+            # se for 'z', volta para 'a'
+            resultado.append('a' if char == 'z' else chr(ord(char) + 1))
+        elif 'A' <= char <= 'Z':
+            # se for 'Z', volta para 'A'
+            resultado.append('A' if char == 'Z' else chr(ord(char) + 1))
+        else:
+            # números, pontos e qualquer outro caractere ficam iguais
+            resultado.append(char)
+
+    return ''.join(resultado)
+

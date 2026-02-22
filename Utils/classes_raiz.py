@@ -256,6 +256,7 @@ class Character(pygame.sprite.Sprite):
         self.last_changed_pov = init_time
         self.last_regenered_hp = init_time
         self.last_mimetization = init_time
+        self.last_step_time = init_time
         self.start_begging_time = init_time
         
         self.mimetization_delay = 15000
@@ -372,6 +373,15 @@ class Character(pygame.sprite.Sprite):
         self.attack_sounds = []
         self.arrow_sounds = []
         self.walk_sounds = []
+        self.has_steps = False
+        root_path = join(getcwd(), "Ecosystem", "Winter", "Steps")
+        step_images = listdir(root_path)
+        self.step_images = []
+        for file in step_images:
+            filepath = join(root_path, file)
+            
+            img = pygame.transform.rotozoom(pygame.image.load(filepath).convert_alpha(), 0, 2)
+            self.step_images.append(img)
 
         self.use_center_on_attack = False
 
@@ -382,6 +392,21 @@ class Character(pygame.sprite.Sprite):
 
 
         self.rota = []
+        self.has_emblem = False
+        self.spawn_points = [
+            (5429,4233),
+            (4748,4465),
+            (3502,4505),
+            (2911, 3922),
+            (1780, 2610),
+            (534, 3515),
+            (765, 2650),
+            (4197, 3582),
+            (3229, 2667),
+            (2266, 1742),
+            (3107, 517),
+        ]
+
 
         if not self.is_player:
             grupo = self.groups()[0]
@@ -631,6 +656,10 @@ class Character(pygame.sprite.Sprite):
                 self.death_time = pygame.time.get_ticks()
 
             if self.delete_sprites_on_death:
+                self.hp = self.max_hp
+                self.is_dead = False
+                self.rect.center = choice(self.spawn_points)
+
                 self.kill()
                 del self
             return
@@ -811,9 +840,11 @@ class Character(pygame.sprite.Sprite):
                     # gira só na 1ª vez
                     if not getattr(sprite, "_rotated_once", False):
                         sprite._rotated_once = True
+                        mid_bottom = sprite.hitbox.midbottom
                         center = sprite.rect.center
                         sprite.image = pygame.transform.rotate(sprite.image, FEEDBACK_DEG)
                         sprite.rect = sprite.image.get_frect(center=center)
+                        sprite.hitbox.midbottom = mid_bottom
                     # empurra o prazo de restauração enquanto continuar encostando
                     sprite._rot_reset_at = now + FEEDBACK_MS
                     continue  # não bloqueia
@@ -1058,6 +1089,11 @@ class Character(pygame.sprite.Sprite):
         else:
             return "Front" if self.direction.y >= 0 else "Back" if self.direction.y <= 0 else None
 
+    def make_steps(self,):
+        img = choice(self.step_images)
+        step = Steps(self.groups()[0], surface=img, pos=self.hitbox.midbottom)
+        step.rect.center = self.hitbox.midbottom
+
     def animate(self,dt, ):
         
 
@@ -1104,9 +1140,13 @@ class Character(pygame.sprite.Sprite):
                 self.last_step_sound = now
                 play_noise(self, self.walk_sounds,)
         except:
+            print(f"Erro ao tentar acessar a imagem número {int(self.frame_index)} da ação {self.action} olhando para {self.state} no personagem {self.personal_name}")
             raise Exception(f"Erro ao tentar acessar a imagem número {int(self.frame_index)} da ação {self.action} olhando para {self.state} no personagem {self.personal_name}")
         self.rect = self.image.get_frect(center = (original_centerx, original_centery))
 
+        if self.action in ["Walk", "Run"] and self.has_steps ==True and now - self.last_step_time > self.speed:
+            self.last_step_time = now
+            self.make_steps()
     
 class Mimetizacao:
     def __init__(self, character:Character, to_mimetize:Character):

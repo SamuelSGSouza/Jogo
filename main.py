@@ -341,6 +341,7 @@ class Game:
                     
                     while exibir_tutorial:
                         dt = self.clock.tick(240) / 1000
+                        
                         for i, (label, key, action) in enumerate(instructions):
                             images = self.player.frames[action]["Front"]
 
@@ -401,7 +402,7 @@ class Game:
                 self.changing_music = True
 
                 
-                game_clock = GameClock(start_hour=8, game_hour_in_real_seconds=90)
+                game_clock = GameClock(start_hour=10, game_hour_in_real_seconds=90)
             
                 #LUZ
                 LIGHT_RADIUS = 550
@@ -446,7 +447,7 @@ class Game:
                     
                     lighting.clear_lights()
                     dt = self.clock.tick(240) / 1000
-
+                    self.all_sprites.dt = dt
                     
                         
 
@@ -541,7 +542,8 @@ class Game:
                             mouse_click = True
                     #updates
                     self.all_sprites.draw(self.player.rect.center)
-                    # print(self.player.rect.center)   
+                    print(self.player.rect.center)   
+                    # print(self.player.has_emblem)   
                         
 
                     
@@ -595,7 +597,7 @@ class Game:
                     creatures = game_defaul_font.render(f"Criaturas: {len(self.creatures)}", True, (12, 144, 12))  # verde
                     self.screen.blit(fps_text, (10, 30))
                     # self.screen.blit(min_fps_text, (10, 50))
-                    # self.screen.blit(text_surf, (10, 10))
+                    self.screen.blit(text_surf, (10, 10))
                     # self.screen.blit(creatures, (10, 80))
                     
                     
@@ -655,10 +657,13 @@ class Game:
 
                         # 2. Obtenha o texto do personagem
                         if creat.speech_text:
+                            txt = str(creat.speech_text)
+                            if creat.specie == "ORC" and self.player.has_emblem == False:
+                                txt = embaralha_palavras(str(creat.speech_text))
                             draw_simple_speech_bubble(
                                 screen=self.screen,
                                 font=game_defaul_font,
-                                text=str(creat.speech_text),
+                                text=txt,
                                 x=bar_x + bar_width // 2,  # Posição base do personagem
                                 y=bar_y+15,  # Posição base do personagem
                                 max_width=bar_width,  # Ajuste conforme necessidade
@@ -717,6 +722,22 @@ class Game:
                             new_rect= pygame.FRect(spr.rect.left + offset.x, spr.rect.top + offset.y, spr.rect.width, spr.rect.height)
                             pygame.draw.rect(self.screen, (255, 255, 0), new_hitbox, 1)
                             pygame.draw.rect(self.screen, (255, 0, 255), new_rect, 1)
+                    
+                    
+                        for creat in self.creatures:
+                            creat.daytime = hour
+
+                            if creat.is_player:
+                                continue
+                            new_hitbox = pygame.FRect(creat.rect.left + offset.x, creat.rect.top + offset.y, creat.rect.width, creat.rect.height)
+                            pygame.draw.rect(self.screen, (255, 244, 0), new_hitbox, 1)
+
+                            new_hitbox = pygame.FRect(creat.hitbox.left + offset.x, creat.hitbox.top + offset.y, creat.hitbox.width, creat.hitbox.height)
+                            pygame.draw.rect(self.screen, (0, 244, 0), new_hitbox, 1)
+                            
+                            if creat.is_attacking and creat.attack_hitbox:
+                                new_hitbox = pygame.FRect(creat.attack_hitbox.left + offset.x, creat.attack_hitbox.top + offset.y, creat.attack_hitbox.width, creat.attack_hitbox.height)
+                                pygame.draw.rect(self.screen, (255, 0, 0), new_hitbox, 1)
                     # desenhar_matriz_mapa(self.screen, self.matriz_mapa, GRID_SIZE, offset)
 
                     if not self.player.is_chatting and now - starter_time > 5000:
@@ -739,6 +760,13 @@ class Game:
                                     self.player.player_chatting_to = None
 
                             if opcoes != [] or self.player.is_chatting == True :
+                                if not self.player.has_emblem:
+                                    if "(língua Orc)" in fala:
+                                        fala = embaralha_palavras(fala.replace("(língua Orc)", ""))
+                                    for i in range(len(opcoes)):
+                                        if "(língua Orc)" in opcoes[i]:
+                                            opcoes[i] = embaralha_palavras(opcoes[i].replace("(língua Orc)", ""))
+
                                 opcao_escolhida = show_modal(self.screen,font=game_defaul_font, main_text=fala, options=opcoes, max_width=800, chat_end=chat_end, name=str(self.player.player_chatting_to))
                                 
                                 self.player.player_chatting_to.processa_escolha(str(opcao_escolhida))  
@@ -903,6 +931,7 @@ class Game:
         holz = Holz(self.all_sprites, self.player_group,self.creatures, collision_sprites=self.collision_sprites, creatures_sprites=self.creatures, npc_name="Holz", is_ranged=False, default_size=HDCS +HHDCS + 7, )
         Fischerin = Villager(self.all_sprites, self.player_group,self.creatures, collision_sprites=self.collision_sprites, creatures_sprites=self.creatures, npc_name="Fischerin", is_ranged=False, default_size=HDCS +HHDCS -3,actions_to_add=["Fishing",] )
         verant = Verant(self.all_sprites, self.player_group,self.creatures, collision_sprites=self.collision_sprites, creatures_sprites=self.creatures, npc_name="Verant", is_ranged=False, default_size=HDCS +HHDCS -3,player=self.player, )
+        verloren = Verloren(self.all_sprites, self.player_group,self.creatures, collision_sprites=self.collision_sprites, creatures_sprites=self.creatures, npc_name="Verloren", is_ranged=False, default_size=HDCS +HHDCS,player=self.player, )
         
         initial_position = (5866, 5918)
         explorer_orc = ExplorerOrc(self.all_sprites, collision_sprites=self.collision_sprites, initial_position=initial_position, creatures_sprites=self.creatures, )
@@ -978,6 +1007,7 @@ class Game:
 
         initial_position = (1371,5368)
         orc = ChiefOrc(self.all_sprites, collision_sprites=self.collision_sprites, initial_position=initial_position, creatures_sprites=self.creatures, )
+        orc.player = self.player
         self.creatures.add(orc)
 
 

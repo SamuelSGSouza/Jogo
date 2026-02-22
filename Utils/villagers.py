@@ -14,7 +14,8 @@ class Villager(Character):
             "Fischerin": 2,
             "Sammy": 3,
             "Nina": 1,
-            "Verant":1
+            "Verant":1,
+            "Verloren": 1
         }
         super().__init__(*groups, collision_sprites=collision_sprites,creatures_sprites=creatures_sprites, personal_name=npc_name, scale_on_attack_value=scale_attacks[npc_name], is_ranged=is_ranged, range_distance=range_distance, team_members=team_members)
         self.all_groups= groups
@@ -69,7 +70,8 @@ class Villager(Character):
             "Fischerin": FischerinBrain(self, ),
             "Sammy": SammyBrain(self, ),
             "Nina": NinaBrain(self,),
-            "Verant": VerantBrain(self,)
+            "Verant": VerantBrain(self,),
+            "Verloren": VerlorenBrain(self,)
         }
         self.brain = self.brains[npc_name]
         
@@ -358,6 +360,136 @@ class Villager(Character):
 
     def __str__(self):
         return self.npc_name
+    
+class Verloren( Villager):
+    def __init__(self, *groups, collision_sprites, creatures_sprites, npc_name="Verloren", house_point=(0, 0), is_ranged=False, attack_hitbox_list={ "Front": (150, 70),"Back": (150, 70),"Left": (70, 150),"Right": (70, 150) }, range_distance=36, default_size=HDCS + HHDCS, team_members=[], original_speed = 80, actions_to_add=[], player=None):
+        super().__init__(*groups, collision_sprites=collision_sprites, creatures_sprites=creatures_sprites, npc_name=npc_name, house_point=house_point, is_ranged=is_ranged, attack_hitbox_list=attack_hitbox_list, range_distance=range_distance, default_size=default_size, team_members=team_members, original_speed=original_speed, actions_to_add=actions_to_add)
+
+        self.max_hp = randint(20,30)
+        self.hp=self.max_hp
+        self.attack_damage = randint(12,20)
+
+        self.encontrou_player = False
+        self.player = player
+        
+        #Falas loop 1 - primeiro encontro
+        self.talks_anter_fugir = {
+            "1": {
+                "fala": "O que? Você conseguiu cruzar essa floresta de fantasmas??? Isso é impressionante!\n Eu me chamo Verloren, sou um estudioso viajante. Vim para esse vale para estudar- bem, não importa. O que acha de fazermos um acordo?",
+                "respostas": {
+                    "Um acordo?": {"next_id": "2"},
+                }
+            },
+            "2": {
+                "fala": "Isso mesmo! Eu sei quase tudo que há para saber sobre o vale. Se conseguir me tirar vivo dessa floresta, eu irei responder uma pergunta sua, o que acha?",
+                "respostas": {
+                    "Nada feito. Primeiro me conte o que quero saber e depois eu te ajudo a sair daqui.": {"next_id": "end_negativo"},
+                    "Fechado! Vou fazer o possível para te tirar daqui.": {"next_id": "end_acordo"}
+                }
+            },
+            "end_acordo": {
+                "fala": "Temos um acordo então!",
+                "respostas": {}
+            },
+            "end_negativo": {
+                "fala": "Nem pensar! Eu te conto o que você quer saber e você me mata aqui mesmo. Eu prefiro apodrecer aqui do que me vender a tipos como você!",
+                "respostas": {}
+            }
+        }
+
+        self.talks_depois_fugir = {
+            "1": {
+                "fala": "Impressionante! Você realmente conseguiu! Como prometido, o que você gostaria de perguntar?",
+                "respostas": {
+                    "Quero saber sobre o Golem": {"next_id": "2_golem"},
+                    "Quero saber sobre os Orcs": {"next_id": "2_orcs"},
+                    "Quero saber sobre o Coração do Inverno": {"next_id": "2_inverno"},
+                }
+            },
+
+            #Rota do Golem
+            "2_golem": {
+                "fala": "Muito bem. Falemos sobre o Golem na entrada da floresta de gelo.\n Minhas pesquisas me mostraram que aquele golem foi criado por algum tipo de elfo do gelo que vivia naquela floresta muito tempo atrás. \n Não consegui determinar exatamente qual foi o fim desse elfo, mas descobri que ele se preocupava com o descontrole da própria criação, então criou uma forma de pará-lo caso as coisas saíssem do controle. \n Próximo à árvore mais alta da floresta de gelo, ele deixou algum tipo de mecanismo que permite deixá-lo inoperante. \n E isso é tudo que eu sei, pois eu mesmo não consegui ir até lá para conferir.",
+                "respostas": {
+                    "Entendi. Isso ajuda bastante! E o que você vai fazer agora?": {"next_id": "end_fora"},
+                }
+            },
+
+            #Rota dos Orcs
+            "2_orcs": {
+                "fala": "Muito bem. Falemos sobre os Orcs.\n\n Os humanos e os orcs dividem espaço nesse vale a muito tempo, por isso conflitos sempre ocorreram. Mas não entenda errado, não estou dizendo que eles vivem sempre em guerra. \n\nHá períodos que o chefe de uma das raças consegue entrar em acordo com a outra e eles vivem um momento de prosperidade, mas isso dura poucas gerações e em seguida o conflito reinicia. \n\n Minha conclusão é que nunca vai haver algo como 'Paz Duradoura' entre as duas espécies.",
+                "respostas": {
+                    "Entendo... Isso é um pouco triste. Mas e você, o que vai fazer agora?": {"next_id": "end_fora"},
+                }
+            },
+
+            #Rota do Coração do Inverno
+            "2_inverno": {
+                "fala": "Oh meu amigo... Somos dois tolos. \n\nTambém ouvi as histórias de como um cristal mágico de poder imensurável estava selado em algum lugar desse vale.\nOuvi também as lendas que dizem que 'Aquele que possuir o poder do cristal, poderá desfazer qualquer erro cometido em sua vida!'. \n\n ... \n\n A verdade, é que não há nenhum cristal.\n\n Procurei por todo esse vale, analisei todos os registros e no fim, parece que isso se mostrou ser apenas uma lenda... feita para atrair idiotas como nós até lugares como esse.",
+                "respostas": {
+                    "...": {"next_id": "end_fora"},
+                }
+            },
+
+
+
+            "end_fora": {
+                "fala": "Vou ficar na vila por alguns dias até descansar e me recuperar, depois vou voltar para a capital. Boa sorte para você meu amigo!",
+                "respostas": {}
+            },
+        }
+
+        self.rect.center = (4368.84765625, 5950.86865234375)
+        self.hitbox.center = (4368.84765625, 5950.86865234375)
+        self.fechou_acordo = False
+        self.resetou_fala = False
+        self.saiu_labirinto = False
+
+
+        vr = self.village_rect #village rect
+        matriz_mundo = self.groups()[0].world_matriz
+
+        self.locais_patrulha = []
+        for _ in range(0,200):
+            x, y = randint(vr.left, vr.right), randint(vr.top, vr.bottom)
+            if matriz_mundo[x//GRID_SIZE][y//GRID_SIZE] != 1 and (x,y) not in self.locais_patrulha:
+                self.locais_patrulha.append((x,y))
+        
+        
+
+    def escolhe_fala(self, ):
+        #falas 1 a 4 dependem do loop de morte do jogador. 
+        #falas 5 só são desbloqueadas depois de falar com o chefe dos orcs e conseguir convencer ele a suspender o ataque.
+    
+        loop = self.player.loop
+
+        if self.player.inside_maze:
+            falas = self.talks_anter_fugir
+        else:
+            if not self.resetou_fala:
+                self.resetou_fala = True
+                self.current_id="1"
+            falas = self.talks_depois_fugir
+            
+
+        
+        self.talks = falas
+        if self.current_id == "end_acordo":
+            self.fechou_acordo = True
+
+        if self.current_id == "end_fora":
+            self.saiu_labirinto = True
+
+        fala_data = self.talks.get(self.current_id)
+        if not fala_data:
+            return "", []
+        
+        # Verifica se é fim (sem respostas) e aplica reputação
+        if not fala_data["respostas"]:
+            delta_rep = self.pontuacao * 20  # Exemplo: pontuação alta -> +rep, baixa -> -rep
+            return fala_data["fala"], []  # Mostra fala final e encerra
+        
+        return fala_data["fala"], list(fala_data["respostas"].keys())
 
 class Verant(Villager):
     def __init__(self, *groups, collision_sprites, creatures_sprites, npc_name="Verant", house_point=(0, 0), is_ranged=False, attack_hitbox_list={ "Front": (150, 70),"Back": (150, 70),"Left": (70, 150),"Right": (70, 150) }, range_distance=36, default_size=HDCS + HHDCS, team_members=[], original_speed = 80, actions_to_add=[], player=None):
@@ -725,9 +857,6 @@ class Verant(Villager):
 
         
         self.talks = falas[loop]
-        print("Falas do Verant: ", {str(self.talks)})
-        print("Loop: ", {str(loop)})
-        print("Possiveis falas: ", {str(falas)})
 
         fala_data = falas[loop].get(self.current_id)
         if not fala_data:
@@ -735,6 +864,7 @@ class Verant(Villager):
         
         # Verifica se é fim (sem respostas) e aplica reputação
         if not fala_data["respostas"]:
+            self.player.falou_chefe_vila = True
             delta_rep = self.pontuacao * 20  # Exemplo: pontuação alta -> +rep, baixa -> -rep
             return fala_data["fala"], []  # Mostra fala final e encerra
         
@@ -1516,7 +1646,11 @@ class Holz(Villager):
         self.max_hp = randint(20,30)
         self.attack_damage = randint(12,20)
 
-        
+        self.tree_group = pygame.sprite.Group()
+        for sp in self.collision_sprites:
+            if hasattr(sp, "is_tree") and sp.is_tree:
+                sp.add(self.tree_group)
+        print(self.tree_group)
 
 class Sammy(Villager):
     def __init__(self, *groups, collision_sprites, creatures_sprites, npc_name="Sammy", house_point=(0, 0), is_ranged=False, attack_hitbox_list={ "Front": (150, 70),"Back": (150, 70),"Left": (70, 150),"Right": (70, 150) }, range_distance=36, default_size=HDCS + HHDCS, team_members=[], original_speed = 200, actions_to_add=[], initial_position:set=()):

@@ -17,7 +17,7 @@ class AllSprites(pygame.sprite.Group):
         self._light_grad = None             # gradiente pré-gerado
         self._light_grad_size = (0, 0)
         self._lightmap = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT), pygame.SRCALPHA)
-
+        self.dt = 0
         self.frame_index = 0
     def att_world_size(self,w,h):
         self.world_w = w
@@ -113,6 +113,7 @@ class AllSprites(pygame.sprite.Group):
         obj_visible =       []
         obj_details =       []
         characters  =       []
+        steps       =       []
         winter_curses  =    []
         # --- 1 única passada: classifica + culling; nada de 2 list comps + sort global ---
         for sp in self.sprites():
@@ -121,6 +122,8 @@ class AllSprites(pygame.sprite.Group):
                 continue  # fora da tela
             if getattr(sp, "is_invisible", False):
                 continue
+            elif getattr(sp, "is_step", False):
+                steps.append((sp.image, (int(r.x) + dx, int(r.y) + dy)))
 
             elif getattr(sp, "is_ground", False):
                 grounds_seq.append((sp.image, (int(r.x) + dx, int(r.y) + dy)))
@@ -143,6 +146,10 @@ class AllSprites(pygame.sprite.Group):
         if magic_circle_seqs:
             blits(magic_circle_seqs, False)
 
+        
+        if steps:
+            blits(steps, False)
+
         # --- objetos visíveis: sort só do subconjunto reduzido ---
         if obj_visible:
             obj_visible.sort(key=lambda s: s.rect.centery)
@@ -151,6 +158,8 @@ class AllSprites(pygame.sprite.Group):
         
         if obj_details:
             blits(obj_details, False)
+
+        
 
             
         if winter_curses:

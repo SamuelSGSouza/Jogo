@@ -9,53 +9,7 @@ class Action:
 
 
 class Brain:
-    """
-        Todos os cérebros devem seguir uma ordem baseada na pirâmide de maslow
-        1. sobrevivencia:
-            Estou sendo atacado:
-                Fugir;
-                Lutar;
-                Se Render;
-            
-            Estou com sede:
-                Vou buscar água num lago ou poço próximo
-
-            Estou faminto:
-                Como a comida que eu tenho;
-                Busco comida no estoque;
-                Vou Caçar;
-
-        2. Afazeres sociais
-            se tem aliado próximo;
-                conversa
-
-        
-        
-
-        3. Afazeres horário
-            hora inicial até hora final
-                afazeres de profissão
-                caçador
-                    caça
-                
-                pescador
-                    pesca
-                
-                vigiador
-                    vigia
-                
-                sentinela
-                    sentineleia
-            
-            noite
-                passeia pela vila
-            
-            fim da noite
-                vai pra casa
-                dorme
-            
-
-    """
+    
 
     def __init__(self, character:Character, crying_time=3000, mental_type:str="calmo"):
         self.character = character
@@ -169,7 +123,7 @@ class Brain:
                             self.conversation = conv
                             return self.character.current_action
                     elif not creature.is_dead and self.have_mercy(creature)==False:# se a criatura não está morta
-                        if self.character.confiabilidades[self.character.specie] <= MARGEM_DE_ATAQUE:# se a confiabilidade para com a espécie for menor que a margem, ataca
+                        if self.character.confiabilidades[self.character.specie] <= MARGEM_DE_ATAQUE and self.can_attack:# se a confiabilidade para com a espécie for menor que a margem, ataca
                             self.character.attacking_character = creature
                             return Combat(self.character, creature,ranged=self.character.is_ranged, attack_range=self.character.range_distance)
                         return None
@@ -276,6 +230,86 @@ class Brain:
         move = Move(self.character, "to", dest=dest)
         return move
 
+
+
+class OrcRootBrain(Brain):
+    def __init__(self, character, crying_time=3000, mental_type = "calmo"):
+        super().__init__(character, crying_time, mental_type)
+
+    def percepeu_inimigo(self,percepted_enemy: Character):
+        if percepted_enemy:
+            if self.can_attack and percepted_enemy.specie != self.character.specie and self.have_mercy(percepted_enemy) == False and percepted_enemy.has_emblem == False:
+                self.character.attacking_character = percepted_enemy
+                return Combat(self.character, percepted_enemy,ranged=self.character.is_ranged, attack_range=self.character.range_distance)
+            elif self.character.specie == percepted_enemy.specie:
+                return None
+            else:
+                return KeepDistance(self.character, percepted_enemy)
+        return None
+    
+    def tem_alvo_para_atacar(self):
+        if self.target:
+            
+            self.character.attacking_character = self.target
+            if self.target.is_dead or self.target.has_emblem == True:
+                self.target=None
+                return None
+         
+            if self.character.team_members != None:
+                for team_member in self.character.team_members:
+                    if not team_member.brain.target:
+                        team_member.brain.target = self.target
+            return Combat(self.character, self.target,ranged=self.character.is_ranged, attack_range=self.character.range_distance)
+        
+        #verifica se algum membro da equipe está em combate
+        for team_member in self.character.team_members:
+            if team_member.brain.target:
+                self.character.attacking_character = team_member.brain
+                return Combat(self.character, team_member.brain.target,ranged=self.character.is_ranged, attack_range=self.character.range_distance)
+            if team_member.attacking_character and self.have_mercy(team_member.attacking_character) == False:
+                self.character.attacking_character = team_member.attacking_character
+                return Combat(self.character, team_member.attacking_character,ranged=self.character.is_ranged, attack_range=self.character.range_distance)
+        
+        return None
+    
+    def esbarrar_em_character(self,):
+        if self.character.is_chatting == True or self.character.is_begging==True:
+            return None
+        proximos = pygame.sprite.spritecollide(self.character, self.character.creatures_sprites, False)
+        if proximos:
+            for creature in proximos: 
+                if creature != self.character:
+                    if creature.specie == self.character.specie or creature.has_emblem == True:
+                        if creature.is_player :
+                            return None
+                        if self.character.now - self.character.last_talk_time > self.character.talk_delay and self.character.can_talk == True and self.character.scripts:
+                            self.character.last_talk_time = self.character.now
+                            self.character.is_chatting = True
+                            creature.is_chatting = True
+                            tipo_conversa = choice(self.character.talk_options)
+                            try:
+                                script = [t.replace(r"{nome_character}", creature.personal_name) for t in choice(self.character.scripts[tipo_conversa]) ]
+                            except:
+                                raise Exception(f"Falha ao iniciar conversa entre: {self.character} X {creature}")
+                            if tipo_conversa == "respondendo":
+                                action_a,action_b,conv = start_chat(creature, self.character,script=script)
+                                creature.current_action = action_a
+                                self.character.current_action = action_b
+                            else:
+                                action_a,action_b,conv = start_chat(self.character,creature,script=script)
+                                creature.current_action = action_b
+                                self.character.current_action = action_a
+                            self.conversation = conv
+                            return self.character.current_action
+                    elif not creature.is_dead and self.have_mercy(creature)==False:# se a criatura não está morta
+                        if self.character.confiabilidades[self.character.specie] <= MARGEM_DE_ATAQUE:# se a confiabilidade para com a espécie for menor que a margem, ataca
+                            self.character.attacking_character = creature
+                            return Combat(self.character, creature,ranged=self.character.is_ranged, attack_range=self.character.range_distance)
+                        return None
+
+        return None
+    
+
 class MonsterBrain(Brain):
     def __init__(self, character):
         super().__init__(character)
@@ -284,6 +318,7 @@ class MonsterBrain(Brain):
 class SlimeBrain(MonsterBrain):
     def __init__(self, character):
         super().__init__(character)
+
     
     def rotina_diaria(self):
         if not self.final_dest:
@@ -300,7 +335,7 @@ class GolemBrain(MonsterBrain):
     def rotina_diaria(self):
         return self.move_to((862,1810), )
 
-class GhostBrain(Brain):
+class GhostBrain(MonsterBrain):
     def __init__(self, character):
         super().__init__(character)
 
@@ -359,6 +394,23 @@ class VerantBrain(Brain):
         move = self.move_to(self.final_dest)
         return move
 
+class VerlorenBrain(Brain):
+    def __init__(self, character, can_attack=False):
+        super().__init__(character,mental_type="raivoso")
+        self.can_attack = False
+        self.target = None
+        self.final_dest = ()
+
+    def rotina_diaria(self):
+        self.character.original_speed = self.character.player.original_speed
+        if self.character.fechou_acordo:
+            if not self.final_dest:
+                if self.character.saiu_labirinto:
+                    self.final_dest = choice(self.character.locais_patrulha)
+                else:
+                    self.final_dest = self.character.player.rect.center
+            return self.move_to(self.final_dest)
+        return None
 
 class ObiBrain(Brain):
     def __init__(self, character, can_attack=False):
@@ -475,7 +527,6 @@ class HolzBrain(Brain):
     
     def rotina_diaria(self):
         if self.iniciar_corte == True:
-            print("Iniciando corte")
             self.character.action = "Attack_1"
             dist = (self.character.position_vector - pygame.Vector2(self.final_dest)).length()
             if dist >= self.character.rect.width // 2 or not self.arvore_destino:
@@ -485,8 +536,8 @@ class HolzBrain(Brain):
             
 
             if pygame.time.get_ticks() - self.momento_inicio_corte >= 40*1000:
-                arvores_rects = [sp for sp in self.character.collision_sprites if hasattr(sp, "is_tree") and sp.is_tree]
-                pygame.sprite.spritecollide(self.character, arvores_rects, dokill=True)
+                
+                pygame.sprite.spritecollide(self.character, self.character.tree_group, dokill=True)
 
                 
                 self.character.arvores.pop(self.character.arvores.index(self.arvore_destino))
@@ -724,7 +775,7 @@ def start_chat(a:Character, b:Character, script:list[str]) -> tuple[Chatting, Ch
 
 
 #ORCS
-class ExplorerOrcBrain(Brain):
+class ExplorerOrcBrain(OrcRootBrain):
     def __init__(self, character):
         super().__init__(character)
 
@@ -733,7 +784,7 @@ class ExplorerOrcBrain(Brain):
         move = self.move_to(self.final_dest)
         return move
     
-class ChiefOrcBrain(Brain):
+class ChiefOrcBrain(OrcRootBrain):
     def __init__(self, character):
         super().__init__(character)
 
@@ -756,7 +807,7 @@ class ChiefOrcBrain(Brain):
             return None
         return super().esbarrar_em_character()
     
-class OrcBrain(Brain):
+class OrcBrain(OrcRootBrain):
     def __init__(self, character, ):
         super().__init__(character,mental_type="raivoso")
         self.can_attack = True
@@ -772,7 +823,7 @@ class OrcBrain(Brain):
         if proximos:
             for creature in proximos: 
                 if creature != self.character:
-                    if creature.specie == self.character.specie:
+                    if creature.specie == self.character.specie or creature.has_emblem:
                         if creature.is_player :
                             return None
                         if self.character.now - self.character.last_talk_time > self.character.talk_delay and self.character.can_talk == True and self.character.scripts and creature.personal_name=="Ghorak":
@@ -822,7 +873,7 @@ class OrcBrain(Brain):
 
         return None
     
-class OrcCacadorBrain(Brain):
+class OrcCacadorBrain(OrcRootBrain):
     def __init__(self, character, ):
         super().__init__(character,mental_type="raivoso")
         self.can_attack = True
@@ -861,7 +912,7 @@ class OrcCacadorBrain(Brain):
 
         return None
 
-class OrcMensageiroBrain(Brain):
+class OrcMensageiroBrain(OrcRootBrain):
     def __init__(self, character, ):
         super().__init__(character,mental_type="raivoso")
         self.can_attack = False
@@ -940,7 +991,7 @@ class OrcMensageiroBrain(Brain):
 
         return None
 
-class OrcGuardaBrain(Brain):
+class OrcGuardaBrain(OrcRootBrain):
     def __init__(self, character, guard_pos=0):
         super().__init__(character,mental_type="raivoso")
         self.can_attack = True

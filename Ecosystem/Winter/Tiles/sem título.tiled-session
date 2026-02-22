@@ -5,8 +5,8 @@
     },
     "activeFile": "tileset/Winter.tmx",
     "expandedProjectPaths": [
-        "tileset",
-        "."
+        ".",
+        "tileset"
     ],
     "fileStates": {
         "": {
@@ -119,11 +119,11 @@
             "scaleInEditor": 2
         },
         "tileset/Winter.tmx": {
-            "scale": 0.5,
-            "selectedLayer": 1,
+            "scale": 0.33,
+            "selectedLayer": 24,
             "viewCenter": {
-                "x": 3087,
-                "y": 2419
+                "x": 2274.242424242424,
+                "y": 3289.3939393939395
             }
         },
         "tileset/Winter.tmx#Ground Ice": {

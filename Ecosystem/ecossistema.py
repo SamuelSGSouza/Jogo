@@ -35,6 +35,7 @@ class Map:
         all_sprites.att_world_size(map_width, map_height)
 
 
+        
 
         fixed_objects_layer =  self.map.get_layer_by_name("Fixed Objects")
         for obj in fixed_objects_layer:

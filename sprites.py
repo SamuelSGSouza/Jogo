@@ -8,7 +8,7 @@ class StaticMap(pygame.sprite.Sprite):
         self.is_ground = True
 
 class AnimatedSprite(pygame.sprite.Sprite):
-    def __init__(self, *groups, root:str="",obj=None,animation_speed=3, use_center=True, pos,is_detail =False, hitbox_scale =1, has_light=False, surfaces=[]):
+    def __init__(self, *groups, root:str="",obj=None,animation_speed=3, use_center=True, pos,is_detail =False, hitbox_scale =1, has_light=False, surfaces=[], is_on = False):
         super().__init__(*groups)
         self.has_light = has_light
         self.is_detail = is_detail
@@ -17,10 +17,13 @@ class AnimatedSprite(pygame.sprite.Sprite):
             self.off_surfaces = surfaces
         else:
             self.on_surfaces, self.off_surfaces = self.load_on_off_surfaces(root, obj)
-        self.on=False
-        self.frames = self.off_surfaces
+        self.on=is_on
+        if is_on:
+            self.frames = self.on_surfaces
+        else:
+            self.frames = self.off_surfaces
         self.frame_index = 0
-        self.animation_speed = animation_speed
+        self.animation_speed = min(len(self.on_surfaces), len(self.off_surfaces))
         self.image = self.off_surfaces[0]
         if use_center:
             self.rect = self.image.get_frect(center=pos)
@@ -64,6 +67,13 @@ class AnimatedSprite(pygame.sprite.Sprite):
         self.frames = self.off_surfaces
         self.image = self.frames[0]
         self.on=False
+
+    def update(self, *args, **kwargs):
+        self.frame_index += 0.01 *len(self.frames)
+        if self.frame_index >= len(self.frames)-1:
+            self.frame_index =  0
+        self.image = self.frames[int(self.frame_index) % len(self.frames)]
+        return super().update(*args, **kwargs)
 
 
 class AnimatedGrowingSprite(AnimatedSprite):
@@ -126,6 +136,31 @@ class Sprites(pygame.sprite.Sprite):
         self.rect = self.image.get_frect(topleft=pos)
         self.is_ground = True
 
+class Steps(pygame.sprite.Sprite):
+    def __init__(self, *groups,surface, pos,):
+        super().__init__(*groups)
+        self.image = pygame.transform.rotozoom(surface, 0, 0.5).convert_alpha()
+        self.rect = self.image.get_frect(topleft=pos)
+        self.hitbox= pygame.FRect(self.rect.left, self.rect.top,self.rect.width, self.rect.height)
+        
+        self.hitbox.width = self.rect.width/4 #fazendo a hitbox ser 1/4 da real
+
+        self.hitbox.height = self.rect.height/3 #fazendo a hitbox ser 1/2 da real
+        self.hitbox.center = self.rect.center
+
+        self.is_fixed = True
+        self.is_getable = False
+        self.is_step = True
+
+        self.existence_time = 5000
+        self.start_time = pygame.time.get_ticks()
+
+    def update(self, *args, **kwargs):
+        super().update(*args, **kwargs)
+        if pygame.time.get_ticks() - self.start_time > self.existence_time:
+            self.kill()
+            
+
 class MoveableSprites(pygame.sprite.Sprite):
     def __init__(self, *groups,surface, pos,):
         super().__init__(*groups)
@@ -159,16 +194,22 @@ class CollisionSprites(pygame.sprite.Sprite):
         self.hitbox= pygame.FRect(self.rect.left, self.rect.top,self.rect.width, self.rect.height)
         
         if self.is_tree:
-            self.hitbox.width = self.rect.width - self.rect.width *50/100
+            self.hitbox.width = self.rect.width - self.rect.width *80/100
             self.hitbox.height = self.rect.height - self.rect.height *60/100
+            self.hitbox.center = (self.rect.center[0], self.rect.center[1] + self.rect.height*10/100)
+        elif self.is_invisible:
+            self.hitbox.width = self.rect.width - self.rect.width *80/100
+            self.hitbox.height = self.rect.height - self.rect.height *80/100
+            self.hitbox.center = self.rect.center
 
         elif self.is_fixed_house:
             self.hitbox.width = self.rect.width - self.rect.width *30/100
-            self.hitbox.height = self.rect.height - self.rect.height *10/100
+            self.hitbox.height = self.rect.height - self.rect.height *50/100
+            self.hitbox.midbottom = (self.rect.midbottom[0], self.rect.midbottom[1]-30)
         else:
             self.hitbox.width = self.rect.width - self.rect.width *30/100
             self.hitbox.height = self.rect.height - self.rect.height *40/100
-        self.hitbox.center = self.rect.center
+            self.hitbox.center = self.rect.center
 
         #INVENTORY
         self.is_inventory = is_inventory

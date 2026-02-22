@@ -26,8 +26,9 @@ class Player(Character):
         
         
         self.image = pygame.transform.scale(self.frames[self.action][self.state][0], (self.default_size, self.default_size))
-        # self.rect = self.image.get_frect(center = (5000, 3000))
-        self.rect = self.image.get_frect(center = (3030, 6040))
+        self.rect = self.image.get_frect(center = (5000, 3000))
+        self.rect = self.image.get_frect(center = (4278.962890625, 5923.7529296875))
+        # self.rect = self.image.get_frect(center = (5866, 5918))
         self.hitbox = pygame.FRect(
             self.rect.left + self.rect.width/2,
             self.rect.top + self.rect.height/3+50,
@@ -64,7 +65,7 @@ class Player(Character):
         self.box_4 = pygame.Rect(883,1900, 100, 10)
         self.box_5 = pygame.Rect(1980,5435, 10, 100)
         self.box_6 = pygame.Rect(2040,5435, 10, 100)
-        self.inside_maze = False
+        self.inside_maze = True
         self.inside_ice_florest = False
         self.max_hp = 50
         self.attack_damage = randint(12,20)
@@ -89,7 +90,7 @@ class Player(Character):
         self.human_0 = None
         self.goblin_0 = None
         self.original_form = None
-
+        self.has_emblem = False
         
 
         self.aplicar_resfriamento = False
@@ -112,6 +113,7 @@ class Player(Character):
         self.convenceu_chefe_vila = False
         self.viu_vila_destruida = False
         self.falou_orc_caido = False
+        self.has_steps = True
         
     @property
     def speed(self):
@@ -296,7 +298,7 @@ class Player(Character):
             hits =  pygame.sprite.spritecollide(self, self.creatures_sprites, dokill=False)
             if hits:
                 for creat in hits:
-                    if not creat.is_player:
+                    if (not creat.is_player and creat.is_dead==False and creat.specie not in ["GHOST", "SLIME", "GOBLIN", "GOLEM"]) or creat.personal_name == "Orc Explorer":
                         self.is_chatting = True
                         self.player_chatting_to = creat
 

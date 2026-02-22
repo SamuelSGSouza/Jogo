@@ -86,6 +86,8 @@ class Monster(Character):
         self.specie = "MONSTER"
 
         self.scripts = {}
+
+        self.delete_sprites_on_death = True
     # ---------------------------------------------------------
     # Direção “para onde está olhando”. Se tiver direction != 0,
     # usa ela; senão usa self.state.
@@ -458,39 +460,69 @@ class ExplorerOrc(Monster):
         self.effects_on_damage = []
         self.brain = ExplorerOrcBrain(self,)
 
-        self.delete_sprites_on_death = True
         self.specie = "ORC"
         self.delete_sprites_on_death = False
 
         self.talks = {}
         self.talks_morto_pouco_tempo = {
             "1": {
-                "fala": "Parece que ele morreu agora pouco. Deve ter sido atacado pelos fantasmas do labirinto",
+                "fala": "... \n(Parece que ele morreu agora pouco. Deve ter sido atacado pelos fantasmas do labirinto)",
                 "respostas": {}
             }
         }
         
         self.talks_morto_muito_tempo = {
             "1": {
-                "fala": "Parece que ele morreu a várias horas. Já está quase se tornando um dos fantasmas desse labirinto.",
+                "fala": "... \n(Parece que ele morreu a várias horas. Já está quase se tornando um dos fantasmas desse labirinto.)",
                 "respostas": {}
             }
         }
         
         self.talks_vivo_loop_1 = {
             "1": {
-                "fala": "Droga... Eu fracassei...",
+                "fala": "Droga, eu fracassei... (língua Orc)",
+                "respostas": {
+                    "Mas que língua é essa?": {"next_id": "2"}
+                }
+            },
+            "2": {
+                "fala": "Humano... eu tentei.",
                 "respostas": {}
             },
         }
         
         self.talks_vivo_loop_2 = {
             "1": {
-                "fala": "…",
+                "fala": "E pensar que o último ser que eu veria em vida seria um humano... Que ironia. (língua Orc)",
                 "respostas": {
-                    "Você consegue falar?": {"next_id": "2"}
+                    "Você consegue falar a língua dos homens?": {"next_id": "2"},
+                    "Talvez possa me ver como um companheiro que lutou pela paz, em vez de um humano? (língua Orc)": {"next_id": "3_secreto"},
+                    "Descanse em paz guerreiro. Pode deixar o resto comigo. (língua Orc)": {"next_id": "fim_secreto"},
                 }
             },
+            #Rota secreta
+            "3_secreto": {
+                "fala": "Um companheiro de guerra então? (língua Orc)",
+                "respostas": {
+                    "Isso mesmo. Acredito que você seja um guerreiro que lutou pela paz e preciso da sua ajuda. (língua Orc)": {"next_id": "4_secreto"},
+                    "Exato. Agora descanse meu amigo. Sua luta chegou ao fim. (língua Orc)": {"next_id": "fim_secreto"},
+                }
+            },
+            "4_secreto": {
+                "fala": "Nosso líder luta por desespero, não por desejo. Se você falar com ele, acredito que ele pode ser convencido a parar com tudo isso. Pegue esse emblema, ele permite que você seja reconhecido como Orc e entenda nossa língua (língua Orc)",
+                "respostas": {
+                    "Entendi. Com isso eu tenho esperança de evitar um derramamento de sangue. Agora descanse guerreiro, você cumpriu bem seu dever. (língua Orc)": {"next_id": "fim_secreto"},
+                }
+            },
+
+            "fim_secreto": {
+                "fala": "Obrigado Humano (língua Orc)",
+                "respostas": {}
+            },
+
+
+
+            # Rota natural
 
             "2": {
                 "fala": "Droga... eu falhei.",
@@ -521,9 +553,9 @@ class ExplorerOrc(Monster):
 
         self.talks_vivo_loop_3 = {
             "1": {
-                "fala": "Humano... Você chegou tarde.",
+                "fala": "Humano... Você chegou tarde. (língua Orc)",
                 "respostas": {
-                    "...": {"next_id": "2"}
+                    "Eu sei que você consegue falar a língua dos homens. O que você veio fazer aqui?": {"next_id": "2"}
                 }
             },
 
@@ -537,19 +569,19 @@ class ExplorerOrc(Monster):
             "3": {
                 "fala": "Antes de decidirem.",
                 "respostas": {
-                    "...": {"next_id": "4"}
+                    "Eu não entendo": {"next_id": "4"}
                 }
             },
 
             "4": {
-                "fala": "Eu vim falar.",
+                "fala": "Eu vim tentar um caminho sem sangue.",
                 "respostas": {
-                    "Falar sobre o quê?": {"next_id": "5"}
+                    "Veio pelo poder do coração do inverno? ": {"next_id": "5"}
                 }
             },
 
             "5": {
-                "fala": "Sobre não fazer isso.",
+                "fala": "Esse coração é uma lenda... (língua Orc)",
                 "respostas": {}
             }
 
@@ -557,9 +589,9 @@ class ExplorerOrc(Monster):
 
         self.talks_vivo_loop_4 = {
             "1": {
-                "fala": "Droga... eu falhei...",
+                "fala": "Droga... eu falhei... (língua Orc)",
                 "respostas": {
-                    "Você não falhou! Ainda dá tempo de consertar as coisas. Mas preciso da sua ajuda. O que eu tenho que fazer?": {"next_id": "2"}
+                    "Fale em língua humana. Como você pretendia impedir o ataque?": {"next_id": "2"}
                 }
             },
 
@@ -571,7 +603,7 @@ class ExplorerOrc(Monster):
             },
 
             "3": {
-                "fala": "Pegue isso. Esse emblema faz você ser reconhecido como um Orc e os guardas vão te deixar passar.",
+                "fala": "Pegue isso. Esse emblema faz você ser reconhecido como um Orc e os guardas vão te deixar passar. Você também será capaz de entender a língua ORC",
                 "respostas": {
                     "...": {"next_id": "4"}
                 }
@@ -585,45 +617,43 @@ class ExplorerOrc(Monster):
             },
 
             "5": {
-                "fala": "Assim, ao menos, minha morte não será em vão...",
+                "fala": "Assim, ao menos, minha morte não será em vão...  (Língua Orc)",
                 "respostas": {}
             }
         }
         
         self.talks_vivo_loop_5 = {
             "1": {
-                "fala": "Você chegou...",
+                "fala": "Eu falhei... (Língua Orc)",
                 "respostas": {
                     "...": {"next_id": "2"}
                 }
             },
 
             "2": {
-                "fala": "Era isso que eu tentei fazer.",
+                "fala": "Eu achei que poderia encontrar o coração do inverno aqui nesse floresta... mas parece que ele sequer existe. (Língua Orc)",
                 "respostas": {
-                    "Tentar o quê?": {"next_id": "3"}
+                    "Então o coração realmente não existe...? (Língua Orc)": {"next_id": "3"}
                 }
             },
 
             "3": {
-                "fala": "Evitar que crianças passem o inverno com fome.",
+                "fala": "Eu só quis evitar que crianças passem o inverno com fome. (Língua Orc)",
                 "respostas": {
                     "...": {"next_id": "4"}
                 }
             },
 
             "4": {
-                "fala": "Se dividissem antes…",
+                "fala": "Se falassem e dividissem antes… (Língua Orc)",
                 "respostas": {
                     "...": {"next_id": "5"}
                 }
             },
 
             "5": {
-                "fala": "Ninguém precisaria tomar nada.",
-                "respostas": {
-                    "...": {"next_id": "5"}
-                }
+                "fala": "Ninguém precisaria tomar nada. (Língua Orc)",
+                "respostas": {}
             },
         }
         
@@ -631,6 +661,8 @@ class ExplorerOrc(Monster):
         self.pontuacao = 0.0
         self.reputacao_orcs = 0.0  # Variável global do jogo, ex: de -1.0 a +1.0
         self.can_talk = True
+
+        self.personal_name = "Orc sem nome"
     
     def escolhe_fala(self, ):
 
@@ -644,6 +676,7 @@ class ExplorerOrc(Monster):
                 falas = {
                     1: self.talks_morto_muito_tempo
                 }
+            self.talks = falas[1]
         else:
             falas = {
                 1: self.talks_vivo_loop_1,
@@ -653,18 +686,23 @@ class ExplorerOrc(Monster):
                 5: self.talks_vivo_loop_5,
             }
             
-        if loop not in falas.keys():
-            raise Exception( f"Loop {loop} do tipo {type(loop)} não está na opção de falas: {falas}")
 
-        self.talks = falas[loop]
+            if loop not in falas.keys():
+                raise Exception( f"Loop {loop} do tipo {type(loop)} não está na opção de falas: {falas}")
+            self.talks = falas[loop]
+            self.player.falou_orc_caido = True
+        
 
-        fala_data = falas[loop].get(self.current_id)
+        fala_data = self.talks.get(self.current_id)
         if not fala_data:
             return "", []
         
         # Verifica se é fim (sem respostas) e aplica reputação
         if not fala_data["respostas"]:
-            self.player.falou_orc_caido = True
+            
+            if self.player.loop >= 4:
+                self.player.has_emblem = True
+            # som_loop()
             delta_rep = self.pontuacao * 20  # Exemplo: pontuação alta -> +rep, baixa -> -rep
             return fala_data["fala"], []  # Mostra fala final e encerra
         
@@ -677,6 +715,8 @@ class ExplorerOrc(Monster):
             respostas = self.talks[self.current_id]["respostas"]
         except KeyError:
             raise Exception(f"Valor de chave '{self.current_id}' não existe nas falas: {self.talks}")
+
+        
 
         keys = list(respostas.keys())
         escolha = keys[int(escolha)]
@@ -719,7 +759,6 @@ class ChiefOrc(Monster):
         self.effects_on_damage = []
         self.brain = ChiefOrcBrain(self,)
 
-        self.delete_sprites_on_death = True
         self.specie = "ORC"
         self.delete_sprites_on_death = False
 
@@ -999,6 +1038,8 @@ class ChiefOrc(Monster):
         self.player.falou_chefe_orcs = True
         if self.current_id == "end_positivo":
             self.player.convenceu_chefe_orcs = True
+        if self.current_id == "end_negativo":
+            self.player.has_emblem = False
         return True
     
 
@@ -1040,7 +1081,7 @@ class Orc(Monster):
         self.effects_on_damage = []
         self.brain = OrcBrain(self,)
 
-        self.delete_sprites_on_death = True
+        self.delete_sprites_on_death = False
         self.specie = "ORC"
         self.confiabilidades["HUMAN"] = 0.3
         self.can_talk = False
@@ -1103,7 +1144,7 @@ class OrcCacador(Monster):
         self.effects_on_damage = []
         self.brain = OrcCacadorBrain(self,)
 
-        self.delete_sprites_on_death = True
+        self.delete_sprites_on_death = False
         self.specie = "ORC"
         self.confiabilidades["HUMAN"] = 0.3
         self.can_talk = True
@@ -1187,7 +1228,7 @@ class OrcMensageiro(Monster):
         self.effects_on_damage = []
         self.brain = OrcMensageiroBrain(self,)
 
-        self.delete_sprites_on_death = True
+        self.delete_sprites_on_death = False
         self.specie = "ORC"
         self.confiabilidades["HUMAN"] = 0.3
         self.can_talk = True
@@ -1259,7 +1300,7 @@ class OrcGuarda(Monster):
         self.effects_on_damage = []
         self.brain = OrcGuardaBrain(self,guard_pos=guard_pos)
 
-        self.delete_sprites_on_death = True
+        self.delete_sprites_on_death = False
         self.specie = "ORC"
         self.confiabilidades["HUMAN"] = 0.3
         self.can_talk = True
@@ -1302,7 +1343,7 @@ class CrystalGolem(Monster):
         self.effects_on_damage = []
         self.brain = GolemBrain(self,)
 
-        self.delete_sprites_on_death = True
+        self.delete_sprites_on_death = False
         self.specie = "GOLEM"
         self.confiabilidades["HUMAN"] = 0.3
         self.can_talk = False

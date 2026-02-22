@@ -25,8 +25,6 @@ Loop 5: Esse loop se mantém até o jogador conseguir convencer o chefe dos orcs
 ## OBI
 ## DASH
 ## NASH
-# ao andar, personagens deixam "pegadas" que somem depois de alguns segundos
-# mudar a posição da caixa de texto e a font dos textos
 
 
 # abrir a parte da mata logo atrás do personagem e adicionar coisas dependendo de quando ele quiser sair
@@ -47,19 +45,22 @@ Loop 5: Esse loop se mantém até o jogador conseguir convencer o chefe dos orcs
 
 # Adicionar final do cansado/covarde. Se o jogador decidir fugir, ele recebe esse final
 
-# Consertar o hitbox das casas
-# deixar a casa dos orcs sempre acessas
-
 # Adicionar mais flores, bonecos e detalhes pelo mapa
+# construir a história
+# dar falas e um pouco de personalidade para os orcs
+# Adicionar um personagem secreto na floresta labirinto. Ele pede ajuda para sair do labirinto e se o player conseguir tirar ele de lá, ele fala sobre uma alavanca atrás da árvore na floresta de gelo. O personagem então vai revelar ser um fantasma e sumir no fim do mundo
+# Se a alavanca for acionada, o Golem é desligado e para de se mover ou stacar
+# Toda vez que analisar um corpo morto:
+## Se foi o player que matou, fala algo como "esse aqui está na minha conta"
+## Senão, pega a espécie que o matou e fala algo como "esses ferimentos... parece que foi morto por um slime" ou "Um humano o matou."
+# Se o jogador falar com o chefe orc enquanto está transformado, ele vai falar algo como "você é um .... mas também é humano. Que tipo de magia é magia?"
 
 
-Perguntas de personagem:
-- Qual é o nome do personagem?  Holz
-- Qual é sua profissão ou função no mundo da história? É o Lenhador da vila e sabe lutar quando necessário 
-- Como ele se apresenta para quem não o conhece? Com firmeza e desconfiança. Apesar de não ser um guarda da vila, por ter muita força desde que nasceu, ele se sente no dever de proteger os outros.
-- Quais são seus principais traços de personalidade? Ele parece ser sério, mas adora piadas sem graça de lenhador
-- Ele é mais racional ou emocional? Racional
-- Qual evento do passado mais o marcou? A guerra com os orcs que aconteceu quando ele era criança
-- Quem ele odeia — e por quê? Odeia os orcs, por causa do que aconteceu quando ele era criança
-- Quem ele acha que é? O pilar de funcionamento diário da vila (com a coleta de madeira e eventuais combates)
-- Quem ele precisa se tornar? Um dos personagens a aceitar ceder comida para os orcs para que a vila possa ter paz, já que os orcs também estão famintos
+
+# Loop 1 -
+
+## Frase Inicial:
+### Quem eu sou, que eu fui e o que eu fiz... Isso não importa.
+### Todo mundo tem arrependimentos na vida, e eu estou aqui pra tentar consertar os meus.
+
+## Conversas devem ser focadas na curiosidade do personagem, então ele está curioso e entendendo um pouco sobre aquele lugar
