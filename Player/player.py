@@ -27,7 +27,7 @@ class Player(Character):
         
         self.image = pygame.transform.scale(self.frames[self.action][self.state][0], (self.default_size, self.default_size))
         self.rect = self.image.get_frect(center = (5000, 3000))
-        self.rect = self.image.get_frect(center = (4278.962890625, 5923.7529296875))
+        self.rect = self.image.get_frect(center = (2369.525390625, 97.13313293457031))
         # self.rect = self.image.get_frect(center = (5866, 5918))
         self.hitbox = pygame.FRect(
             self.rect.left + self.rect.width/2,
@@ -114,7 +114,16 @@ class Player(Character):
         self.viu_vila_destruida = False
         self.falou_orc_caido = False
         self.has_steps = True
-        
+        self.puxou_alavanca = False
+
+
+        self.frases_loops = {
+            1: "Quem eu sou, que eu fui e o que eu fiz... Isso não importa.\n\nTodo mundo tem arrependimentos na vida, e eu estou aqui pra tentar consertar os meus.",
+            2: "Espera. Esse lugar... Esse momento.... \n\n Eu já ouvi história sobre magias do tempo. Será que estou preso em algum tipo de feitiço temporal?",
+            3: "Eu vim Aqui pelo Cristal, mas parece que tem mais coisas acontecendo no momento.",
+            4: "Eu entendo que essas pessoas estão com problemas, mas esse problema não é meu."
+        }
+
     @property
     def speed(self):
         mult = min(1, 1.0 - (1 - self.hp/self.max_hp))

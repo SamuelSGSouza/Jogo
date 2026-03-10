@@ -870,6 +870,54 @@ class Verant(Villager):
         
         return fala_data["fala"], list(fala_data["respostas"].keys())
 
+class PessoaAlavanca(Villager):
+    def __init__(self, *groups, collision_sprites, creatures_sprites, npc_name="Nina", house_point=(0, 0), is_ranged=False, attack_hitbox_list={ "Front": (150, 70),"Back": (150, 70),"Left": (70, 150),"Right": (70, 150) }, range_distance=36, default_size=HDCS - HHDCS, team_members=[], original_speed = 200, actions_to_add=[], player):
+        super().__init__(*groups, collision_sprites=collision_sprites, creatures_sprites=creatures_sprites, npc_name=npc_name, house_point=house_point, is_ranged=is_ranged, attack_hitbox_list=attack_hitbox_list, range_distance=range_distance, default_size=default_size, team_members=team_members, original_speed=original_speed, actions_to_add=actions_to_add, )
+        self.brain = PessoaAlavancaBrain(self,)
+        self.encontrou_player = False
+        self.player = player
+        self.rect.center = (2398.87744140625, 120.6853256225586)
+        self.hitbox.center = (2398.87744140625, 120.6853256225586)
+
+        self.sons_alavanca = [pygame.mixer.Sound("Sounds/lever_sound.mp3"), ]
+        self.sound_ok = False
+        self.talks = {
+            "1": {  # Introdução
+                "fala": "(Parece que tem uma alavanca aqui)",
+                "respostas": {
+                    "Puxar": {"pontuacao": 0.8, "next_id": "end_puxou"},
+                    "Não Puxar": {"pontuacao": 0.8, "next_id": "end_nao_puxou"},
+                }
+            },
+            "end_nao_puxou": { 
+                "fala": "Eu não sei o que isso faz, então é melhor não mexer.",
+                "respostas": {}
+            },
+            "end_puxou": { 
+                "fala": "Alguma coisa aconteceu, mas o que?...",
+                "respostas": {}
+            },
+        }
+        self.hp = 99999
+        self.personal_name = ""
+        
+    def escolhe_fala(self, ):
+        
+        if self.current_id == "end_puxou" and not self.sound_ok:
+            play_noise(self, self.sons_alavanca, cooldown=1000, volume=0.2)
+            self.sound_ok = True
+            self.player.puxou_alavanca = True
+
+        fala_data = self.talks.get(self.current_id)
+        if not fala_data:
+            return "", []
+        
+        # Verifica se é fim (sem respostas) e aplica reputação
+        if not fala_data["respostas"]:
+            delta_rep = self.pontuacao * 20  # Exemplo: pontuação alta -> +rep, baixa -> -rep
+            return fala_data["fala"], []  # Mostra fala final e encerra
+        
+        return fala_data["fala"], list(fala_data["respostas"].keys())
 
 class Nina(Villager):
     def __init__(self, *groups, collision_sprites, creatures_sprites, npc_name="Nina", house_point=(0, 0), is_ranged=False, attack_hitbox_list={ "Front": (150, 70),"Back": (150, 70),"Left": (70, 150),"Right": (70, 150) }, range_distance=36, default_size=HDCS - HHDCS, team_members=[], original_speed = 200, actions_to_add=[], player):

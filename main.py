@@ -542,7 +542,7 @@ class Game:
                             mouse_click = True
                     #updates
                     self.all_sprites.draw(self.player.rect.center)
-                    print(self.player.rect.center)   
+                    # print(self.player.rect.center)   
                     # print(self.player.has_emblem)   
                         
 
@@ -682,7 +682,7 @@ class Game:
                         
                         # Desenha a barra de vida
                         # Fundo da barra (vazia)
-                        if creat.specie != "SAMMY" and creat.specie != "GHOST":
+                        if creat.specie != "SAMMY" and creat.specie != "GHOST" and creat.hp < 9999:
                             draw_health_bar(
                                 surf=self.screen,
                                 x=creat.hitbox.centerx + offset.x, y=bar_y,
@@ -767,7 +767,7 @@ class Game:
                                         if "(língua Orc)" in opcoes[i]:
                                             opcoes[i] = embaralha_palavras(opcoes[i].replace("(língua Orc)", ""))
 
-                                opcao_escolhida = show_modal(self.screen,font=game_defaul_font, main_text=fala, options=opcoes, max_width=800, chat_end=chat_end, name=str(self.player.player_chatting_to))
+                                opcao_escolhida = show_modal(self.screen,font=game_defaul_font, main_text=fala, options=opcoes, max_width=800, chat_end=chat_end, name=str(self.player.player_chatting_to.personal_name))
                                 
                                 self.player.player_chatting_to.processa_escolha(str(opcao_escolhida))  
                     
@@ -860,7 +860,7 @@ class Game:
                         fade.fill((255, 255, 255, int(alpha)))
 
                         self.screen.blit(fade, (0, 0))
-                        opcao_escolhida = show_modal(self.screen,font=game_defaul_font, main_text="Mais uma vez.", options=[], max_width=800, chat_end=elapsed < DURATION, )
+                        opcao_escolhida = show_modal(self.screen,font=game_defaul_font, main_text=self.player.frases_loops[self.player.loop], options=[], max_width=800, chat_end=elapsed < DURATION, )
 
                     
 
@@ -919,7 +919,8 @@ class Game:
         self.orcs_village_rect = pygame.Rect(360,4358,1500, 1500)
         self.human_pits = [(5528, 2200), (4618, 2836), (4481, 2000) ]
         nina = Nina(self.all_sprites, self.player_group,self.creatures, collision_sprites=self.collision_sprites, creatures_sprites=self.creatures, default_size=DCS-HHDCS - HHHDCS, player=self.player)
-
+        alav = PessoaAlavanca(self.all_sprites, self.player_group,self.creatures, collision_sprites=self.collision_sprites, creatures_sprites=self.creatures, default_size=DCS-HHDCS - HHHDCS, player=self.player)
+        alav.player = self.player
         # Obi
         obi = Obi(self.all_sprites, self.player_group,self.creatures, collision_sprites=self.collision_sprites, creatures_sprites=self.creatures, npc_name="Obi")
         self.char_monitored = obi
@@ -1023,6 +1024,7 @@ class Game:
                 creat.specie_group = creats_groups[creat.specie]
                 creats_groups[creat.specie].add(creat)
         golem = CrystalGolem(self.all_sprites, collision_sprites=self.collision_sprites, initial_position=(959,1912), creatures_sprites=self.creatures, )
+        golem.player = self.player
         self.creatures.add(golem)
 
 

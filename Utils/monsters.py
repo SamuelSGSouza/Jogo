@@ -1359,6 +1359,7 @@ class CrystalGolem(Monster):
             "Right": (self.hitbox.width*multip,self.hitbox.width*multip),#width, height
         }
         self.use_center_on_attack=True
+        self.player = None
     def __str__(self):
         return self.personal_name
 

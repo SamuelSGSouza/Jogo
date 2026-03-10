@@ -309,6 +309,7 @@ class OrcRootBrain(Brain):
 
         return None
     
+    
 
 class MonsterBrain(Brain):
     def __init__(self, character):
@@ -333,7 +334,29 @@ class GolemBrain(MonsterBrain):
         super().__init__(character)
 
     def rotina_diaria(self):
+        if self.character.player.puxou_alavanca:
+            return None
         return self.move_to((862,1810), )
+
+    def esbarrar_em_character(self):
+        if self.character.player.puxou_alavanca:
+            return None
+        return super().esbarrar_em_character()
+    
+    def esta_em_combate(self):
+        if self.character.player.puxou_alavanca:
+            return None
+        return super().esta_em_combate()
+    
+    def tem_alvo_para_atacar(self):
+        if self.character.player.puxou_alavanca:
+            return None
+        return super().tem_alvo_para_atacar()
+
+    def percepeu_inimigo(self, percepted_enemy):
+        if self.character.player.puxou_alavanca:
+            return None
+        return super().percepeu_inimigo(percepted_enemy)
 
 class GhostBrain(MonsterBrain):
     def __init__(self, character):
@@ -379,7 +402,17 @@ class NinaBrain(Brain):
                 self.final_dest = choice(self.character.locais_patrulha)
         move = self.move_to(self.final_dest)
         return move
-    
+
+class PessoaAlavancaBrain(Brain):
+    def __init__(self, character, can_attack=False):
+        super().__init__(character,mental_type="raivoso")
+        self.can_attack = can_attack
+        self.target = None
+        self.final_dest = ()
+
+    def rotina_diaria(self):
+        return None
+
 class VerantBrain(Brain):
     def __init__(self, character, can_attack=False):
         super().__init__(character,mental_type="raivoso")

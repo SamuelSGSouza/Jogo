@@ -738,10 +738,6 @@ class Character(pygame.sprite.Sprite):
             return
         return True
 
-
-    
-
-
     def handle_effects(self, *args, **kwargs):
         
         for e in self.effects[:]:
@@ -1148,6 +1144,9 @@ class Character(pygame.sprite.Sprite):
             self.last_step_time = now
             self.make_steps()
     
+    def __str__(self,):
+        return self.personal_name
+
 class Mimetizacao:
     def __init__(self, character:Character, to_mimetize:Character):
         self.character = character
